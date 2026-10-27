@@ -1,0 +1,441 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0f6b6b"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Shelves">
+<link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="icon-192.png">
+<title>Reading Shelves</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Young+Serif&family=Figtree:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+body{margin:0;padding-top:env(safe-area-inset-top)}
+/* Layout: one column. Masthead with counts, a filter bar, then shelves of cover cards grouped by genre, author or type. */
+:root{
+  --bg:#edf0f2; --surface:#f8fafb; --ink:#15212b; --muted:#5b6b78; --line:#cfd7dd;
+  --accent:#0f6b6b; --accent-ink:#ffffff; --spine:#243746;
+  --display:"Young Serif",Georgia,serif; --body:"Figtree",system-ui,sans-serif; --mono:"IBM Plex Mono",ui-monospace,monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#101820; --surface:#18232d; --ink:#e6edf1; --muted:#93a3af; --line:#2b3a46;
+  --accent:#5fc9c0; --accent-ink:#0b1a1d; --spine:#31485a; color-scheme:dark } }
+:root[data-theme="dark"]{
+  --bg:#101820; --surface:#18232d; --ink:#e6edf1; --muted:#93a3af; --line:#2b3a46;
+  --accent:#5fc9c0; --accent-ink:#0b1a1d; --spine:#31485a; color-scheme:dark }
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.5}
+.wrap{max-width:1080px;margin:0 auto;padding-inline:20px;padding-block:32px 64px;display:flex;flex-direction:column;gap:28px}
+header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px;border-bottom:2px solid var(--ink);padding-bottom:16px}
+h1{font-family:var(--display);font-weight:400;font-size:clamp(28px,5vw,42px);line-height:1.1;margin:0;text-wrap:balance}
+.counts{font-family:var(--mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-variant-numeric:tabular-nums}
+.bar{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+.bar input,.bar select{font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:8px 10px;min-width:0}
+.bar input{flex:1 1 220px}
+.bar label{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{font:inherit;font-size:13px;border:1px solid var(--line);background:transparent;color:var(--ink);border-radius:999px;padding:4px 12px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+section{display:flex;flex-direction:column;gap:14px}
+h2{font-family:var(--display);font-weight:400;font-size:20px;margin:0;display:flex;align-items:baseline;gap:10px}
+h2 span{font-family:var(--mono);font-size:12px;color:var(--muted)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:24px 20px}
+.book{display:flex;flex-direction:column;gap:10px;min-width:0}
+.cover{aspect-ratio:2/3;max-width:100%;border-radius:3px 6px 6px 3px;overflow:hidden;background:var(--spine);box-shadow:inset 4px 0 0 rgba(0,0,0,.25),0 6px 14px -8px rgba(0,0,0,.5);display:flex}
+.cover img{width:100%;height:100%;object-fit:cover;display:block}
+.cover .fallback{padding:16px 12px 12px 18px;display:flex;flex-direction:column;justify-content:space-between;color:#f1f5f7;width:100%}
+.fallback b{font-family:var(--display);font-weight:400;font-size:17px;line-height:1.2;overflow-wrap:anywhere}
+.fallback i{font-style:normal;font-size:12px;opacity:.8}
+.title{font-weight:600;line-height:1.3;overflow-wrap:anywhere}
+.meta{font-size:13px;color:var(--muted);overflow-wrap:anywhere}
+.call{font-family:var(--mono);font-size:11px;letter-spacing:.04em;color:var(--muted);text-transform:uppercase}
+.tags{display:flex;flex-wrap:wrap;gap:4px}
+.tag{font-size:11px;border:1px solid var(--line);border-radius:4px;padding:1px 6px;color:var(--muted)}
+.book{cursor:pointer;background:none;border:0;padding:0;font:inherit;color:inherit;text-align:left}
+.book:hover .title{color:var(--accent)}
+.hint{font-size:12px;color:var(--accent)}
+dialog{border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink);padding:0;width:min(640px,calc(100% - 32px));max-height:85vh}
+dialog::backdrop{background:rgba(8,14,20,.6)}
+.sheet{display:flex;flex-wrap:wrap;gap:20px;padding:24px}
+.sheet .cover{flex:0 0 130px;align-self:flex-start}
+.sheet .text{flex:1 1 260px;min-width:0;display:flex;flex-direction:column;gap:10px}
+.sheet h3{font-family:var(--display);font-weight:400;font-size:24px;line-height:1.15;margin:0;text-wrap:balance}
+.sheet p{margin:0;max-width:65ch}
+.sheet a{color:var(--accent)}
+.close{align-self:flex-start;font:inherit;border:1px solid var(--line);background:transparent;color:var(--ink);border-radius:6px;padding:6px 14px;cursor:pointer}
+.add{font:inherit;font-weight:600;background:var(--accent);color:var(--accent-ink);border:0;border-radius:6px;padding:8px 14px;cursor:pointer}
+.add:disabled{opacity:.5;cursor:default}
+.form{display:flex;flex-direction:column;gap:14px;padding:24px}
+.form h3{font-family:var(--display);font-weight:400;font-size:24px;margin:0}
+.form label{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--muted)}
+.form input,.form select,.form textarea{font:inherit;font-size:16px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:8px 10px;min-width:0;width:100%}
+.form .row{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:14px}
+.form .actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.form .msg{font-size:13px;color:var(--muted);flex:1 1 160px}
+.now{border:1px solid var(--accent);border-radius:10px;padding:18px 16px;background:var(--surface)}
+.badge{align-self:flex-start;font-family:var(--mono);font-size:11px;letter-spacing:.04em;text-transform:uppercase;background:var(--accent);color:var(--accent-ink);border-radius:4px;padding:1px 6px}
+.notes{display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--muted)}
+.notes textarea{font:inherit;font-size:16px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:8px 10px;width:100%;min-height:96px;resize:vertical}
+.rowb{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.nav{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:14px}
+.nav a{color:var(--muted);text-decoration:none;padding:4px 0;border-bottom:2px solid transparent}
+.nav a[aria-current="page"]{color:var(--ink);border-color:var(--accent)}
+.nav a:hover{color:var(--accent)}
+.doors{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px}
+.door{display:flex;flex-direction:column;gap:12px;padding:20px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:inherit;text-decoration:none}
+.door:hover{border-color:var(--accent)}
+.door h2{font-size:24px}
+.strip{display:flex;gap:8px;min-height:84px}
+.strip .cover{width:56px;flex:0 0 56px}
+.strip .fallback{padding:6px}.strip .fallback b{font-size:11px}.strip .fallback i{display:none}
+.go{font-weight:600;color:var(--accent)}
+.sugs{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px;align-items:start}
+.sug{display:flex;flex-direction:column;gap:6px;padding:14px 16px;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+.sug p{margin:0;max-width:65ch}
+.panel{border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+.empty{border:1px dashed var(--line);border-radius:8px;padding:32px 20px;color:var(--muted);text-align:center}
+</style>
+
+<div class="wrap">
+  <nav class="nav" aria-label="Pages">
+    <a href="#home" data-v="home">Home</a>
+    <a href="#jacopo" data-v="jacopo">Jacopo's shelf</a>
+    <a href="#gaia" data-v="gaia">Gaia's shelf</a>
+    <a href="#swap" data-v="swap">Book swap</a>
+  </nav>
+
+  <div id="homeView" hidden>
+    <header><h1>Reading Shelves</h1><div class="counts" id="homeCounts">Opening the shelves</div></header>
+    <div class="doors" style="margin-top:28px">
+      <a class="door" href="#jacopo"><h2>Jacopo's shelf</h2><div class="meta" id="d-jacopo">Loading</div><div class="strip" id="s-jacopo"></div><span class="go">Open shelf</span></a>
+      <a class="door" href="#gaia"><h2>Gaia's shelf</h2><div class="meta" id="d-gaia">Loading</div><div class="strip" id="s-gaia"></div><span class="go">Open shelf</span></a>
+      <div class="door" style="cursor:default"><h2>Backup</h2><div class="meta">Everything lives only on this phone. Save a backup now and then, and use it to move your shelves to another device or to load the update files Claude sends you.</div>
+        <div class="rowb"><button class="add" id="expBtn" type="button">Save backup</button><label class="close" style="cursor:pointer">Load backup<input id="impFile" type="file" accept="application/json,.json" hidden></label></div><span class="meta" id="bkMsg" role="status"></span></div>
+      <a class="door" href="#swap"><h2>Book swap</h2><div class="meta" id="d-swap">Suggest books to each other and send the good ones straight to a wishlist.</div><span class="go">Open suggestions</span></a>
+    </div>
+  </div>
+
+  <div id="swapView" hidden style="display:flex;flex-direction:column;gap:28px">
+    <header><h1>Book swap</h1><div class="counts" id="swapCounts"></div></header>
+    <form class="form panel" id="sugForm">
+      <h3>Suggest a book</h3>
+      <div class="row">
+        <label>From<select name="from"><option value="jacopo">Jacopo</option><option value="gaia">Gaia</option></select></label>
+        <label>To<select name="to"><option value="gaia">Gaia</option><option value="jacopo">Jacopo</option></select></label>
+      </div>
+      <div class="row">
+        <label>Title<input name="title" required autocomplete="off"></label>
+        <label>Author<input name="author" autocomplete="off"></label>
+      </div>
+      <label>Why you should read it<textarea name="why" rows="3"></textarea></label>
+      <div class="actions"><button class="add" id="sugSave" type="submit">Send suggestion</button><span class="msg" id="sugMsg" role="status"></span></div>
+    </form>
+    <div class="sugs" id="sugList"></div>
+  </div>
+
+  <div id="shelfView" hidden style="display:flex;flex-direction:column;gap:28px">
+  <header>
+    <h1 id="shelfTitle">Reading Shelf</h1>
+    <div class="counts" id="counts">Opening the shelf</div>
+  </header>
+
+  <div class="bar">
+    <input id="q" type="search" placeholder="Search title, author, genre" aria-label="Search">
+    <label for="group">Shelve by
+      <select id="group">
+        <option value="genre">Genre</option>
+        <option value="author">Author</option>
+        <option value="series">Series</option>
+        <option value="type">Book or manga</option>
+        <option value="none">One shelf</option>
+      </select>
+    </label>
+    <label for="sort">Order
+      <select id="sort">
+        <option value="title">Title</option>
+        <option value="author">Author</option>
+        <option value="year">Year published</option>
+        <option value="added">Recently added</option>
+      </select>
+    </label>
+    <button class="add" id="addBtn" type="button" hidden>Add a book</button>
+    <button class="close" id="wishBtn" type="button" hidden>Add to wishlist</button>
+  </div>
+  <div class="chips" id="chips" aria-label="Filter by genre"></div>
+
+  <main id="shelves">
+    <div class="empty">Books and manga will appear here with their covers.</div>
+  </main>
+  </div>
+</div>
+<dialog id="detail" aria-labelledby="d-title"><div class="sheet" id="sheet"></div></dialog>
+
+<dialog id="addDlg" aria-labelledby="a-title"><form class="form" id="addForm">
+  <h3 id="a-title">Add a book</h3>
+  <label>Title<input name="title" required autocomplete="off"></label>
+  <label>Author (separate several with commas)<input name="authors" required autocomplete="off"></label>
+  <div class="row">
+    <label>Year<input name="year" type="number" inputmode="numeric"></label>
+    <label>Type<select name="type"><option>Book</option><option>Manga</option></select></label>
+    <label>Status<select name="status"><option value="read">Finished</option><option value="reading">Currently reading</option><option value="wishlist">Wishlist</option></select></label>
+  </div>
+  <label>Genres (separate with commas)<input name="genres" list="genreList" autocomplete="off"><datalist id="genreList"></datalist></label>
+  <div class="row">
+    <label>Series (optional)<input name="series" autocomplete="off"></label>
+    <label>Number in series<input name="seriesNo" type="number" inputmode="numeric" min="1"></label>
+  </div>
+  <label>Plot (optional)<textarea name="plot" rows="4"></textarea></label>
+  <div class="actions">
+    <button class="add" id="saveBtn" type="submit">Save to shelf</button>
+    <button class="close" id="cancelBtn" type="button">Cancel</button>
+    <span class="msg" id="addMsg" role="status"></span>
+  </div>
+</form></dialog>
+
+<script>
+const KEY = "shelves-v1";
+function LocalDB() {
+  let store; try { store = JSON.parse(localStorage.getItem(KEY) || "null"); } catch (e) { store = null; }
+  const subs = {};
+  const save = () => { try { localStorage.setItem(KEY, JSON.stringify(store)); } catch (e) { alert("Storage is full or blocked, the change was not saved."); } };
+  const fire = c => (subs[c] || []).forEach(f => f({ docs: Object.entries(store[c] || {}).map(([id, d]) => ({ id, data: () => d })) }));
+  const ready = (async () => {
+    if (!store) { try { store = await (await fetch("data.json")).json(); } catch (e) { store = {}; } save(); }
+    for (const c of ["books", "gaia_books", "suggestions"]) store[c] = store[c] || {};
+  })();
+  const coll = c => ({
+    onSnapshot: f => { (subs[c] = subs[c] || []).push(f); ready.then(() => fire(c)); },
+    doc: id => ({
+      set: async d => { await ready; store[c][id] = d; save(); fire(c); },
+      update: async d => { await ready; store[c][id] = Object.assign(store[c][id] || {}, d); save(); fire(c); },
+      delete: async () => { await ready; delete store[c][id]; save(); fire(c); }
+    }),
+    add: async d => { await ready; store[c]["s" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6)] = d; save(); fire(c); }
+  });
+  return { collection: coll, _all: async () => { await ready; return store; }, _load: async data => { await ready; store = data; for (const c of ["books", "gaia_books", "suggestions"]) store[c] = store[c] || {}; save(); Object.keys(subs).forEach(fire); } };
+}
+const LDB = LocalDB();
+</script>
+<script>
+let books = [], genre = null, DB = null, cur = "jacopo", sugs = [];
+const SHELVES = { jacopo: { coll: "books", name: "Jacopo", data: [], loaded: false }, gaia: { coll: "gaia_books", name: "Gaia", data: [], loaded: false } };
+const COLL = () => SHELVES[cur].coll;
+const reading = b => b.status === "reading", wished = b => b.status === "wishlist";
+const $ = id => document.getElementById(id);
+const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+const arr = v => Array.isArray(v) ? v : (v ? [v] : []);
+const yr = b => b.yearLabel || b.year || "";
+const surname = b => (arr(b.authors)[0] || "").split(" ").pop();
+
+try { $("group").value = localStorage.getItem("group") || "genre"; $("sort").value = localStorage.getItem("sort") || "title"; } catch (e) {}
+
+function coverOf(b) {
+  const cover = el("div", "cover");
+  const fallback = () => { cover.replaceChildren(); const f = el("div", "fallback"); f.append(el("b", "", b.title), el("i", "", arr(b.authors).join(", "))); cover.append(f); };
+  if (b.cover) { const img = el("img"); img.alt = "Cover of " + b.title; img.onerror = fallback; img.src = b.cover; cover.append(img); } else fallback();
+  return cover;
+}
+function openDetail(b) {
+  const sheet = $("sheet"), text = el("div", "text"), h = el("h3", "", b.title); h.id = "d-title";
+  text.append(h, el("div", "meta", arr(b.authors).join(" & ") + (yr(b) ? " · " + yr(b) : "") + (b.altTitle ? " · " + b.altTitle : "")));
+  const tags = el("div", "tags"); arr(b.genres).forEach(g => tags.append(el("span", "tag", g))); text.append(tags);
+  text.append(el("p", "", b.plot || "No plot summary saved for this title yet. Ask Claude to add one."));
+  if (b.source && /^https:\/\//.test(b.source)) { const a = el("a", "meta", "Read more"); a.href = b.source; a.target = "_blank"; a.rel = "noopener"; text.append(a); }
+  if (DB && b.id) {
+    const box = el("label", "notes", "Notes"), ta = el("textarea"), rowb = el("div", "rowb"), sv = el("button", "close", "Save notes"), st = el("span", "", "");
+    ta.value = b.notes || ""; ta.placeholder = "What you thought of it, quotes, where you stopped"; sv.type = "button"; st.setAttribute("role", "status");
+    ta.oninput = () => { st.textContent = ""; };
+    sv.onclick = async () => { sv.disabled = true; st.textContent = "Saving"; try { await DB.collection(COLL()).doc(b.id).update({ notes: ta.value.trim() }); b.notes = ta.value.trim(); st.textContent = "Saved"; } catch (e) { st.textContent = "Could not save, try again"; } sv.disabled = false; };
+    rowb.append(sv, st); box.append(ta, rowb); text.append(box);
+  } else if (b.notes) text.append(el("p", "meta", "My notes: " + b.notes));
+  if (DB && b.id) {
+    const acts = el("div", "rowb"), go = (label, status) => { const t = el("button", "close", label); t.type = "button";
+      t.onclick = async () => { t.disabled = true; try { await DB.collection(COLL()).doc(b.id).update({ status }); $("detail").close(); } catch (e) { t.disabled = false; t.textContent = "Could not save, try again"; } };
+      acts.append(t); };
+    if (wished(b)) { go("Start reading", "reading"); go("Mark as finished", "read"); }
+    else if (reading(b)) go("Mark as finished", "read");
+    else go("Mark as currently reading", "reading");
+    text.append(acts); }
+  const x = el("button", "close", "Close"); x.type = "button"; x.onclick = () => $("detail").close(); text.append(x);
+  sheet.replaceChildren(coverOf(b), text);
+  $("detail").showModal();
+}
+$("detail").addEventListener("click", e => { if (e.target === $("detail")) $("detail").close(); });
+
+function card(b) {
+  const c = el("button", "book"); c.type = "button"; c.onclick = () => openDetail(b);
+  const cover = el("div", "cover");
+  const fallback = () => { cover.replaceChildren(); const f = el("div", "fallback"); f.append(el("b", "", b.title), el("i", "", arr(b.authors).join(", "))); cover.append(f); };
+  if (b.cover) { const img = el("img"); img.alt = "Cover of " + b.title; img.loading = "lazy"; img.onerror = fallback; img.src = b.cover; cover.append(img); } else fallback();
+  c.append(cover); if (reading(b)) c.append(el("span", "badge", "Reading now")); if (wished(b)) c.append(el("span", "badge", "Wishlist")); c.append(el("div", "title", b.title), el("div", "meta", arr(b.authors).join(" & ") + (yr(b) ? " · " + yr(b) : "")));
+  if (b.series) c.append(el("div", "meta", b.series + (b.seriesNo ? " #" + b.seriesNo : "")));
+  if (b.altTitle) c.append(el("div", "meta", b.altTitle));
+  const call = [b.type, arr(b.genres)[0], surname(b).slice(0, 3), yr(b)].filter(Boolean).join(" · ");
+  c.append(el("div", "call", call));
+  const tags = el("div", "tags"); arr(b.genres).forEach(g => tags.append(el("span", "tag", g))); c.append(tags, el("div", "hint", b.notes ? "Open plot and notes" : "Open plot"));
+  return c;
+}
+
+function render() {
+  const q = $("q").value.trim().toLowerCase(), group = $("group").value, sort = $("sort").value;
+  const allGenres = [...new Set(books.flatMap(b => arr(b.genres)))].sort();
+  const chips = $("chips"); chips.replaceChildren();
+  allGenres.forEach(g => { const ch = el("button", "chip", g); ch.type = "button"; ch.setAttribute("aria-pressed", String(genre === g)); ch.onclick = () => { genre = genre === g ? null : g; render(); }; chips.append(ch); });
+
+  let list = books.filter(b => (!genre || arr(b.genres).includes(genre)) &&
+    (!q || [b.title, b.altTitle, b.series, b.type, b.notes, ...arr(b.authors), ...arr(b.genres)].join(" ").toLowerCase().includes(q)));
+  const key = { title: b => b.title || "", author: b => surname(b), year: b => b.year || 0, added: b => b.added || "" }[sort];
+  list.sort((a, b) => { const x = key(a), y = key(b); return (x < y ? -1 : x > y ? 1 : 0) * (sort === "added" ? -1 : 1); });
+
+  const have = books.filter(b => !wished(b)), wish = list.filter(wished); list = list.filter(b => !wished(b));
+  const nAuthors = new Set(have.flatMap(b => arr(b.authors))).size;
+  $("shelfTitle").textContent = SHELVES[cur].name + "'s Reading Shelf";
+  $("counts").textContent = have.length + (have.length === 1 ? " title" : " titles") + " · " + nAuthors + (nAuthors === 1 ? " author" : " authors") + " · " + allGenres.length + (allGenres.length === 1 ? " genre" : " genres") + (books.some(reading) ? " · " + books.filter(reading).length + " in progress" : "") + (books.some(wished) ? " · " + books.filter(wished).length + " on wishlist" : "");
+
+  const main = $("shelves"); main.replaceChildren();
+  if (!books.length) { main.append(el("div", "empty", SHELVES[cur].loaded ? "Nothing on " + SHELVES[cur].name + "'s shelf yet. Use Add a book, or tell Claude the titles and they get shelved with covers." : "Opening the shelf")); return; }
+  if (!list.length && !wish.length) { main.append(el("div", "empty", "No titles match. Clear the search or the genre filter.")); return; }
+  const shelves = new Map();
+  const put = (k, b) => { if (!shelves.has(k)) shelves.set(k, []); shelves.get(k).push(b); };
+  list.forEach(b => {
+    if (group === "genre") (arr(b.genres).length ? arr(b.genres) : ["Unsorted"]).filter(g => !genre || g === genre).forEach(g => put(g, b));
+    else if (group === "author") (arr(b.authors).length ? arr(b.authors) : ["Unknown"]).forEach(a => put(a, b));
+    else if (group === "series") put(b.series || "Standalone", b);
+    else if (group === "type") put(b.type || "Book", b);
+    else put("All titles", b);
+  });
+  main.style.cssText = "display:flex;flex-direction:column;gap:36px";
+  const now = list.filter(reading);
+  if (now.length) { const s = el("section", "now"), h = el("h2", "", "Currently reading"); h.append(el("span", "", String(now.length))); const g = el("div", "grid"); now.forEach(b => g.append(card(b))); s.append(h, g); main.append(s); }
+  if (wish.length) { const s = el("section", "now"), h = el("h2", "", "Wishlist"); h.append(el("span", "", String(wish.length))); const g = el("div", "grid"); wish.forEach(b => g.append(card(b))); s.append(h, g); main.append(s); }
+  [...shelves.keys()].sort().forEach(k => {
+    const s = el("section"), h = el("h2", "", k); h.append(el("span", "", String(shelves.get(k).length)));
+    const g = el("div", "grid"); if (group === "series") shelves.get(k).sort((a, b) => (a.seriesNo || 0) - (b.seriesNo || 0)); shelves.get(k).forEach(b => g.append(card(b)));
+    s.append(h, g); main.append(s);
+  });
+}
+
+$("q").addEventListener("input", render);
+["group", "sort"].forEach(id => $(id).addEventListener("change", () => { try { localStorage.setItem(id, $(id).value); } catch (e) {} render(); }));
+
+function wireAdd(db) {
+  const dlg = $("addDlg"), form = $("addForm"), msg = $("addMsg");
+  const list = v => v.split(",").map(x => x.trim()).filter(Boolean);
+  const slug = t => t.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 80);
+  $("addBtn").hidden = false;
+  $("addBtn").onclick = () => { form.reset(); msg.textContent = ""; $("a-title").textContent = "Add a book"; $("genreList").replaceChildren(...[...new Set(books.flatMap(b => arr(b.genres)))].sort().map(g => { const o = el("option"); o.value = g; return o; })); dlg.showModal(); };
+  $("wishBtn").hidden = false; $("wishBtn").onclick = () => { $("addBtn").onclick(); form.elements.status.value = "wishlist"; $("a-title").textContent = "Add to wishlist"; };
+  $("cancelBtn").onclick = () => dlg.close();
+  dlg.addEventListener("click", e => { if (e.target === dlg) dlg.close(); });
+  form.addEventListener("submit", async e => {
+    e.preventDefault();
+    const f = new FormData(form), title = String(f.get("title")).trim(), authors = list(String(f.get("authors")));
+    let id = slug(title);
+    if (!id || !authors.length) { msg.textContent = "Add a title and an author."; return; }
+    if (books.some(b => b.id === id)) id = slug(title + " " + authors[0].split(" ").pop());
+    if (books.some(b => b.id === id)) { msg.textContent = "This title is already on the shelf."; return; }
+    const data = { title, authors, type: String(f.get("type")), genres: list(String(f.get("genres"))), status: String(f.get("status")), added: new Date().toISOString().slice(0, 10), addedBy: "page" };
+    const year = parseInt(f.get("year"), 10); if (!isNaN(year)) data.year = year;
+    const series = String(f.get("series")).trim(); if (series) { data.series = series; const n = parseInt(f.get("seriesNo"), 10); if (!isNaN(n)) data.seriesNo = n; }
+    const plot = String(f.get("plot")).trim(); if (plot) data.plot = plot;
+    $("saveBtn").disabled = true; msg.textContent = "Saving";
+    try { await db.collection(COLL()).doc(id).set(data); dlg.close(); }
+    catch (err) { msg.textContent = "Could not save. Check that you can edit this page and try again."; }
+    finally { $("saveBtn").disabled = false; }
+  });
+}
+
+function view() {
+  const v = (location.hash || "#home").slice(1);
+  const page = SHELVES[v] ? "shelf" : (v === "swap" ? "swap" : "home");
+  if (SHELVES[v] && cur !== v) { cur = v; genre = null; $("q").value = ""; }
+  books = SHELVES[cur].data;
+  $("homeView").hidden = page !== "home"; $("swapView").hidden = page !== "swap"; $("shelfView").hidden = page !== "shelf";
+  $("swapView").style.display = page === "swap" ? "flex" : "none"; $("shelfView").style.display = page === "shelf" ? "flex" : "none";
+  document.querySelectorAll(".nav a").forEach(a => a.setAttribute("aria-current", a.dataset.v === (page === "shelf" ? cur : page) ? "page" : "false"));
+  if (page === "shelf") render(); else if (page === "home") renderHome(); else renderSwap();
+}
+window.addEventListener("hashchange", () => { view(); window.scrollTo(0, 0); });
+
+function renderHome() {
+  for (const k of Object.keys(SHELVES)) {
+    const d = SHELVES[k].data, have = d.filter(b => !wished(b)), now = d.filter(reading), wl = d.filter(wished);
+    $("d-" + k).textContent = SHELVES[k].loaded ? (d.length ? have.length + " read or in progress · " + now.length + " reading now · " + wl.length + " on wishlist" : "Empty for now, ready for the first book") : "Loading";
+    const strip = $("s-" + k); strip.replaceChildren();
+    const pick = (now.length ? now : [...have].sort((a, b) => (b.added || "") < (a.added || "") ? -1 : 1)).slice(0, 5);
+    pick.forEach(b => strip.append(coverOf(b)));
+  }
+  const open = sugs.length;
+  $("d-swap").textContent = open ? open + (open === 1 ? " suggestion" : " suggestions") + " waiting. Suggest books to each other and send the good ones straight to a wishlist." : "Suggest books to each other and send the good ones straight to a wishlist.";
+  $("homeCounts").textContent = Object.values(SHELVES).map(s => s.name + " " + s.data.filter(b => !wished(b)).length).join(" · ");
+}
+
+function renderSwap() {
+  const list = $("sugList"); list.replaceChildren();
+  $("swapCounts").textContent = sugs.length + (sugs.length === 1 ? " suggestion" : " suggestions");
+  for (const to of ["gaia", "jacopo"]) {
+    const sec = el("section"), h = el("h2", "", "For " + SHELVES[to].name), mine = sugs.filter(x => x.to === to).sort((a, b) => (b.at || "") < (a.at || "") ? -1 : 1);
+    h.append(el("span", "", String(mine.length))); sec.append(h);
+    if (!mine.length) sec.append(el("div", "empty", "No suggestions for " + SHELVES[to].name + " yet."));
+    mine.forEach(x => {
+      const c = el("div", "sug"); c.append(el("div", "title", x.title), el("div", "meta", (x.author ? x.author + " · " : "") + "suggested by " + (SHELVES[x.from]?.name || "someone") + (x.at ? " on " + x.at : "")));
+      if (x.why) c.append(el("p", "", x.why));
+      const row = el("div", "rowb"), st = el("span", "meta", "");
+      const onShelf = SHELVES[to].data.some(b => (b.title || "").toLowerCase() === (x.title || "").toLowerCase());
+      if (DB) {
+        const add = el("button", "add", onShelf ? "Already on the shelf" : "Add to " + SHELVES[to].name + "'s wishlist"); add.type = "button"; add.disabled = onShelf;
+        add.onclick = async () => { add.disabled = true; st.textContent = "Saving";
+          try { const slug = (x.title || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 80) || "book";
+            const data = { title: x.title, authors: x.author ? x.author.split(",").map(a => a.trim()).filter(Boolean) : [], type: "Book", status: "wishlist", genres: [], added: new Date().toISOString().slice(0, 10), addedBy: "swap", notes: "Suggested by " + (SHELVES[x.from]?.name || "someone") + (x.why ? ": " + x.why : "") };
+            await DB.collection(SHELVES[to].coll).doc(slug).set(data); await DB.collection("suggestions").doc(x.id).delete(); }
+          catch (e) { add.disabled = false; st.textContent = "Could not save, try again"; } };
+        const rm = el("button", "close", "Remove"); rm.type = "button";
+        rm.onclick = async () => { rm.disabled = true; try { await DB.collection("suggestions").doc(x.id).delete(); } catch (e) { rm.disabled = false; st.textContent = "Could not remove"; } };
+        row.append(add, rm, st);
+      }
+      c.append(row); sec.append(c);
+    });
+    list.append(sec);
+  }
+}
+
+function wireSwap(db) {
+  const form = $("sugForm"), msg = $("sugMsg");
+  form.elements.from.onchange = () => { form.elements.to.value = form.elements.from.value === "jacopo" ? "gaia" : "jacopo"; };
+  form.addEventListener("submit", async e => {
+    e.preventDefault();
+    const f = new FormData(form), title = String(f.get("title")).trim();
+    if (!title) { msg.textContent = "Add a title."; return; }
+    if (f.get("from") === f.get("to")) { msg.textContent = "Pick someone else in To."; return; }
+    $("sugSave").disabled = true; msg.textContent = "Sending";
+    try { await db.collection("suggestions").add({ from: String(f.get("from")), to: String(f.get("to")), title, author: String(f.get("author")).trim(), why: String(f.get("why")).trim(), at: new Date().toISOString().slice(0, 10) });
+      const keepFrom = form.elements.from.value; form.reset(); form.elements.from.value = keepFrom; form.elements.to.value = keepFrom === "jacopo" ? "gaia" : "jacopo"; msg.textContent = "Sent"; }
+    catch (err) { msg.textContent = "Could not send, try again."; }
+    finally { $("sugSave").disabled = false; }
+  });
+}
+
+$("expBtn").onclick = async () => {
+  const blob = new Blob([JSON.stringify(await LDB._all(), null, 1)], { type: "application/json" });
+  const name = "shelves-backup-" + new Date().toISOString().slice(0, 10) + ".json", file = new File([blob], name, { type: "application/json" });
+  if (navigator.canShare && navigator.canShare({ files: [file] })) { try { await navigator.share({ files: [file], title: name }); $("bkMsg").textContent = "Backup ready"; return; } catch (e) { if (e.name === "AbortError") return; } }
+  const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 5000); $("bkMsg").textContent = "Backup saved";
+};
+$("impFile").onchange = async e => {
+  const f = e.target.files[0]; if (!f) return;
+  try { const data = JSON.parse(await f.text()); if (!data || typeof data.books !== "object") throw 0;
+    if (!confirm("Replace the shelves on this phone with this backup?")) return;
+    await LDB._load(data); $("bkMsg").textContent = "Backup loaded"; }
+  catch (err) { $("bkMsg").textContent = "That file is not a shelves backup."; }
+  e.target.value = "";
+};
+if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost")) navigator.serviceWorker.register("sw.js");
+view();
+(async () => {
+  const db = LDB;
+  if (!db) { $("counts").textContent = "Could not open storage"; $("homeCounts").textContent = "Sign in to see the shelves"; $("sugForm").hidden = true; return; }
+  DB = db; wireAdd(db); wireSwap(db);
+  for (const k of Object.keys(SHELVES)) {
+    db.collection(SHELVES[k].coll).onSnapshot(snap => { SHELVES[k].data = snap.docs.map(d => ({ id: d.id, ...d.data() })); SHELVES[k].loaded = true; view(); },
+      () => { if (cur === k) $("counts").textContent = "The shelf could not be loaded. Reload to try again."; });
+  }
+  db.collection("suggestions").onSnapshot(snap => { sugs = snap.docs.map(d => ({ id: d.id, ...d.data() })); view(); }, () => {});
+})();
+</script>
+
+</body></html>
