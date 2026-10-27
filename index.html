@@ -192,11 +192,30 @@ const KEY = "shelves-v1";
 function LocalDB() {
   let store; try { store = JSON.parse(localStorage.getItem(KEY) || "null"); } catch (e) { store = null; }
   const subs = {};
-  const save = () => { try { localStorage.setItem(KEY, JSON.stringify(store)); } catch (e) { alert("Storage is full or blocked, the change was not saved."); } };
+  const save = () => { if (!store) return; try { localStorage.setItem(KEY, JSON.stringify(store)); } catch (e) { alert("Storage is full or blocked, the change was not saved."); } };
   const fire = c => (subs[c] || []).forEach(f => f({ docs: Object.entries(store[c] || {}).map(([id, d]) => ({ id, data: () => d })) }));
+  const getRemote = async () => {
+    const ctl = new AbortController(), t = setTimeout(() => ctl.abort(), 5000);
+    try { const r = await fetch("data.json?t=" + Date.now(), { cache: "no-store", signal: ctl.signal }); return r.ok ? await r.json() : null; }
+    catch (e) { return null; } finally { clearTimeout(t); }
+  };
+  const FILL = ["cover", "plot", "source", "altTitle", "yearLabel", "series", "seriesNo", "year", "genres", "authors"];
   const ready = (async () => {
-    if (!store) { try { store = await (await fetch("data.json")).json(); } catch (e) { store = {}; } save(); }
+    const remote = await getRemote();
+    if (!store) { store = remote || (await fetch("data.json").then(r => r.json()).catch(() => ({}))); store._seen = {}; }
     for (const c of ["books", "gaia_books", "suggestions"]) store[c] = store[c] || {};
+    store._seen = store._seen || {};
+    let added = 0;
+    if (remote) for (const c of ["books", "gaia_books"]) {
+      const seen = store._seen[c] = store._seen[c] || Object.keys(store[c]);
+      for (const [id, d] of Object.entries(remote[c] || {})) {
+        if (!store[c][id]) { if (!seen.includes(id)) { store[c][id] = d; added++; } }
+        else { const mine = store[c][id]; for (const k of FILL) { const empty = mine[k] == null || mine[k] === "" || (Array.isArray(mine[k]) && !mine[k].length); if (empty && d[k] != null) mine[k] = d[k]; } }
+        if (!seen.includes(id)) seen.push(id);
+      }
+    }
+    window.__added = added;
+    save();
   })();
   const coll = c => ({
     onSnapshot: f => { (subs[c] = subs[c] || []).push(f); ready.then(() => fire(c)); },
@@ -426,6 +445,7 @@ $("impFile").onchange = async e => {
 };
 if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost")) navigator.serviceWorker.register("sw.js");
 view();
+LDB._all().then(() => { if (window.__added) { const n = window.__added; $("bkMsg").textContent = n + (n === 1 ? " new book" : " new books") + " added from Claude since last time."; } });
 (async () => {
   const db = LDB;
   if (!db) { $("counts").textContent = "Could not open storage"; $("homeCounts").textContent = "Sign in to see the shelves"; $("sugForm").hidden = true; return; }
