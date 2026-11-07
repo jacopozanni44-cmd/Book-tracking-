@@ -522,7 +522,7 @@ function renderLibrary() {
       DB.mode === "local" ? h("div", { class: "card" }, h("h2", {}, "Backup"), h("div", { class: "muted" }, PREVIEW ? "Test sandbox: a copy of your shelf to play with. Reset it any time by loading a backup." : "This library lives only on this phone until sync is switched on. Save a backup now and then."),
         h("div", { class: "actions" }, h("button", { class: "btn", onclick: exportBackup }, "Save backup"), h("label", { class: "btn ghost" }, "Load backup", h("input", { type: "file", accept: ".json,application/json", hidden: true, onchange: importBackup })))) : null),
     h("div", { class: "actions", style: { "justify-content": "center", "margin-top": "18px" } }, myUid() ? h("button", { class: "rename", type: "button", onclick: () => setView(classic() ? "room" : "classic") }, classic() ? "◈ Switch to the 3D room" : "▤ Switch to the classic layout") : null),
-    h("div", { class: "foot" }, h("div", { class: "faint", style: { "font-size": "12px", "margin-bottom": "4px" } }, PREVIEW ? "Preview version" : "Version 7 Nov l"), DB.mode === "firebase" ? ["Signed in as ", mine ? mine.name : user.email, " · ", h("button", { onclick: () => DB.signOut() }, "Sign out")] : "Sync is not set up yet, so changes stay on this phone.")
+    h("div", { class: "foot" }, h("div", { class: "faint", style: { "font-size": "12px", "margin-bottom": "4px" } }, PREVIEW ? "Preview version" : "Version 7 Nov m"), DB.mode === "firebase" ? ["Signed in as ", mine ? mine.name : user.email, " · ", h("button", { onclick: () => DB.signOut() }, "Sign out")] : "Sync is not set up yet, so changes stay on this phone.")
   );
 }
 
@@ -1357,7 +1357,7 @@ function renderMe() {
     h("section", { class: "section" }, h("h2", {}, "Favourite quotes", h("small", {}, quotes.length)), quotes.length ? h("div", { class: "quotes" }, quotes.map(([q, b]) => h("blockquote", { onclick: () => openBook(uid, b.id) }, "“" + q + "”", h("cite", {}, b.title)))) : h("p", { class: "faint" }, "Save lines you love from any book page.")),
     h("section", { class: "section card" }, h("h2", { style: { "font-size": "22px" } }, "Settings"),
       h("div", { class: "field" }, "Layout", seg),
-      h("div", { class: "faint", style: { "font-size": "13px" } }, PREVIEW ? "Test version" : "Version 7 Nov l"),
+      h("div", { class: "faint", style: { "font-size": "13px" } }, PREVIEW ? "Test version" : "Version 7 Nov m"),
       DB.mode === "firebase" ? h("button", { class: "btn ghost", type: "button", onclick: () => DB.signOut() }, "Sign out") : null)
   );
 }
