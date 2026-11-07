@@ -162,6 +162,14 @@ button.card:hover{border-color:var(--ink-3)}
 .cropimg{display:block;max-width:100%;max-height:52vh;width:auto;height:auto}
 .cropframe{position:absolute;border:2px solid #fff;box-shadow:0 0 0 9999px rgba(0,0,0,.5),inset 0 0 0 1px rgba(0,0,0,.4);cursor:move;touch-action:none}
 .cropstage{overflow:hidden;border-radius:6px}
+.camera{position:fixed;inset:0;z-index:90;background:#000;display:flex;align-items:center;justify-content:center}
+.camvideo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.camguide{position:relative;width:min(62vw,46vh);aspect-ratio:2/3;border:3px solid rgba(255,255,255,.9);border-radius:6px;box-shadow:0 0 0 9999px rgba(0,0,0,.45)}
+.camguide.bar{aspect-ratio:2/1;width:min(80vw,420px)}
+.camhint{position:absolute;top:calc(env(safe-area-inset-top) + 24px);left:16px;right:16px;text-align:center;color:#fff;font-size:16px;text-shadow:0 1px 3px #000}
+.cambar{position:absolute;left:0;right:0;bottom:calc(env(safe-area-inset-bottom) + 24px);display:flex;justify-content:space-around;align-items:center}
+.camshutter{width:72px;height:72px;border-radius:50%;border:5px solid #fff;background:rgba(255,255,255,.35)}
+.camshutter:active{background:#fff}
 .swatches{display:flex;gap:10px;flex-wrap:wrap}
 .swatch{width:40px;height:56px;border-radius:3px;border:0;background:var(--c);box-shadow:inset 0 0 0 1px rgba(0,0,0,.2)}
 .swatch[aria-pressed="true"]{outline:3px solid var(--ink);outline-offset:2px}
@@ -378,7 +386,7 @@ function renderLibrary() {
       h("button", { class: "card", onclick: () => go("/letters") }, h("h2", {}, "Letters ", forMe ? h("span", { class: "badge" }, forMe) : null), h("div", { class: "muted" }, "Suggest books to each other and send the good ones straight to a wishlist.")),
       DB.mode === "local" ? h("div", { class: "card" }, h("h2", {}, "Backup"), h("div", { class: "muted" }, "This library lives only on this phone until sync is switched on. Save a backup now and then."),
         h("div", { class: "actions" }, h("button", { class: "btn", onclick: exportBackup }, "Save backup"), h("label", { class: "btn ghost" }, "Load backup", h("input", { type: "file", accept: ".json,application/json", hidden: true, onchange: importBackup })))) : null),
-    h("div", { class: "foot" }, h("div", { class: "faint", style: { "font-size": "12px", "margin-bottom": "4px" } }, "Version 7 Nov h"), DB.mode === "firebase" ? ["Signed in as ", mine ? mine.name : user.email, " · ", h("button", { onclick: () => DB.signOut() }, "Sign out")] : "Sync is not set up yet, so changes stay on this phone.")
+    h("div", { class: "foot" }, h("div", { class: "faint", style: { "font-size": "12px", "margin-bottom": "4px" } }, "Version 7 Nov i"), DB.mode === "firebase" ? ["Signed in as ", mine ? mine.name : user.email, " · ", h("button", { onclick: () => DB.signOut() }, "Sign out")] : "Sync is not set up yet, so changes stay on this phone.")
   );
 }
 
@@ -451,7 +459,7 @@ function sheet(...kids) {
   const sh = h("div", { class: "sheet", role: "dialog", "aria-modal": "true" }, x, grab, ...kids);
   const scrim = h("div", { class: "scrim", onclick: e => { if (e.target === scrim) close(); } }, sh);
   let y0 = null, dy = 0;
-  sh.addEventListener("touchstart", e => { if (sh.scrollTop <= 0 && (e.target.closest(".grabzone") || !e.target.closest("input,textarea,select,button"))) { y0 = e.touches[0].clientY; dy = 0; sh.style.transition = "none"; } }, { passive: true });
+  sh.addEventListener("touchstart", e => { if (sh.scrollTop <= 0 && (e.target.closest(".grabzone") || !e.target.closest("input,textarea,select,button,.cropstage,.cropwrap"))) { y0 = e.touches[0].clientY; dy = 0; sh.style.transition = "none"; } }, { passive: true });
   sh.addEventListener("touchmove", e => { if (y0 == null) return; dy = e.touches[0].clientY - y0; if (dy > 0 && sh.scrollTop <= 0) { sh.style.transform = "translateY(" + dy + "px)"; if (e.cancelable) e.preventDefault(); } else if (dy < 0) { y0 = null; sh.style.transform = ""; } }, { passive: false });
   sh.addEventListener("touchend", () => { if (y0 == null) return; y0 = null; sh.style.transition = "transform .2s ease"; if (dy > 90) close(); else sh.style.transform = ""; });
   document.addEventListener("keydown", onKey); window.addEventListener("popstate", onPop);
@@ -522,12 +530,13 @@ function addBook(uid, editId) {
       } }, d.cover_i ? h("img", { src: "https://covers.openlibrary.org/b/id/" + d.cover_i + "-S.jpg", alt: "" }) : h("span", { class: "noimg" }), h("div", {}, h("b", {}, d.title), h("small", {}, [arr(d.author_name)[0], d.first_publish_year].filter(Boolean).join(" · "))))));
     } catch (e) { if (n === qn) results.replaceChildren(h("div", { class: "faint" }, "Search needs internet. Fill it in by hand below.")); }
   }
+  const pmsg = h("div", { class: "status", role: "status" }); const say = t => { pmsg.textContent = t; };
   const camIn = mode => { const i = h("input", { type: "file", accept: "image/*", hidden: true }); i.onchange = () => { const fl = i.files[0]; i.value = ""; if (fl) (mode === "scan" ? scan(fl) : photoCover(fl)); }; return i; };
   const scanIn = camIn("scan"), photoIn = camIn("photo");
   async function loadImg(fl) { const url = URL.createObjectURL(fl); const im = new Image(); im.src = url; await im.decode(); return im; }
   const cropBox = h("div", { class: "cropwrap", hidden: true });
   async function photoCover(fl) {
-    let im; try { im = await loadImg(fl); } catch (e) { msg.textContent = "Could not read that image."; return; }
+    let im; try { im = await loadImg(fl); } catch (e) { say("Could not read that image."); return; }
     const NW = im.naturalWidth, NH = im.naturalHeight;
     // frame in natural pixels, 2:3, starts as the largest that fits, centred
     let fh = Math.min(NH, NW * 1.5), fw = fh / 1.5, fx = (NW - fw) / 2, fy = (NH - fh) / 2;
@@ -549,7 +558,7 @@ function addBook(uid, editId) {
       c.getContext("2d").drawImage(im, fx, fy, fw, fh, 0, 0, 320, 480);
       let data = c.toDataURL("image/webp", 0.72); if (!data.startsWith("data:image/webp")) data = c.toDataURL("image/jpeg", 0.72);
       cover = data; showCover(); cropBox.hidden = true; cropBox.replaceChildren();
-      if (ocrOn.checked) readCover(im, fx, fy, fw, fh); else msg.textContent = "Cover set";
+      if (ocrOn.checked) readCover(im, fx, fy, fw, fh); else say("Cover set");
     };
     cropBox.replaceChildren(h("div", { class: "faint", style: { "font-size": "14px" } }, "Drag the frame over the cover, use the slider to resize it"), stage, h("label", { class: "field" }, "Frame size", size),
       h("label", { style: { display: "flex", gap: "8px", "align-items": "center", "font-size": "14px" } }, ocrOn, "Read title and author from the image"),
@@ -558,7 +567,7 @@ function addBook(uid, editId) {
     cropBox.scrollIntoView({ behavior: "smooth", block: "start" });
   }
   async function readCover(im, sx, sy, sw, sh) {
-    msg.textContent = "Reading the cover, this takes a few seconds the first time";
+    say("Reading the cover, this takes a few seconds the first time");
     try {
       if (!window.Tesseract) await new Promise((ok, ko) => document.head.append(h("script", { src: "https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js", onload: ok, onerror: ko })));
       const c = document.createElement("canvas"), H = 1200, W = 800; c.width = W; c.height = H;
@@ -566,29 +575,72 @@ function addBook(uid, editId) {
       const w = await Tesseract.createWorker("eng+ita");
       const { data } = await w.recognize(c); await w.terminate();
       const lines = (data.lines || []).filter(l => l.confidence > 45).map(l => l.text.replace(/[^\p{L}\p{N}'’ .,:&-]/gu, " ").replace(/\s+/g, " ").trim()).filter(t => t.replace(/[^\p{L}]/gu, "").length >= 3);
-      if (!lines.length) { msg.textContent = "Could not read any text. Type the title above."; return; }
+      if (!lines.length) { say("Could not read any text. Type the title above."); return; }
       const guess = lines.slice(0, 4).join(" ").slice(0, 90);
-      q.value = guess; msg.textContent = "Read: \u201C" + guess + "\u201D. Pick the right book below, or fix the words in the search box.";
+      q.value = guess; say("Read: \u201C" + guess + "\u201D. Pick the right book below, or fix the words in the search box.");
       await lookup(guess); q.scrollIntoView({ behavior: "smooth", block: "start" });
       if (!f.title.value) f.title.value = lines[0];
-    } catch (e) { msg.textContent = "Reading text needs internet. Type the title above."; }
+    } catch (e) { say("Reading text needs internet. Type the title above."); }
   }
+  async function getBD() {
+    let BD = window.BarcodeDetector;
+    try { if (BD && (await BD.getSupportedFormats()).includes("ean_13")) return BD; } catch (e) {}
+    return (await import("https://cdn.jsdelivr.net/npm/barcode-detector@2.3.1/+esm")).BarcodeDetector;
+  }
+  const pickIsbn = codes => codes.map(c => c.rawValue).find(v => /^97[89]\d{10}$/.test(v)) || codes.map(c => c.rawValue).find(v => /^\d{10,13}$/.test(v));
   async function scan(fl) {
-    msg.textContent = "Reading the barcode";
-    try {
-      let BD = window.BarcodeDetector;
-      if (!BD || !(await BD.getSupportedFormats?.() || []).includes("ean_13")) BD = (await import("https://cdn.jsdelivr.net/npm/barcode-detector@2.3.1/+esm")).BarcodeDetector;
-      const im = await loadImg(fl), codes = await new BD({ formats: ["ean_13", "upc_a"] }).detect(im);
-      const isbn = codes.map(c => c.rawValue).find(v => /^97[89]\d{10}$/.test(v)) || codes[0]?.rawValue;
-      if (!isbn) { msg.textContent = "No barcode found. Try closer, with good light, or type the title."; return; }
-      msg.textContent = "Looking up ISBN " + isbn;
-      const r = await fetch("https://openlibrary.org/search.json?" + new URLSearchParams({ isbn, limit: 1, fields: "title,author_name,first_publish_year,cover_i,subject" })).then(x => x.json());
-      const d = r.docs?.[0];
-      if (!d) { msg.textContent = "ISBN " + isbn + " is not in the online catalogue. Type the title and use Photo for the cover."; return; }
-      f.title.value = d.title || ""; f.authors.value = arr(d.author_name).slice(0, 2).join(", "); f.year.value = d.first_publish_year || "";
-      if (d.cover_i) cover = "https://covers.openlibrary.org/b/id/" + d.cover_i + "-M.jpg";
-      showCover(); msg.textContent = "Found it: " + d.title;
-    } catch (e) { msg.textContent = "Barcode reading needs internet. Type the title instead."; }
+    say("Reading the barcode");
+    try { const BD = await getBD(), im = await loadImg(fl), isbn = pickIsbn(await new BD({ formats: ["ean_13", "upc_a", "ean_8"] }).detect(im)); if (!isbn) { say("No barcode found in that photo. Try closer and with more light, or type the title."); return; } await byIsbn(isbn); }
+    catch (e) { say("Barcode reading needs internet. Type the title instead."); }
+  }
+  async function byIsbn(isbn) {
+    say("Looking up ISBN " + isbn);
+    let d = null;
+    try { const r = await fetch("https://openlibrary.org/search.json?" + new URLSearchParams({ isbn, limit: 1, fields: "title,author_name,first_publish_year,cover_i" })).then(x => x.json()); const o = r.docs?.[0]; if (o) d = { title: o.title, authors: arr(o.author_name).slice(0, 2), year: o.first_publish_year, cover: o.cover_i ? "https://covers.openlibrary.org/b/id/" + o.cover_i + "-M.jpg" : "" }; } catch (e) {}
+    if (!d) try { const r = await fetch("https://www.googleapis.com/books/v1/volumes?q=isbn:" + isbn).then(x => x.json()); const v = r.items?.[0]?.volumeInfo; if (v) d = { title: v.title + (v.subtitle ? ": " + v.subtitle : ""), authors: arr(v.authors).slice(0, 2), year: parseInt(v.publishedDate, 10) || "", cover: v.imageLinks?.thumbnail ? v.imageLinks.thumbnail.replace("http:", "https:").replace("&edge=curl", "") : "", plot: v.description || "" }; } catch (e) {}
+    if (!d) { say("ISBN " + isbn + " was not found online. Type the title and take a photo of the cover."); return; }
+    f.title.value = d.title || ""; f.authors.value = d.authors.join(", "); f.year.value = d.year || "";
+    if (d.plot && !f.plot.value) f.plot.value = d.plot.slice(0, 900);
+    if (d.cover && !String(cover).startsWith("data:")) cover = d.cover;
+    showCover(); say("Found it: " + d.title);
+  }
+  async function liveCamera(mode) {
+    const fallback = () => (mode === "scan" ? scanIn : photoIn).click();
+    if (!navigator.mediaDevices?.getUserMedia) { fallback(); return; }
+    let stream;
+    try { stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: "environment" }, width: { ideal: 1920 }, height: { ideal: 1080 } }, audio: false }); }
+    catch (e) { if (e.name === "NotAllowedError") say("Camera permission was refused. Allow the camera for this site in the phone settings, or use Screenshot or gallery."); else fallback(); return; }
+    const video = h("video", { playsinline: true, muted: true, autoplay: true, class: "camvideo" }); video.srcObject = stream; video.muted = true;
+    const guide = h("div", { class: mode === "scan" ? "camguide bar" : "camguide" });
+    const hint = h("div", { class: "camhint" }, mode === "scan" ? "Point at the barcode on the back of the book" : "Fit the front cover inside the frame");
+    let done = false, timer;
+    const vis = () => { if (document.hidden) stop(); };
+    const stop = () => { done = true; clearTimeout(timer); stream.getTracks().forEach(t => t.stop()); ov.remove(); document.removeEventListener("visibilitychange", vis); };
+    const shutter = h("button", { class: "camshutter", type: "button", "aria-label": "Take photo" });
+    const ov = h("div", { class: "camera" }, video, guide, hint,
+      h("div", { class: "cambar" }, h("button", { class: "btn", type: "button", onclick: () => stop() }, "Cancel"), mode === "photo" ? shutter : h("span", { style: { width: "72px" } }),
+        h("button", { class: "btn", type: "button", onclick: () => { stop(); fallback(); } }, "Gallery")));
+    document.body.append(ov); document.addEventListener("visibilitychange", vis);
+    try { await video.play(); } catch (e) {}
+    if (mode === "photo") {
+      shutter.onclick = () => {
+        if (!video.videoWidth) return;
+        const vw = video.videoWidth, vh = video.videoHeight, R = video.getBoundingClientRect(), G = guide.getBoundingClientRect();
+        const k = Math.max(R.width / vw, R.height / vh), ox = (R.width - vw * k) / 2, oy = (R.height - vh * k) / 2;
+        let sx = (G.left - R.left - ox) / k, sy = (G.top - R.top - oy) / k, sw = G.width / k, sh2 = G.height / k;
+        sx = Math.max(0, sx); sy = Math.max(0, sy); sw = Math.min(vw - sx, sw); sh2 = Math.min(vh - sy, sh2);
+        const c = document.createElement("canvas"); c.width = Math.round(sw); c.height = Math.round(sh2); c.getContext("2d").drawImage(video, sx, sy, sw, sh2, 0, 0, c.width, c.height);
+        stop(); c.toBlob(bl => photoCover(bl), "image/jpeg", 0.92);
+      };
+    } else {
+      let det; try { det = new (await getBD())({ formats: ["ean_13", "upc_a", "ean_8"] }); } catch (e) { stop(); say("Barcode reading needs internet. Type the title instead."); return; }
+      const tick = async () => {
+        if (done) return;
+        try { if (video.readyState >= 2) { const isbn = pickIsbn(await det.detect(video)); if (isbn && !done) { navigator.vibrate?.(60); stop(); byIsbn(isbn); return; } } } catch (e) {}
+        timer = setTimeout(tick, 250);
+      };
+      tick();
+    }
   }
   const save = async e => {
     e.preventDefault();
@@ -608,7 +660,7 @@ function addBook(uid, editId) {
   const { close } = sheet(h("form", { onsubmit: save, style: { display: "flex", "flex-direction": "column", gap: "14px" } },
     h("h2", {}, editId ? "Edit book" : "Add a book"),
     editId ? null : h("label", { class: "field" }, "Find it online for cover and details", q), results,
-    h("div", { class: "actions" }, editId ? null : h("button", { class: "btn", type: "button", onclick: () => scanIn.click() }, "▥ Scan barcode"), h("button", { class: "btn", type: "button", onclick: () => photoIn.click() }, "📷 Photo or screenshot"), scanIn, photoIn), cropBox,
+    h("div", { class: "actions" }, editId ? null : h("button", { class: "btn", type: "button", onclick: () => liveCamera("scan") }, "▥ Scan barcode"), h("button", { class: "btn", type: "button", onclick: () => liveCamera("photo") }, "📷 Photo of cover"), h("button", { class: "btn ghost", type: "button", onclick: () => photoIn.click() }, "🖼 Screenshot or gallery"), scanIn, photoIn), pmsg, cropBox,
     h("div", { style: { display: "flex", gap: "12px", "align-items": "flex-start" } }, preview, h("div", { style: { flex: "1", display: "flex", "flex-direction": "column", gap: "12px" } }, h("label", { class: "field" }, "Title", f.title), h("label", { class: "field" }, "Author (comma between several)", f.authors))),
     h("div", { class: "row" }, h("label", { class: "field" }, "Year", f.year), h("label", { class: "field" }, "Status", f.status)),
     h("label", { class: "field" }, "Genres (comma between several)", f.genres, gl),
