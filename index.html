@@ -1,461 +1,639 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#0f6b6b"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Shelves">
-<link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="icon-192.png">
-<title>Reading Shelves</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Young+Serif&family=Figtree:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#F3ECDD" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#1B1713" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Ex Libris">
+<title>Ex Libris</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,600;1,7..72,400&display=swap" rel="stylesheet">
 <style>
-body{margin:0;padding-top:env(safe-area-inset-top)}
-/* Layout: one column. Masthead with counts, a filter bar, then shelves of cover cards grouped by genre, author or type. */
 :root{
-  --bg:#edf0f2; --surface:#f8fafb; --ink:#15212b; --muted:#5b6b78; --line:#cfd7dd;
-  --accent:#0f6b6b; --accent-ink:#ffffff; --spine:#243746;
-  --display:"Young Serif",Georgia,serif; --body:"Figtree",system-ui,sans-serif; --mono:"IBM Plex Mono",ui-monospace,monospace;
+  --paper:#F3ECDD; --paper-2:#EBE2CE; --paper-3:#E2D6BC; --edge:#D8CBAE;
+  --ink:#2A221C; --ink-2:#5E5145; --ink-3:#8A7B6B;
+  --accent:#8E3B2E; --accent-ink:#FBF6EC; --gilt:#B08A3E; --wood:#7A5638; --wood-2:#5E412A;
+  --shadow:0 1px 2px rgba(60,40,20,.12),0 6px 18px rgba(60,40,20,.12);
+  --display:"Cormorant Garamond",Georgia,"Times New Roman",serif;
+  --text:"Literata",Georgia,"Times New Roman",serif;
+  color-scheme:light;
 }
-@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
-  --bg:#101820; --surface:#18232d; --ink:#e6edf1; --muted:#93a3af; --line:#2b3a46;
-  --accent:#5fc9c0; --accent-ink:#0b1a1d; --spine:#31485a; color-scheme:dark } }
-:root[data-theme="dark"]{
-  --bg:#101820; --surface:#18232d; --ink:#e6edf1; --muted:#93a3af; --line:#2b3a46;
-  --accent:#5fc9c0; --accent-ink:#0b1a1d; --spine:#31485a; color-scheme:dark }
+@media (prefers-color-scheme:dark){
+  :root{
+    --paper:#1B1713; --paper-2:#241F19; --paper-3:#2E2720; --edge:#3A3128;
+    --ink:#EDE3D1; --ink-2:#C2B49E; --ink-3:#8F8270;
+    --accent:#D2876F; --accent-ink:#1B1713; --gilt:#D3AE62; --wood:#4A3424; --wood-2:#33241A;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 22px rgba(0,0,0,.35);
+    color-scheme:dark;
+  }
+}
 *{box-sizing:border-box}
-body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.5}
-.wrap{max-width:1080px;margin:0 auto;padding-inline:20px;padding-block:32px 64px;display:flex;flex-direction:column;gap:28px}
-header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px;border-bottom:2px solid var(--ink);padding-bottom:16px}
-h1{font-family:var(--display);font-weight:400;font-size:clamp(28px,5vw,42px);line-height:1.1;margin:0;text-wrap:balance}
-.counts{font-family:var(--mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-variant-numeric:tabular-nums}
-.bar{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
-.bar input,.bar select{font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:8px 10px;min-width:0}
-.bar input{flex:1 1 220px}
-.bar label{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted)}
+html,body{margin:0}
+body{
+  background:var(--paper);
+  background-image:radial-gradient(ellipse at 20% 0%,rgba(255,255,255,.35),transparent 60%),radial-gradient(ellipse at 100% 100%,rgba(120,90,50,.08),transparent 55%);
+  color:var(--ink);font-family:var(--text);font-size:16px;line-height:1.55;
+  -webkit-font-smoothing:antialiased;min-height:100vh;
+  padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+a{color:var(--accent)}
+.page{max-width:920px;margin:0 auto;padding:20px 16px 120px}
+h1,h2,h3{font-family:var(--display);font-weight:600;line-height:1.1;margin:0}
+.sc{font-variant:small-caps;letter-spacing:.08em;text-transform:lowercase}
+.muted{color:var(--ink-2)}.faint{color:var(--ink-3)}
+.fleuron{display:flex;align-items:center;gap:12px;color:var(--gilt);margin:18px 0}
+.fleuron::before,.fleuron::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,transparent,var(--gilt),transparent)}
+.btn{border:1px solid var(--edge);background:var(--paper-2);border-radius:8px;padding:10px 16px;font-size:15px}
+.btn:hover{border-color:var(--ink-3)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:600}
+.btn.ghost{background:transparent}
+.btn:disabled{opacity:.5;cursor:default}
+.field{display:flex;flex-direction:column;gap:5px;font-size:14px;color:var(--ink-2)}
+.field input,.field select,.field textarea{font-size:16px;color:var(--ink);background:var(--paper);border:1px solid var(--edge);border-radius:8px;padding:10px 12px;width:100%;min-width:0}
+.field textarea{resize:vertical;min-height:90px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.status{font-size:14px;color:var(--ink-2);min-height:1.4em}
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-.chips{display:flex;flex-wrap:wrap;gap:8px}
-.chip{font:inherit;font-size:13px;border:1px solid var(--line);background:transparent;color:var(--ink);border-radius:999px;padding:4px 12px;cursor:pointer}
-.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
-section{display:flex;flex-direction:column;gap:14px}
-h2{font-family:var(--display);font-weight:400;font-size:20px;margin:0;display:flex;align-items:baseline;gap:10px}
-h2 span{font-family:var(--mono);font-size:12px;color:var(--muted)}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:24px 20px}
-.book{display:flex;flex-direction:column;gap:10px;min-width:0}
-.cover{aspect-ratio:2/3;max-width:100%;border-radius:3px 6px 6px 3px;overflow:hidden;background:var(--spine);box-shadow:inset 4px 0 0 rgba(0,0,0,.25),0 6px 14px -8px rgba(0,0,0,.5);display:flex}
+
+/* title page */
+.titlepage{text-align:center;padding:22px 0 6px}
+.titlepage .kicker{font-family:var(--display);font-size:15px;color:var(--gilt);letter-spacing:.3em;text-transform:uppercase}
+.titlepage h1{font-size:46px;margin-top:6px}
+.titlepage p{margin:6px 0 0;color:var(--ink-2);font-style:italic}
+
+/* bookshelf of profiles */
+.case{margin-top:26px;padding:0 6px}
+.spines{display:flex;align-items:flex-end;gap:8px;padding:0 10px;min-height:250px;overflow-x:auto;scrollbar-width:none}
+.spines::-webkit-scrollbar{display:none}
+.spine{flex:0 0 auto;width:64px;border:0;border-radius:4px 4px 2px 2px;position:relative;color:#F4E9D2;
+  background:var(--c,#7A2E2A);
+  background-image:linear-gradient(90deg,rgba(0,0,0,.28),rgba(255,255,255,.10) 18%,rgba(255,255,255,0) 40%,rgba(0,0,0,.18) 85%,rgba(0,0,0,.35));
+  box-shadow:inset 0 0 0 1px rgba(0,0,0,.15),2px 0 4px rgba(0,0,0,.18);
+  display:flex;flex-direction:column;align-items:center;padding:14px 0;transition:transform .2s ease}
+.spine:hover{transform:translateY(-6px)}
+.spine .band{width:100%;height:5px;border-top:1px solid rgba(225,190,110,.75);border-bottom:1px solid rgba(225,190,110,.75);margin:4px 0}
+.spine .name{writing-mode:vertical-rl;transform:rotate(180deg);font-family:var(--display);font-weight:700;font-size:22px;letter-spacing:.06em;margin:12px 0;flex:1;display:flex;align-items:center;color:#F1D99A;text-shadow:0 1px 0 rgba(0,0,0,.35)}
+.spine .num{font-family:var(--display);font-size:13px;color:#EAD7A8}
+.spine.add{background:transparent;background-image:none;border:2px dashed var(--ink-3);color:var(--ink-2);box-shadow:none;justify-content:center}
+.spine.add .name{color:var(--ink-2);text-shadow:none;font-size:18px}
+.plank{height:16px;margin:0 0 0;border-radius:3px;background:linear-gradient(var(--wood),var(--wood-2));box-shadow:0 8px 14px -6px rgba(60,40,20,.5)}
+.casehint{text-align:center;font-size:14px;color:var(--ink-3);margin-top:12px;font-style:italic}
+
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;margin-top:28px}
+.card{border:1px solid var(--edge);background:var(--paper-2);border-radius:10px;padding:18px;display:flex;flex-direction:column;gap:8px;text-align:left}
+.card h2{font-size:26px}
+button.card:hover{border-color:var(--ink-3)}
+.badge{display:inline-block;min-width:22px;padding:0 7px;border-radius:11px;background:var(--accent);color:var(--accent-ink);font-size:13px;text-align:center;font-family:var(--text);font-weight:600;vertical-align:3px}
+.foot{margin-top:28px;font-size:14px;color:var(--ink-3);text-align:center}
+.foot button{background:none;border:0;color:var(--accent);text-decoration:underline;padding:4px}
+
+/* profile page */
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+.back{background:none;border:0;color:var(--ink-2);font-family:var(--display);font-size:19px;padding:6px 0}
+.ribbon{width:16px;height:40px;background:var(--c);clip-path:polygon(0 0,100% 0,100% 100%,50% 78%,0 100%);margin-right:4px}
+.phead{text-align:center;padding:4px 0 0}
+.phead h1{font-size:42px}
+.phead .stats{margin-top:6px;color:var(--ink-2)}
+.tabs{display:flex;gap:4px;justify-content:center;margin:18px 0 14px;flex-wrap:wrap}
+.tab{border:0;background:none;padding:8px 12px;font-family:var(--display);font-size:18px;color:var(--ink-3);border-bottom:2px solid transparent}
+.tab[aria-selected="true"]{color:var(--ink);border-color:var(--c,var(--accent))}
+.tools{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.tools input[type=search]{flex:1 1 200px;font-size:16px;background:var(--paper);border:1px solid var(--edge);border-radius:20px;padding:9px 16px;min-width:0}
+.tools select{background:var(--paper);border:1px solid var(--edge);border-radius:20px;padding:8px 12px;font-size:15px}
+.chips{display:flex;gap:6px;overflow-x:auto;margin:12px -16px 0;padding:0 16px 4px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:0 0 auto;border:1px solid var(--edge);background:var(--paper);border-radius:16px;padding:5px 12px;font-size:14px;color:var(--ink-2)}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.section{margin-top:26px}
+.section h2{font-size:24px;display:flex;align-items:baseline;gap:10px;margin-bottom:12px}
+.section h2 small{font-family:var(--text);font-size:13px;color:var(--ink-3);font-weight:400}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:18px 14px}
+.book{border:0;background:none;padding:0;text-align:left;display:flex;flex-direction:column;gap:6px;min-width:0}
+.cover{position:relative;aspect-ratio:2/3;border-radius:2px 4px 4px 2px;overflow:hidden;background:var(--paper-3);box-shadow:var(--shadow)}
+.cover::after{content:"";position:absolute;inset:0 auto 0 0;width:7px;background:linear-gradient(90deg,rgba(0,0,0,.28),rgba(255,255,255,.12),transparent)}
 .cover img{width:100%;height:100%;object-fit:cover;display:block}
-.cover .fallback{padding:16px 12px 12px 18px;display:flex;flex-direction:column;justify-content:space-between;color:#f1f5f7;width:100%}
-.fallback b{font-family:var(--display);font-weight:400;font-size:17px;line-height:1.2;overflow-wrap:anywhere}
-.fallback i{font-style:normal;font-size:12px;opacity:.8}
-.title{font-weight:600;line-height:1.3;overflow-wrap:anywhere}
-.meta{font-size:13px;color:var(--muted);overflow-wrap:anywhere}
-.call{font-family:var(--mono);font-size:11px;letter-spacing:.04em;color:var(--muted);text-transform:uppercase}
-.tags{display:flex;flex-wrap:wrap;gap:4px}
-.tag{font-size:11px;border:1px solid var(--line);border-radius:4px;padding:1px 6px;color:var(--muted)}
-.book{cursor:pointer;background:none;border:0;padding:0;font:inherit;color:inherit;text-align:left}
-.book:hover .title{color:var(--accent)}
-.hint{font-size:12px;color:var(--accent)}
-dialog{border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink);padding:0;width:min(640px,calc(100% - 32px));max-height:85vh}
-dialog::backdrop{background:rgba(8,14,20,.6)}
-.sheet{display:flex;flex-wrap:wrap;gap:20px;padding:24px}
-.sheet .cover{flex:0 0 130px;align-self:flex-start}
-.sheet .text{flex:1 1 260px;min-width:0;display:flex;flex-direction:column;gap:10px}
-.sheet h3{font-family:var(--display);font-weight:400;font-size:24px;line-height:1.15;margin:0;text-wrap:balance}
-.sheet p{margin:0;max-width:65ch}
-.sheet a{color:var(--accent)}
-.close{align-self:flex-start;font:inherit;border:1px solid var(--line);background:transparent;color:var(--ink);border-radius:6px;padding:6px 14px;cursor:pointer}
-.add{font:inherit;font-weight:600;background:var(--accent);color:var(--accent-ink);border:0;border-radius:6px;padding:8px 14px;cursor:pointer}
-.add:disabled{opacity:.5;cursor:default}
-.form{display:flex;flex-direction:column;gap:14px;padding:24px}
-.form h3{font-family:var(--display);font-weight:400;font-size:24px;margin:0}
-.form label{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--muted)}
-.form input,.form select,.form textarea{font:inherit;font-size:16px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:8px 10px;min-width:0;width:100%}
-.form .row{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:14px}
-.form .actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
-.form .msg{font-size:13px;color:var(--muted);flex:1 1 160px}
-.now{border:1px solid var(--accent);border-radius:10px;padding:18px 16px;background:var(--surface)}
-.badge{align-self:flex-start;font-family:var(--mono);font-size:11px;letter-spacing:.04em;text-transform:uppercase;background:var(--accent);color:var(--accent-ink);border-radius:4px;padding:1px 6px}
-.notes{display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--muted)}
-.notes textarea{font:inherit;font-size:16px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:8px 10px;width:100%;min-height:96px;resize:vertical}
-.rowb{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
-.nav{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:14px}
-.nav a{color:var(--muted);text-decoration:none;padding:4px 0;border-bottom:2px solid transparent}
-.nav a[aria-current="page"]{color:var(--ink);border-color:var(--accent)}
-.nav a:hover{color:var(--accent)}
-.doors{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px}
-.door{display:flex;flex-direction:column;gap:12px;padding:20px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:inherit;text-decoration:none}
-.door:hover{border-color:var(--accent)}
-.door h2{font-size:24px}
-.strip{display:flex;gap:8px;min-height:84px}
-.strip .cover{width:56px;flex:0 0 56px}
-.strip .fallback{padding:6px}.strip .fallback b{font-size:11px}.strip .fallback i{display:none}
-.go{font-weight:600;color:var(--accent)}
-.sugs{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px;align-items:start}
-.sug{display:flex;flex-direction:column;gap:6px;padding:14px 16px;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
-.sug p{margin:0;max-width:65ch}
-.panel{border:1px solid var(--line);border-radius:10px;background:var(--surface)}
-.empty{border:1px dashed var(--line);border-radius:8px;padding:32px 20px;color:var(--muted);text-align:center}
+.cloth{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:space-between;padding:12px 10px 10px 14px;color:#F1E3C4;background:var(--cc,#3D4A3A);
+  background-image:repeating-linear-gradient(45deg,rgba(255,255,255,.035) 0 2px,transparent 2px 4px)}
+.cloth b{font-family:var(--display);font-weight:700;font-size:16px;line-height:1.1;color:#F1D99A}
+.cloth i{font-size:11px;font-style:normal;opacity:.85}
+.cloth::before{content:"";position:absolute;inset:6px 6px 6px 10px;border:1px solid rgba(225,190,110,.5);pointer-events:none}
+.book .t{font-size:14px;line-height:1.25;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.book .a{font-size:12px;color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pill{position:absolute;top:6px;right:6px;z-index:1;font-size:10px;letter-spacing:.06em;text-transform:uppercase;background:var(--paper);color:var(--ink);border-radius:3px;padding:1px 5px;box-shadow:0 1px 2px rgba(0,0,0,.2)}
+.empty{border:1px dashed var(--edge);border-radius:10px;padding:28px 18px;text-align:center;color:var(--ink-2);font-style:italic}
+.fab{position:fixed;right:max(18px,env(safe-area-inset-right));bottom:calc(22px + env(safe-area-inset-bottom));z-index:20;border:0;background:var(--accent);color:var(--accent-ink);border-radius:28px;padding:14px 20px;font-weight:600;box-shadow:0 8px 20px rgba(90,40,20,.35);display:flex;align-items:center;gap:8px}
+.fab span{font-size:22px;line-height:1}
+
+/* sheets */
+.scrim{position:fixed;inset:0;background:rgba(30,20,12,.45);z-index:40;display:flex;align-items:flex-end;justify-content:center;animation:fade .2s ease}
+.sheet{background:var(--paper);width:100%;max-width:640px;max-height:92vh;overflow:auto;border-radius:16px 16px 0 0;padding:10px 18px calc(24px + env(safe-area-inset-bottom));box-shadow:0 -10px 30px rgba(0,0,0,.25);animation:rise .25s ease}
+@media (min-width:700px){.scrim{align-items:center}.sheet{border-radius:14px}}
+.grab{width:42px;height:5px;border-radius:3px;background:var(--edge);margin:4px auto 14px}
+.sheet h2{font-size:30px}
+.detail{display:grid;grid-template-columns:110px 1fr;gap:16px;align-items:start}
+.detail .meta{font-size:14px;color:var(--ink-2)}
+.seg{display:flex;border:1px solid var(--edge);border-radius:10px;overflow:hidden;margin:16px 0}
+.seg button{flex:1;border:0;background:var(--paper-2);padding:10px 4px;font-size:14px;color:var(--ink-2)}
+.seg button+button{border-left:1px solid var(--edge)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--paper);font-weight:600}
+.plot{margin:12px 0 0;max-width:62ch}
+.plot::first-letter{font-family:var(--display);font-size:2.6em;float:left;line-height:.8;padding:6px 6px 0 0;color:var(--accent)}
+.margin{margin-top:18px;padding:14px;border-left:3px solid var(--gilt);background:var(--paper-2);border-radius:0 8px 8px 0}
+.margin .field textarea{background:transparent;border-style:dashed;font-style:italic}
+.results{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+.result{display:flex;gap:10px;align-items:center;border:1px solid var(--edge);background:var(--paper-2);border-radius:8px;padding:6px;text-align:left}
+.result img,.result .noimg{width:38px;height:56px;object-fit:cover;border-radius:2px;background:var(--paper-3);flex:0 0 38px}
+.result div{min-width:0}.result b{display:block;font-weight:600;font-size:15px}.result small{color:var(--ink-3)}
+.swatches{display:flex;gap:10px;flex-wrap:wrap}
+.swatch{width:40px;height:56px;border-radius:3px;border:0;background:var(--c);box-shadow:inset 0 0 0 1px rgba(0,0,0,.2)}
+.swatch[aria-pressed="true"]{outline:3px solid var(--ink);outline-offset:2px}
+.letter{border:1px solid var(--edge);background:var(--paper-2);border-radius:8px;padding:14px 16px;display:flex;flex-direction:column;gap:6px}
+.letter .t{font-family:var(--display);font-size:21px;font-weight:600}
+.letter p{margin:0;font-style:italic}
+.actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+
+/* page turn */
+.turn{position:fixed;inset:0;z-index:30;perspective:1800px;pointer-events:none}
+.turn .leaf{position:absolute;inset:0;transform-origin:left center;backface-visibility:hidden;background:var(--c);
+  background-image:linear-gradient(90deg,rgba(0,0,0,.35),rgba(0,0,0,0) 6%,rgba(255,255,255,.06) 50%,rgba(0,0,0,.25));
+  display:flex;flex-direction:column;align-items:center;justify-content:center;color:#F1D99A;font-family:var(--display)}
+.turn .leaf::before{content:"";position:absolute;inset:18px 18px 18px 26px;border:2px solid rgba(225,190,110,.6)}
+.turn .leaf::after{content:"";position:absolute;inset:26px 26px 26px 34px;border:1px solid rgba(225,190,110,.4)}
+.turn .leaf .k{letter-spacing:.35em;font-size:15px;text-transform:uppercase}
+.turn .leaf .n{font-size:54px;font-weight:700;margin-top:10px;text-align:center;padding:0 40px}
+.turn .leaf .o{font-size:22px;margin-top:14px}
+.turn.paper .leaf{background:var(--paper);color:var(--ink)}
+.turn.paper .leaf::before,.turn.paper .leaf::after{border-color:var(--edge)}
+@keyframes fade{from{opacity:0}}
+@keyframes rise{from{transform:translateY(30px);opacity:0}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+.toast{position:fixed;left:50%;bottom:calc(90px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:10px 16px;border-radius:8px;font-size:14px;z-index:60;box-shadow:var(--shadow);max-width:90vw}
+.auth{max-width:420px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
 </style>
+</head>
+<body>
+<div id="app" class="page"><div class="titlepage"><div class="kicker">Ex Libris</div><h1>Opening the library</h1></div></div>
+<script type="module">
+/* ------------------------------------------------------------------
+   Sync setup. Paste the firebaseConfig from the Firebase console here.
+   While it stays null the app works on this phone only.
+------------------------------------------------------------------- */
+const FIREBASE_CONFIG = null;
 
-<div class="wrap">
-  <nav class="nav" aria-label="Pages">
-    <a href="#home" data-v="home">Home</a>
-    <a href="#jacopo" data-v="jacopo">Jacopo's shelf</a>
-    <a href="#gaia" data-v="gaia">Gaia's shelf</a>
-    <a href="#swap" data-v="swap">Book swap</a>
-  </nav>
+const LEATHER = ["#7A2E2A", "#2F4F3A", "#2B3A55", "#A8742B", "#5A3550", "#3F5E63", "#6B4A2B", "#4A4A4A"];
+const STATUS = { reading: "Reading", read: "Read", wishlist: "Wishlist" };
+const $app = document.getElementById("app");
 
-  <div id="homeView" hidden>
-    <header><h1>Reading Shelves</h1><div class="counts" id="homeCounts">Opening the shelves</div></header>
-    <div class="doors" style="margin-top:28px">
-      <a class="door" href="#jacopo"><h2>Jacopo's shelf</h2><div class="meta" id="d-jacopo">Loading</div><div class="strip" id="s-jacopo"></div><span class="go">Open shelf</span></a>
-      <a class="door" href="#gaia"><h2>Gaia's shelf</h2><div class="meta" id="d-gaia">Loading</div><div class="strip" id="s-gaia"></div><span class="go">Open shelf</span></a>
-      <div class="door" style="cursor:default"><h2>Backup</h2><div class="meta">Everything lives only on this phone. Save a backup now and then, and use it to move your shelves to another device or to load the update files Claude sends you.</div>
-        <div class="rowb"><button class="add" id="expBtn" type="button">Save backup</button><label class="close" style="cursor:pointer">Load backup<input id="impFile" type="file" accept="application/json,.json" hidden></label></div><span class="meta" id="bkMsg" role="status"></span></div>
-      <a class="door" href="#swap"><h2>Book swap</h2><div class="meta" id="d-swap">Suggest books to each other and send the good ones straight to a wishlist.</div><span class="go">Open suggestions</span></a>
-    </div>
-  </div>
-
-  <div id="swapView" hidden style="display:flex;flex-direction:column;gap:28px">
-    <header><h1>Book swap</h1><div class="counts" id="swapCounts"></div></header>
-    <form class="form panel" id="sugForm">
-      <h3>Suggest a book</h3>
-      <div class="row">
-        <label>From<select name="from"><option value="jacopo">Jacopo</option><option value="gaia">Gaia</option></select></label>
-        <label>To<select name="to"><option value="gaia">Gaia</option><option value="jacopo">Jacopo</option></select></label>
-      </div>
-      <div class="row">
-        <label>Title<input name="title" required autocomplete="off"></label>
-        <label>Author<input name="author" autocomplete="off"></label>
-      </div>
-      <label>Why you should read it<textarea name="why" rows="3"></textarea></label>
-      <div class="actions"><button class="add" id="sugSave" type="submit">Send suggestion</button><span class="msg" id="sugMsg" role="status"></span></div>
-    </form>
-    <div class="sugs" id="sugList"></div>
-  </div>
-
-  <div id="shelfView" hidden style="display:flex;flex-direction:column;gap:28px">
-  <header>
-    <h1 id="shelfTitle">Reading Shelf</h1>
-    <div class="counts" id="counts">Opening the shelf</div>
-  </header>
-
-  <div class="bar">
-    <input id="q" type="search" placeholder="Search title, author, genre" aria-label="Search">
-    <label for="group">Shelve by
-      <select id="group">
-        <option value="genre">Genre</option>
-        <option value="author">Author</option>
-        <option value="series">Series</option>
-        <option value="type">Book or manga</option>
-        <option value="none">One shelf</option>
-      </select>
-    </label>
-    <label for="sort">Order
-      <select id="sort">
-        <option value="title">Title</option>
-        <option value="author">Author</option>
-        <option value="year">Year published</option>
-        <option value="added">Recently added</option>
-      </select>
-    </label>
-    <button class="add" id="addBtn" type="button" hidden>Add a book</button>
-    <button class="close" id="wishBtn" type="button" hidden>Add to wishlist</button>
-  </div>
-  <div class="chips" id="chips" aria-label="Filter by genre"></div>
-
-  <main id="shelves">
-    <div class="empty">Books and manga will appear here with their covers.</div>
-  </main>
-  </div>
-</div>
-<dialog id="detail" aria-labelledby="d-title"><div class="sheet" id="sheet"></div></dialog>
-
-<dialog id="addDlg" aria-labelledby="a-title"><form class="form" id="addForm">
-  <h3 id="a-title">Add a book</h3>
-  <label>Title<input name="title" required autocomplete="off"></label>
-  <label>Author (separate several with commas)<input name="authors" required autocomplete="off"></label>
-  <div class="row">
-    <label>Year<input name="year" type="number" inputmode="numeric"></label>
-    <label>Type<select name="type"><option>Book</option><option>Manga</option></select></label>
-    <label>Status<select name="status"><option value="read">Finished</option><option value="reading">Currently reading</option><option value="wishlist">Wishlist</option></select></label>
-  </div>
-  <label>Genres (separate with commas)<input name="genres" list="genreList" autocomplete="off"><datalist id="genreList"></datalist></label>
-  <div class="row">
-    <label>Series (optional)<input name="series" autocomplete="off"></label>
-    <label>Number in series<input name="seriesNo" type="number" inputmode="numeric" min="1"></label>
-  </div>
-  <label>Plot (optional)<textarea name="plot" rows="4"></textarea></label>
-  <div class="actions">
-    <button class="add" id="saveBtn" type="submit">Save to shelf</button>
-    <button class="close" id="cancelBtn" type="button">Cancel</button>
-    <span class="msg" id="addMsg" role="status"></span>
-  </div>
-</form></dialog>
-
-<script>
-const KEY = "shelves-v1";
-function LocalDB() {
-  let store; try { store = JSON.parse(localStorage.getItem(KEY) || "null"); } catch (e) { store = null; }
-  const subs = {};
-  const save = () => { if (!store) return; try { localStorage.setItem(KEY, JSON.stringify(store)); } catch (e) { alert("Storage is full or blocked, the change was not saved."); } };
-  const fire = c => (subs[c] || []).forEach(f => f({ docs: Object.entries(store[c] || {}).map(([id, d]) => ({ id, data: () => d })) }));
-  const getRemote = async () => {
-    const ctl = new AbortController(), t = setTimeout(() => ctl.abort(), 5000);
-    try { const r = await fetch("data.json?t=" + Date.now(), { cache: "no-store", signal: ctl.signal }); return r.ok ? await r.json() : null; }
-    catch (e) { return null; } finally { clearTimeout(t); }
-  };
-  const FILL = ["cover", "plot", "source", "altTitle", "yearLabel", "series", "seriesNo", "year", "genres", "authors"];
-  const ready = (async () => {
-    const remote = await getRemote();
-    if (!store) { store = remote || (await fetch("data.json").then(r => r.json()).catch(() => ({}))); store._seen = {}; }
-    for (const c of ["books", "gaia_books", "suggestions"]) store[c] = store[c] || {};
-    store._seen = store._seen || {};
-    let added = 0;
-    if (remote) for (const c of ["books", "gaia_books"]) {
-      const seen = store._seen[c] = store._seen[c] || Object.keys(store[c]);
-      for (const [id, d] of Object.entries(remote[c] || {})) {
-        if (!store[c][id]) { if (!seen.includes(id)) { store[c][id] = d; added++; } }
-        else { const mine = store[c][id]; for (const k of FILL) { const empty = mine[k] == null || mine[k] === "" || (Array.isArray(mine[k]) && !mine[k].length); if (empty && d[k] != null) mine[k] = d[k]; } }
-        if (!seen.includes(id)) seen.push(id);
-      }
-    }
-    window.__added = added;
-    save();
-  })();
-  const coll = c => ({
-    onSnapshot: f => { (subs[c] = subs[c] || []).push(f); ready.then(() => fire(c)); },
-    doc: id => ({
-      set: async d => { await ready; store[c][id] = d; save(); fire(c); },
-      update: async d => { await ready; store[c][id] = Object.assign(store[c][id] || {}, d); save(); fire(c); },
-      delete: async () => { await ready; delete store[c][id]; save(); fire(c); }
-    }),
-    add: async d => { await ready; store[c]["s" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6)] = d; save(); fire(c); }
-  });
-  return { collection: coll, _all: async () => { await ready; return store; }, _load: async data => { await ready; store = data; for (const c of ["books", "gaia_books", "suggestions"]) store[c] = store[c] || {}; save(); Object.keys(subs).forEach(fire); } };
+/* ---------- helpers ---------- */
+function h(tag, attrs, ...kids) {
+  const e = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs || {})) {
+    if (v == null || v === false) continue;
+    if (k === "class") e.className = v;
+    else if (k === "style" && typeof v === "object") Object.entries(v).forEach(([p, val]) => e.style.setProperty(p, val));
+    else if (k.startsWith("on")) e.addEventListener(k.slice(2), v);
+    else if (k === "text") e.textContent = v;
+    else e.setAttribute(k, v === true ? "" : v);
+  }
+  for (const k of kids.flat()) if (k != null && k !== false) e.append(k.nodeType ? k : document.createTextNode(String(k)));
+  return e;
 }
-const LDB = LocalDB();
-</script>
-<script>
-let books = [], genre = null, DB = null, cur = "jacopo", sugs = [];
-const SHELVES = { jacopo: { coll: "books", name: "Jacopo", data: [], loaded: false }, gaia: { coll: "gaia_books", name: "Gaia", data: [], loaded: false } };
-const COLL = () => SHELVES[cur].coll;
-const reading = b => b.status === "reading", wished = b => b.status === "wishlist";
-const $ = id => document.getElementById(id);
-const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
 const arr = v => Array.isArray(v) ? v : (v ? [v] : []);
-const yr = b => b.yearLabel || b.year || "";
-const surname = b => (arr(b.authors)[0] || "").split(" ").pop();
+const slug = t => String(t || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 80) || "book";
+const hash = s => { let x = 0; for (const c of String(s)) x = (x * 31 + c.charCodeAt(0)) | 0; return Math.abs(x); };
+const today = () => new Date().toISOString().slice(0, 10);
+const yr = b => b.yearLabel || (b.year != null ? (b.year < 0 ? -b.year + " BC" : b.year) : "");
+let toastT;
+function toast(msg) { document.querySelector(".toast")?.remove(); const t = h("div", { class: "toast", role: "status" }, msg); document.body.append(t); clearTimeout(toastT); toastT = setTimeout(() => t.remove(), 3200); }
+const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-try { $("group").value = localStorage.getItem("group") || "genre"; $("sort").value = localStorage.getItem("sort") || "title"; } catch (e) {}
-
-function coverOf(b) {
-  const cover = el("div", "cover");
-  const fallback = () => { cover.replaceChildren(); const f = el("div", "fallback"); f.append(el("b", "", b.title), el("i", "", arr(b.authors).join(", "))); cover.append(f); };
-  if (b.cover) { const img = el("img"); img.alt = "Cover of " + b.title; img.onerror = fallback; img.src = b.cover; cover.append(img); } else fallback();
-  return cover;
+/* ---------- local adapter (this phone only) ---------- */
+function localAdapter() {
+  const KEY = "exlibris-v2";
+  let db; const subs = { profiles: [], sugs: [], books: {} };
+  const save = () => { try { localStorage.setItem(KEY, JSON.stringify(db)); } catch (e) { toast("Storage is full, change not saved"); } };
+  const emit = () => { subs.profiles.forEach(f => f(structuredClone(db.profiles))); subs.sugs.forEach(f => f(Object.entries(db.sugs).map(([id, d]) => ({ id, ...d })))); for (const [u, fs] of Object.entries(subs.books)) fs.forEach(f => f(db.books[u] || {})); };
+  let me = null; const authSubs = [];
+  return {
+    mode: "local",
+    async init() {
+      try { db = JSON.parse(localStorage.getItem(KEY) || "null"); } catch (e) { db = null; }
+      if (!db) {
+        db = { profiles: {}, books: {}, sugs: {} };
+        let old = null; try { old = JSON.parse(localStorage.getItem("shelves-v1") || "null"); } catch (e) {}
+        const seed = old || await fetch("data.json").then(r => r.json()).catch(() => ({ books: {} }));
+        db.profiles.jacopo = { name: "Jacopo", color: LEATHER[0], created: 1, seedFrom: "data.json", seen: Object.keys(seed.books || {}) };
+        db.books.jacopo = seed.books || {};
+        if (old && Object.keys(old.gaia_books || {}).length) { db.profiles.gaia = { name: "Gaia", color: LEATHER[4], created: 2 }; db.books.gaia = old.gaia_books; }
+        save();
+      }
+      me = sessionStorage.getItem("exlibris-me") || null; if (me && !db.profiles[me]) me = null;
+    },
+    user: () => me ? { uid: me } : null,
+    onAuth(f) { authSubs.push(f); f(this.user()); },
+    use(uid) { me = uid; sessionStorage.setItem("exlibris-me", uid || ""); authSubs.forEach(f => f(this.user())); },
+    watchProfiles(f) { subs.profiles.push(f); f(structuredClone(db.profiles)); },
+    async saveProfile(uid, d) { db.profiles[uid] = { ...(db.profiles[uid] || {}), ...d }; save(); emit(); },
+    watchBooks(uid, f) { (subs.books[uid] = subs.books[uid] || []).push(f); f(db.books[uid] || {}); return () => { subs.books[uid] = subs.books[uid].filter(x => x !== f); }; },
+    async setBook(uid, id, d) { (db.books[uid] = db.books[uid] || {})[id] = d; save(); emit(); },
+    async updateBook(uid, id, p) { Object.assign(db.books[uid][id], p); save(); emit(); },
+    async deleteBook(uid, id) { delete db.books[uid][id]; save(); emit(); },
+    async setBooks(uid, map) { db.books[uid] = { ...(db.books[uid] || {}), ...map }; save(); emit(); },
+    watchSugs(f) { subs.sugs.push(f); f(Object.entries(db.sugs).map(([id, d]) => ({ id, ...d }))); },
+    async addSug(d) { db.sugs["s" + Date.now().toString(36)] = d; save(); emit(); },
+    async delSug(id) { delete db.sugs[id]; save(); emit(); },
+    exportAll: () => structuredClone(db),
+    async importAll(d) { db = d; save(); emit(); }
+  };
 }
-function openDetail(b) {
-  const sheet = $("sheet"), text = el("div", "text"), h = el("h3", "", b.title); h.id = "d-title";
-  text.append(h, el("div", "meta", arr(b.authors).join(" & ") + (yr(b) ? " · " + yr(b) : "") + (b.altTitle ? " · " + b.altTitle : "")));
-  const tags = el("div", "tags"); arr(b.genres).forEach(g => tags.append(el("span", "tag", g))); text.append(tags);
-  text.append(el("p", "", b.plot || "No plot summary saved for this title yet. Ask Claude to add one."));
-  if (b.source && /^https:\/\//.test(b.source)) { const a = el("a", "meta", "Read more"); a.href = b.source; a.target = "_blank"; a.rel = "noopener"; text.append(a); }
-  if (DB && b.id) {
-    const box = el("label", "notes", "Notes"), ta = el("textarea"), rowb = el("div", "rowb"), sv = el("button", "close", "Save notes"), st = el("span", "", "");
-    ta.value = b.notes || ""; ta.placeholder = "What you thought of it, quotes, where you stopped"; sv.type = "button"; st.setAttribute("role", "status");
-    ta.oninput = () => { st.textContent = ""; };
-    sv.onclick = async () => { sv.disabled = true; st.textContent = "Saving"; try { await DB.collection(COLL()).doc(b.id).update({ notes: ta.value.trim() }); b.notes = ta.value.trim(); st.textContent = "Saved"; } catch (e) { st.textContent = "Could not save, try again"; } sv.disabled = false; };
-    rowb.append(sv, st); box.append(ta, rowb); text.append(box);
-  } else if (b.notes) text.append(el("p", "meta", "My notes: " + b.notes));
-  if (DB && b.id) {
-    const acts = el("div", "rowb"), go = (label, status) => { const t = el("button", "close", label); t.type = "button";
-      t.onclick = async () => { t.disabled = true; try { await DB.collection(COLL()).doc(b.id).update({ status }); $("detail").close(); } catch (e) { t.disabled = false; t.textContent = "Could not save, try again"; } };
-      acts.append(t); };
-    if (wished(b)) { go("Start reading", "reading"); go("Mark as finished", "read"); }
-    else if (reading(b)) go("Mark as finished", "read");
-    else go("Mark as currently reading", "reading");
-    text.append(acts); }
-  const x = el("button", "close", "Close"); x.type = "button"; x.onclick = () => $("detail").close(); text.append(x);
-  sheet.replaceChildren(coverOf(b), text);
-  $("detail").showModal();
-}
-$("detail").addEventListener("click", e => { if (e.target === $("detail")) $("detail").close(); });
 
-function card(b) {
-  const c = el("button", "book"); c.type = "button"; c.onclick = () => openDetail(b);
-  const cover = el("div", "cover");
-  const fallback = () => { cover.replaceChildren(); const f = el("div", "fallback"); f.append(el("b", "", b.title), el("i", "", arr(b.authors).join(", "))); cover.append(f); };
-  if (b.cover) { const img = el("img"); img.alt = "Cover of " + b.title; img.loading = "lazy"; img.onerror = fallback; img.src = b.cover; cover.append(img); } else fallback();
-  c.append(cover); if (reading(b)) c.append(el("span", "badge", "Reading now")); if (wished(b)) c.append(el("span", "badge", "Wishlist")); c.append(el("div", "title", b.title), el("div", "meta", arr(b.authors).join(" & ") + (yr(b) ? " · " + yr(b) : "")));
-  if (b.series) c.append(el("div", "meta", b.series + (b.seriesNo ? " #" + b.seriesNo : "")));
-  if (b.altTitle) c.append(el("div", "meta", b.altTitle));
-  const call = [b.type, arr(b.genres)[0], surname(b).slice(0, 3), yr(b)].filter(Boolean).join(" · ");
-  c.append(el("div", "call", call));
-  const tags = el("div", "tags"); arr(b.genres).forEach(g => tags.append(el("span", "tag", g))); c.append(tags, el("div", "hint", b.notes ? "Open plot and notes" : "Open plot"));
+/* ---------- firebase adapter (shared, synced) ---------- */
+async function firebaseAdapter(cfg) {
+  const V = "10.12.2", base = "https://www.gstatic.com/firebasejs/" + V + "/";
+  const [{ initializeApp }, A, F] = await Promise.all([import(base + "firebase-app.js"), import(base + "firebase-auth.js"), import(base + "firebase-firestore.js")]);
+  const app = initializeApp(cfg);
+  const auth = A.getAuth(app);
+  let fs; try { fs = F.initializeFirestore(app, { localCache: F.persistentLocalCache({ tabManager: F.persistentMultipleTabManager() }) }); } catch (e) { fs = F.getFirestore(app); }
+  const books = uid => F.collection(fs, "profiles", uid, "books");
+  return {
+    mode: "firebase",
+    async init() { await new Promise(r => { const u = A.onAuthStateChanged(auth, () => { u(); r(); }); }); },
+    user: () => auth.currentUser ? { uid: auth.currentUser.uid, email: auth.currentUser.email } : null,
+    onAuth(f) { A.onAuthStateChanged(auth, u => f(u ? { uid: u.uid, email: u.email } : null)); },
+    signIn: (e, p) => A.signInWithEmailAndPassword(auth, e, p),
+    signUp: (e, p) => A.createUserWithEmailAndPassword(auth, e, p),
+    reset: e => A.sendPasswordResetEmail(auth, e),
+    signOut: () => A.signOut(auth),
+    watchProfiles(f) { return F.onSnapshot(F.collection(fs, "profiles"), s => { const o = {}; s.forEach(d => o[d.id] = d.data()); f(o); }, e => toast("Could not load profiles: " + e.code)); },
+    saveProfile: (uid, d) => F.setDoc(F.doc(fs, "profiles", uid), d, { merge: true }),
+    watchBooks(uid, f) { return F.onSnapshot(books(uid), s => { const o = {}; s.forEach(d => o[d.id] = d.data()); f(o); }, e => toast("Could not load books: " + e.code)); },
+    setBook: (uid, id, d) => F.setDoc(F.doc(books(uid), id), d),
+    updateBook: (uid, id, p) => F.updateDoc(F.doc(books(uid), id), p),
+    deleteBook: (uid, id) => F.deleteDoc(F.doc(books(uid), id)),
+    async setBooks(uid, map) { const ids = Object.keys(map); for (let i = 0; i < ids.length; i += 400) { const b = F.writeBatch(fs); ids.slice(i, i + 400).forEach(id => b.set(F.doc(books(uid), id), map[id])); await b.commit(); } },
+    watchSugs(f) { return F.onSnapshot(F.collection(fs, "suggestions"), s => f(s.docs.map(d => ({ id: d.id, ...d.data() }))), () => {}); },
+    addSug: d => F.addDoc(F.collection(fs, "suggestions"), d),
+    delSug: id => F.deleteDoc(F.doc(fs, "suggestions", id))
+  };
+}
+
+/* ---------- state ---------- */
+let DB, profiles = {}, sugs = [], user = null;
+const shelf = {}; const unsub = {};
+const ui = { route: "", tab: "all", q: "", genre: null, group: localStorage.getItem("exl-group") || "genre", sort: localStorage.getItem("exl-sort") || "title" };
+const meUid = () => user?.uid || null;
+const canEdit = uid => DB.mode === "local" || uid === meUid();
+const nameOf = uid => profiles[uid]?.name || "Someone";
+function books(uid) { return Object.entries(shelf[uid] || {}).map(([id, d]) => ({ id, ...d })); }
+function watch(uid) { if (unsub[uid] !== undefined) return; unsub[uid] = null; let sync = true; const u = DB.watchBooks(uid, o => { shelf[uid] = o; if (!sync) render(); }); sync = false; if (shelf[uid]) queueMicrotask(render); unsub[uid] = u || null; }
+
+/* ---------- seed merge: books Claude adds to data.json ---------- */
+async function mergeSeed(uid) {
+  const p = profiles[uid]; if (!p || p.seedFrom !== "data.json" || !canEdit(uid)) return;
+  const r = await fetch("data.json?t=" + Date.now(), { cache: "no-store" }).then(x => x.ok ? x.json() : null).catch(() => null); if (!r) return;
+  const seen = new Set(p.seen || []), mine = shelf[uid] || {}, add = {};
+  for (const [id, d] of Object.entries(r.books || {})) if (!seen.has(id) && !mine[id]) add[id] = d;
+  const all = [...new Set([...(p.seen || []), ...Object.keys(r.books || {})])];
+  if (Object.keys(add).length) { await DB.setBooks(uid, add); toast(Object.keys(add).length + " new book" + (Object.keys(add).length > 1 ? "s" : "") + " added from Claude"); }
+  if (all.length !== (p.seen || []).length) await DB.saveProfile(uid, { seen: all });
+}
+
+/* ---------- covers ---------- */
+function coverEl(b, pill) {
+  const c = h("div", { class: "cover" });
+  if (pill) c.append(h("span", { class: "pill" }, pill));
+  const cloth = () => h("div", { class: "cloth", style: { "--cc": LEATHER[hash(b.title) % LEATHER.length] } }, h("b", {}, b.title || "Untitled"), h("i", {}, arr(b.authors).join(", ")));
+  if (b.cover) { const img = h("img", { src: b.cover, alt: "Cover of " + b.title, loading: "lazy" }); img.onerror = () => img.replaceWith(cloth()); c.append(img); } else c.append(cloth());
   return c;
 }
 
+/* ---------- page turn ---------- */
+function turn({ color, kicker, name, paper, opening }) {
+  if (reduce) return Promise.resolve();
+  const wrap = h("div", { class: "turn" + (paper ? " paper" : "") }), leaf = h("div", { class: "leaf", style: { "--c": color || "var(--paper-3)" } }, h("div", { class: "k" }, kicker || "Ex Libris"), h("div", { class: "n" }, name || ""), h("div", { class: "o" }, "❦"));
+  wrap.append(leaf); document.body.append(wrap);
+  const frames = opening ? [{ transform: "rotateY(0deg)" }, { transform: "rotateY(-178deg)" }] : [{ transform: "rotateY(-178deg)" }, { transform: "rotateY(0deg)" }];
+  const a = leaf.animate(frames, { duration: 760, easing: "cubic-bezier(.55,.05,.35,1)", fill: "forwards", delay: opening ? 140 : 0 });
+  return new Promise(r => a.onfinish = () => { if (opening) wrap.remove(); else setTimeout(() => wrap.remove(), 60); r(); });
+}
+
+/* ---------- views ---------- */
 function render() {
-  const q = $("q").value.trim().toLowerCase(), group = $("group").value, sort = $("sort").value;
-  const allGenres = [...new Set(books.flatMap(b => arr(b.genres)))].sort();
-  const chips = $("chips"); chips.replaceChildren();
-  allGenres.forEach(g => { const ch = el("button", "chip", g); ch.type = "button"; ch.setAttribute("aria-pressed", String(genre === g)); ch.onclick = () => { genre = genre === g ? null : g; render(); }; chips.append(ch); });
+  const r = location.hash.slice(1) || "/";
+  if (DB.mode === "firebase" && !user) return renderAuth();
+  if (user && DB.mode === "firebase" && !profiles[user.uid] && !r.startsWith("/new")) return renderNewProfile(true);
+  if (r.startsWith("/p/")) return renderShelf(decodeURIComponent(r.slice(3)));
+  if (r === "/letters") return renderLetters();
+  if (r.startsWith("/new")) return renderNewProfile(false);
+  return renderLibrary();
+}
+function mount(...kids) { const y = window.scrollY, same = $app.dataset.view === ui.route; $app.replaceChildren(...kids.flat().filter(k => k != null && k !== false)); if (same) window.scrollTo(0, y); }
 
-  let list = books.filter(b => (!genre || arr(b.genres).includes(genre)) &&
-    (!q || [b.title, b.altTitle, b.series, b.type, b.notes, ...arr(b.authors), ...arr(b.genres)].join(" ").toLowerCase().includes(q)));
-  const key = { title: b => b.title || "", author: b => surname(b), year: b => b.year || 0, added: b => b.added || "" }[sort];
-  list.sort((a, b) => { const x = key(a), y = key(b); return (x < y ? -1 : x > y ? 1 : 0) * (sort === "added" ? -1 : 1); });
-
-  const have = books.filter(b => !wished(b)), wish = list.filter(wished); list = list.filter(b => !wished(b));
-  const nAuthors = new Set(have.flatMap(b => arr(b.authors))).size;
-  $("shelfTitle").textContent = SHELVES[cur].name + "'s Reading Shelf";
-  $("counts").textContent = have.length + (have.length === 1 ? " title" : " titles") + " · " + nAuthors + (nAuthors === 1 ? " author" : " authors") + " · " + allGenres.length + (allGenres.length === 1 ? " genre" : " genres") + (books.some(reading) ? " · " + books.filter(reading).length + " in progress" : "") + (books.some(wished) ? " · " + books.filter(wished).length + " on wishlist" : "");
-
-  const main = $("shelves"); main.replaceChildren();
-  if (!books.length) { main.append(el("div", "empty", SHELVES[cur].loaded ? "Nothing on " + SHELVES[cur].name + "'s shelf yet. Use Add a book, or tell Claude the titles and they get shelved with covers." : "Opening the shelf")); return; }
-  if (!list.length && !wish.length) { main.append(el("div", "empty", "No titles match. Clear the search or the genre filter.")); return; }
-  const shelves = new Map();
-  const put = (k, b) => { if (!shelves.has(k)) shelves.set(k, []); shelves.get(k).push(b); };
-  list.forEach(b => {
-    if (group === "genre") (arr(b.genres).length ? arr(b.genres) : ["Unsorted"]).filter(g => !genre || g === genre).forEach(g => put(g, b));
-    else if (group === "author") (arr(b.authors).length ? arr(b.authors) : ["Unknown"]).forEach(a => put(a, b));
-    else if (group === "series") put(b.series || "Standalone", b);
-    else if (group === "type") put(b.type || "Book", b);
-    else put("All titles", b);
+function renderLibrary() {
+  ui.route = "lib"; $app.dataset.view = "lib";
+  const list = Object.entries(profiles).sort((a, b) => (a[1].created || 0) - (b[1].created || 0));
+  const heights = [230, 210, 240, 200, 225, 215];
+  const spines = list.map(([uid, p], i) => {
+    watch(uid); const n = Object.values(shelf[uid] || {}).filter(b => b.status !== "wishlist").length;
+    return h("button", { class: "spine", style: { "--c": p.color || LEATHER[0], height: heights[i % heights.length] + "px" }, "aria-label": "Open " + p.name + "'s shelf", onclick: () => openShelf(uid) },
+      h("div", { class: "band" }), h("div", { class: "band" }), h("div", { class: "name" }, p.name), h("div", { class: "num" }, shelf[uid] ? n : "·"), h("div", { class: "band" }));
   });
-  main.style.cssText = "display:flex;flex-direction:column;gap:36px";
-  const now = list.filter(reading);
-  if (now.length) { const s = el("section", "now"), h = el("h2", "", "Currently reading"); h.append(el("span", "", String(now.length))); const g = el("div", "grid"); now.forEach(b => g.append(card(b))); s.append(h, g); main.append(s); }
-  if (wish.length) { const s = el("section", "now"), h = el("h2", "", "Wishlist"); h.append(el("span", "", String(wish.length))); const g = el("div", "grid"); wish.forEach(b => g.append(card(b))); s.append(h, g); main.append(s); }
-  [...shelves.keys()].sort().forEach(k => {
-    const s = el("section"), h = el("h2", "", k); h.append(el("span", "", String(shelves.get(k).length)));
-    const g = el("div", "grid"); if (group === "series") shelves.get(k).sort((a, b) => (a.seriesNo || 0) - (b.seriesNo || 0)); shelves.get(k).forEach(b => g.append(card(b)));
-    s.append(h, g); main.append(s);
-  });
+  spines.push(h("button", { class: "spine add", style: { height: "180px" }, "aria-label": "Add a reader", onclick: () => go("/new") }, h("div", { class: "name" }, "+ Add a reader")));
+  const forMe = sugs.filter(s => DB.mode === "local" ? true : s.to === meUid()).length;
+  const mine = meUid() && profiles[meUid()];
+  mount(
+    h("header", { class: "titlepage" }, h("div", { class: "kicker" }, "Ex Libris"), h("h1", {}, "The Family Library"), h("p", {}, list.length ? "Choose a volume to open it" : "Add the first reader to begin")),
+    h("div", { class: "case" }, h("div", { class: "spines" }, spines), h("div", { class: "plank" })),
+    h("div", { class: "cards" },
+      h("button", { class: "card", onclick: () => go("/letters") }, h("h2", {}, "Letters ", forMe ? h("span", { class: "badge" }, forMe) : null), h("div", { class: "muted" }, "Suggest books to each other and send the good ones straight to a wishlist.")),
+      DB.mode === "local" ? h("div", { class: "card" }, h("h2", {}, "Backup"), h("div", { class: "muted" }, "This library lives only on this phone until sync is switched on. Save a backup now and then."),
+        h("div", { class: "actions" }, h("button", { class: "btn", onclick: exportBackup }, "Save backup"), h("label", { class: "btn ghost" }, "Load backup", h("input", { type: "file", accept: ".json,application/json", hidden: true, onchange: importBackup })))) : null),
+    h("div", { class: "foot" }, DB.mode === "firebase" ? ["Signed in as ", mine ? mine.name : user.email, " · ", h("button", { onclick: () => DB.signOut() }, "Sign out")] : "Sync is not set up yet, so changes stay on this phone.")
+  );
 }
 
-$("q").addEventListener("input", render);
-["group", "sort"].forEach(id => $(id).addEventListener("change", () => { try { localStorage.setItem(id, $(id).value); } catch (e) {} render(); }));
-
-function wireAdd(db) {
-  const dlg = $("addDlg"), form = $("addForm"), msg = $("addMsg");
-  const list = v => v.split(",").map(x => x.trim()).filter(Boolean);
-  const slug = t => t.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 80);
-  $("addBtn").hidden = false;
-  $("addBtn").onclick = () => { form.reset(); msg.textContent = ""; $("a-title").textContent = "Add a book"; $("genreList").replaceChildren(...[...new Set(books.flatMap(b => arr(b.genres)))].sort().map(g => { const o = el("option"); o.value = g; return o; })); dlg.showModal(); };
-  $("wishBtn").hidden = false; $("wishBtn").onclick = () => { $("addBtn").onclick(); form.elements.status.value = "wishlist"; $("a-title").textContent = "Add to wishlist"; };
-  $("cancelBtn").onclick = () => dlg.close();
-  dlg.addEventListener("click", e => { if (e.target === dlg) dlg.close(); });
-  form.addEventListener("submit", async e => {
-    e.preventDefault();
-    const f = new FormData(form), title = String(f.get("title")).trim(), authors = list(String(f.get("authors")));
-    let id = slug(title);
-    if (!id || !authors.length) { msg.textContent = "Add a title and an author."; return; }
-    if (books.some(b => b.id === id)) id = slug(title + " " + authors[0].split(" ").pop());
-    if (books.some(b => b.id === id)) { msg.textContent = "This title is already on the shelf."; return; }
-    const data = { title, authors, type: String(f.get("type")), genres: list(String(f.get("genres"))), status: String(f.get("status")), added: new Date().toISOString().slice(0, 10), addedBy: "page" };
-    const year = parseInt(f.get("year"), 10); if (!isNaN(year)) data.year = year;
-    const series = String(f.get("series")).trim(); if (series) { data.series = series; const n = parseInt(f.get("seriesNo"), 10); if (!isNaN(n)) data.seriesNo = n; }
-    const plot = String(f.get("plot")).trim(); if (plot) data.plot = plot;
-    $("saveBtn").disabled = true; msg.textContent = "Saving";
-    try { await db.collection(COLL()).doc(id).set(data); dlg.close(); }
-    catch (err) { msg.textContent = "Could not save. Check that you can edit this page and try again."; }
-    finally { $("saveBtn").disabled = false; }
-  });
+async function openShelf(uid) {
+  const p = profiles[uid]; watch(uid);
+  ui.tab = "all"; ui.q = ""; ui.genre = null;
+  const t = turn({ color: p.color, kicker: "Ex Libris", name: p.name, opening: true });
+  await new Promise(r => setTimeout(r, reduce ? 0 : 160));
+  go("/p/" + encodeURIComponent(uid)); window.scrollTo(0, 0);
+  await t; mergeSeed(uid);
 }
+async function closeTo(path) { const t = turn({ paper: true, kicker: "Ex Libris", name: "", opening: false }); await new Promise(r => setTimeout(r, reduce ? 0 : 700)); go(path); window.scrollTo(0, 0); await t; }
 
-function view() {
-  const v = (location.hash || "#home").slice(1);
-  const page = SHELVES[v] ? "shelf" : (v === "swap" ? "swap" : "home");
-  if (SHELVES[v] && cur !== v) { cur = v; genre = null; $("q").value = ""; }
-  books = SHELVES[cur].data;
-  $("homeView").hidden = page !== "home"; $("swapView").hidden = page !== "swap"; $("shelfView").hidden = page !== "shelf";
-  $("swapView").style.display = page === "swap" ? "flex" : "none"; $("shelfView").style.display = page === "shelf" ? "flex" : "none";
-  document.querySelectorAll(".nav a").forEach(a => a.setAttribute("aria-current", a.dataset.v === (page === "shelf" ? cur : page) ? "page" : "false"));
-  if (page === "shelf") render(); else if (page === "home") renderHome(); else renderSwap();
-}
-window.addEventListener("hashchange", () => { view(); window.scrollTo(0, 0); });
-
-function renderHome() {
-  for (const k of Object.keys(SHELVES)) {
-    const d = SHELVES[k].data, have = d.filter(b => !wished(b)), now = d.filter(reading), wl = d.filter(wished);
-    $("d-" + k).textContent = SHELVES[k].loaded ? (d.length ? have.length + " read or in progress · " + now.length + " reading now · " + wl.length + " on wishlist" : "Empty for now, ready for the first book") : "Loading";
-    const strip = $("s-" + k); strip.replaceChildren();
-    const pick = (now.length ? now : [...have].sort((a, b) => (b.added || "") < (a.added || "") ? -1 : 1)).slice(0, 5);
-    pick.forEach(b => strip.append(coverOf(b)));
+function renderShelf(uid) {
+  const p = profiles[uid]; if (!p) { if (Object.keys(profiles).length) go("/"); return; }
+  watch(uid); ui.route = "shelf:" + uid; $app.dataset.view = ui.route;
+  const all = books(uid), color = p.color || LEATHER[0], edit = canEdit(uid);
+  const counts = { reading: 0, read: 0, wishlist: 0 }; all.forEach(b => counts[b.status === "reading" ? "reading" : b.status === "wishlist" ? "wishlist" : "read"]++);
+  const st = b => b.status === "reading" ? "reading" : b.status === "wishlist" ? "wishlist" : "read";
+  let list = all.filter(b => ui.tab === "all" ? st(b) !== "wishlist" : st(b) === ui.tab);
+  const genres = [...new Set(list.flatMap(b => arr(b.genres)))].sort();
+  if (ui.genre && !genres.includes(ui.genre)) ui.genre = null;
+  if (ui.genre) list = list.filter(b => arr(b.genres).includes(ui.genre));
+  const q = ui.q.trim().toLowerCase();
+  if (q) list = list.filter(b => [b.title, b.altTitle, b.series, b.notes, ...arr(b.authors), ...arr(b.genres)].join(" ").toLowerCase().includes(q));
+  const sorters = { title: (a, b) => (a.title || "").localeCompare(b.title || ""), author: (a, b) => (arr(a.authors)[0] || "").localeCompare(arr(b.authors)[0] || "") || (a.year || 0) - (b.year || 0), added: (a, b) => (b.added || "").localeCompare(a.added || ""), year: (a, b) => (a.year || 9999) - (b.year || 9999) };
+  list.sort(sorters[ui.sort] || sorters.title);
+  const groups = new Map(), put = (k, b) => { if (!groups.has(k)) groups.set(k, []); groups.get(k).push(b); };
+  if (ui.group === "genre") list.forEach(b => put(arr(b.genres)[0] || "Other", b));
+  else if (ui.group === "author") list.forEach(b => put(arr(b.authors)[0] || "Unknown", b));
+  else if (ui.group === "series") { list.forEach(b => put(b.series || "Standalone", b)); groups.forEach(v => v.sort((a, b) => (a.seriesNo ?? 99) - (b.seriesNo ?? 99))); }
+  else groups.set("", list);
+  const keys = [...groups.keys()].sort((a, b) => (a === "Other" || a === "Standalone") - (b === "Other" || b === "Standalone") || a.localeCompare(b));
+  const reading = ui.tab === "all" ? all.filter(b => st(b) === "reading") : [];
+  const grid = arrb => h("div", { class: "grid" }, arrb.map(b => h("button", { class: "book", onclick: () => openBook(uid, b.id) }, coverEl(b, ui.tab === "all" && st(b) === "reading" ? "Reading" : null), h("div", { class: "t" }, b.title), h("div", { class: "a" }, arr(b.authors).join(", ")))));
+  const tab = (k, label, n) => h("button", { class: "tab", role: "tab", "aria-selected": ui.tab === k ? "true" : "false", onclick: () => { ui.tab = k; ui.genre = null; render(); } }, label, n != null ? h("span", { class: "faint", style: { "font-size": "14px" } }, " " + n) : null);
+  const content = [];
+  if (!all.length) content.push(h("div", { class: "empty" }, shelf[uid] ? (edit ? "This shelf is empty. Tap Add a book to put the first one here." : p.name + " has not added any books yet.") : "Opening the shelf"));
+  else if (!list.length) content.push(h("div", { class: "empty" }, "No books match."));
+  else {
+    if (reading.length && !q && !ui.genre) content.push(h("section", { class: "section" }, h("h2", {}, "On the nightstand", h("small", {}, reading.length)), grid(reading.sort(sorters.title))));
+    keys.forEach(k => content.push(h("section", { class: "section" }, k ? h("h2", {}, k, h("small", {}, groups.get(k).length)) : null, grid(groups.get(k)))));
   }
-  const open = sugs.length;
-  $("d-swap").textContent = open ? open + (open === 1 ? " suggestion" : " suggestions") + " waiting. Suggest books to each other and send the good ones straight to a wishlist." : "Suggest books to each other and send the good ones straight to a wishlist.";
-  $("homeCounts").textContent = Object.values(SHELVES).map(s => s.name + " " + s.data.filter(b => !wished(b)).length).join(" · ");
+  const authors = new Set(all.filter(b => st(b) !== "wishlist").flatMap(b => arr(b.authors))).size;
+  mount(
+    h("div", { class: "topbar" }, h("button", { class: "back", onclick: () => closeTo("/") }, "‹ Library"), h("div", { class: "ribbon", style: { "--c": color } })),
+    h("header", { class: "phead" }, h("div", { class: "sc faint" }, "the shelf of"), h("h1", {}, p.name),
+      h("div", { class: "stats sc" }, counts.read + " read · " + counts.reading + " reading · " + counts.wishlist + " wished · " + authors + " authors")),
+    h("div", { class: "fleuron" }, "❦"),
+    h("div", { class: "tabs", role: "tablist", style: { "--c": color } }, tab("all", "Shelf", counts.read + counts.reading), tab("reading", "Reading", counts.reading), tab("wishlist", "Wishlist", counts.wishlist)),
+    h("div", { class: "tools" },
+      h("input", { type: "search", placeholder: "Search title, author, notes", value: ui.q, "aria-label": "Search", oninput: e => { ui.q = e.target.value; render(); const i = $app.querySelector("input[type=search]"); i.focus(); i.setSelectionRange(i.value.length, i.value.length); } }),
+      h("select", { "aria-label": "Group by", onchange: e => { ui.group = e.target.value; localStorage.setItem("exl-group", ui.group); render(); } }, ...[["genre", "By genre"], ["author", "By author"], ["series", "By series"], ["none", "One shelf"]].map(([v, l]) => h("option", { value: v, selected: ui.group === v }, l))),
+      h("select", { "aria-label": "Order", onchange: e => { ui.sort = e.target.value; localStorage.setItem("exl-sort", ui.sort); render(); } }, ...[["title", "Title"], ["author", "Author"], ["year", "Year"], ["added", "Recently added"]].map(([v, l]) => h("option", { value: v, selected: ui.sort === v }, l)))),
+    genres.length > 1 ? h("div", { class: "chips" }, h("button", { class: "chip", "aria-pressed": ui.genre ? "false" : "true", onclick: () => { ui.genre = null; render(); } }, "All"), genres.map(g => h("button", { class: "chip", "aria-pressed": ui.genre === g ? "true" : "false", onclick: () => { ui.genre = ui.genre === g ? null : g; render(); } }, g))) : null,
+    ...content,
+    edit ? h("button", { class: "fab", onclick: () => addBook(uid) }, h("span", {}, "+"), "Add a book") : null
+  );
 }
 
-function renderSwap() {
-  const list = $("sugList"); list.replaceChildren();
-  $("swapCounts").textContent = sugs.length + (sugs.length === 1 ? " suggestion" : " suggestions");
-  for (const to of ["gaia", "jacopo"]) {
-    const sec = el("section"), h = el("h2", "", "For " + SHELVES[to].name), mine = sugs.filter(x => x.to === to).sort((a, b) => (b.at || "") < (a.at || "") ? -1 : 1);
-    h.append(el("span", "", String(mine.length))); sec.append(h);
-    if (!mine.length) sec.append(el("div", "empty", "No suggestions for " + SHELVES[to].name + " yet."));
-    mine.forEach(x => {
-      const c = el("div", "sug"); c.append(el("div", "title", x.title), el("div", "meta", (x.author ? x.author + " · " : "") + "suggested by " + (SHELVES[x.from]?.name || "someone") + (x.at ? " on " + x.at : "")));
-      if (x.why) c.append(el("p", "", x.why));
-      const row = el("div", "rowb"), st = el("span", "meta", "");
-      const onShelf = SHELVES[to].data.some(b => (b.title || "").toLowerCase() === (x.title || "").toLowerCase());
-      if (DB) {
-        const add = el("button", "add", onShelf ? "Already on the shelf" : "Add to " + SHELVES[to].name + "'s wishlist"); add.type = "button"; add.disabled = onShelf;
-        add.onclick = async () => { add.disabled = true; st.textContent = "Saving";
-          try { const slug = (x.title || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 80) || "book";
-            const data = { title: x.title, authors: x.author ? x.author.split(",").map(a => a.trim()).filter(Boolean) : [], type: "Book", status: "wishlist", genres: [], added: new Date().toISOString().slice(0, 10), addedBy: "swap", notes: "Suggested by " + (SHELVES[x.from]?.name || "someone") + (x.why ? ": " + x.why : "") };
-            await DB.collection(SHELVES[to].coll).doc(slug).set(data); await DB.collection("suggestions").doc(x.id).delete(); }
-          catch (e) { add.disabled = false; st.textContent = "Could not save, try again"; } };
-        const rm = el("button", "close", "Remove"); rm.type = "button";
-        rm.onclick = async () => { rm.disabled = true; try { await DB.collection("suggestions").doc(x.id).delete(); } catch (e) { rm.disabled = false; st.textContent = "Could not remove"; } };
-        row.append(add, rm, st);
-      }
-      c.append(row); sec.append(c);
-    });
-    list.append(sec);
+/* ---------- sheets ---------- */
+function sheet(...kids) {
+  const close = () => scrim.remove();
+  const sh = h("div", { class: "sheet", role: "dialog", "aria-modal": "true" }, h("div", { class: "grab" }), ...kids);
+  const scrim = h("div", { class: "scrim", onclick: e => { if (e.target === scrim) close(); } }, sh);
+  document.addEventListener("keydown", function k(e) { if (e.key === "Escape") { close(); document.removeEventListener("keydown", k); } });
+  document.body.append(scrim); return { close, sh };
+}
+
+function openBook(uid, id) {
+  const b = { id, ...(shelf[uid] || {})[id] }; if (!b.title) return;
+  const edit = canEdit(uid);
+  const st = b.status === "reading" ? "reading" : b.status === "wishlist" ? "wishlist" : "read";
+  const meta = [arr(b.authors).join(", "), yr(b), b.series ? b.series + (b.seriesNo != null ? " " + b.seriesNo : "") : ""].filter(Boolean).join(" · ");
+  const notes = h("textarea", { rows: 4, placeholder: "Thoughts, quotes, where you stopped" }); notes.value = b.notes || "";
+  const msg = h("span", { class: "status", role: "status" });
+  const { close } = sheet(
+    h("div", { class: "detail" }, coverEl(b), h("div", {}, h("h2", {}, b.title), b.altTitle ? h("div", { class: "faint", style: { "font-style": "italic" } }, b.altTitle) : null, h("div", { class: "meta", style: { "margin-top": "6px" } }, meta), arr(b.genres).length ? h("div", { class: "meta faint" }, arr(b.genres).join(" · ")) : null)),
+    edit ? h("div", { class: "seg", role: "group", "aria-label": "Status" }, ["wishlist", "reading", "read"].map(k => h("button", { "aria-pressed": st === k ? "true" : "false", onclick: async () => { await DB.updateBook(uid, id, { status: k }); close(); toast("Moved to " + STATUS[k]); } }, STATUS[k]))) : h("div", { class: "sc faint", style: { margin: "14px 0" } }, STATUS[st]),
+    b.plot ? h("p", { class: "plot" }, b.plot) : h("p", { class: "faint", style: { "font-style": "italic" } }, "No summary yet."),
+    b.source ? h("p", {}, h("a", { href: b.source, target: "_blank", rel: "noopener" }, "Read more")) : null,
+    edit ? h("div", { class: "margin" }, h("label", { class: "field" }, "Margin notes", notes), h("div", { class: "actions", style: { "margin-top": "8px" } }, h("button", { class: "btn", onclick: async () => { msg.textContent = "Saving"; await DB.updateBook(uid, id, { notes: notes.value.trim() }); msg.textContent = "Saved"; } }, "Save notes"), msg))
+      : (b.notes ? h("div", { class: "margin" }, h("div", { class: "sc faint" }, "margin notes"), h("p", { style: { margin: "6px 0 0", "font-style": "italic" } }, b.notes)) : null),
+    edit ? h("div", { class: "actions", style: { "margin-top": "18px" } }, h("button", { class: "btn ghost", onclick: () => { close(); addBook(uid, id); } }, "Edit details"), h("button", { class: "btn ghost", onclick: async () => { if (confirm("Remove " + b.title + " from the shelf?")) { await DB.deleteBook(uid, id); close(); toast("Removed"); } } }, "Remove")) : null
+  );
+}
+
+function addBook(uid, editId) {
+  const old = editId ? { ...(shelf[uid] || {})[editId] } : null;
+  const f = { title: h("input", { required: true, autocomplete: "off" }), authors: h("input", { autocomplete: "off" }), year: h("input", { type: "number", inputmode: "numeric" }),
+    status: h("select", {}, ...Object.entries(STATUS).map(([k, l]) => h("option", { value: k }, l))), genres: h("input", { autocomplete: "off", list: "genreList" }),
+    series: h("input", { autocomplete: "off" }), seriesNo: h("input", { type: "number", inputmode: "decimal" }), plot: h("textarea", { rows: 4 }) };
+  let cover = old?.cover || "";
+  if (old) { f.title.value = old.title || ""; f.authors.value = arr(old.authors).join(", "); f.year.value = old.year ?? ""; f.status.value = old.status || "read"; f.genres.value = arr(old.genres).join(", "); f.series.value = old.series || ""; f.seriesNo.value = old.seriesNo ?? ""; f.plot.value = old.plot || ""; }
+  else f.status.value = ui.tab === "wishlist" ? "wishlist" : ui.tab === "reading" ? "reading" : "read";
+  const gl = h("datalist", { id: "genreList" }, [...new Set(Object.keys(shelf).flatMap(u => books(u).flatMap(b => arr(b.genres))))].sort().map(g => h("option", { value: g })));
+  const q = h("input", { type: "search", placeholder: "Type a title or author", autocomplete: "off" }), results = h("div", { class: "results" }), msg = h("div", { class: "status", role: "status" });
+  const preview = h("div", { style: { width: "70px" } }); const showCover = () => preview.replaceChildren(cover ? coverEl({ title: f.title.value, cover }) : "");
+  showCover();
+  let qt, qn = 0;
+  q.oninput = () => { clearTimeout(qt); const v = q.value.trim(); if (v.length < 3) { results.replaceChildren(); return; } qt = setTimeout(() => lookup(v), 400); };
+  async function lookup(v) {
+    const n = ++qn; results.replaceChildren(h("div", { class: "faint" }, "Searching"));
+    try {
+      const r = await fetch("https://openlibrary.org/search.json?" + new URLSearchParams({ q: v, limit: 6, fields: "title,author_name,first_publish_year,cover_i,subject" })).then(x => x.json());
+      if (n !== qn) return;
+      if (!r.docs?.length) { results.replaceChildren(h("div", { class: "faint" }, "Nothing found, fill it in by hand below.")); return; }
+      results.replaceChildren(...r.docs.map(d => h("button", { class: "result", type: "button", onclick: () => {
+        f.title.value = d.title || ""; f.authors.value = arr(d.author_name).slice(0, 2).join(", "); f.year.value = d.first_publish_year || "";
+        if (d.cover_i) cover = "https://covers.openlibrary.org/b/id/" + d.cover_i + "-M.jpg";
+        if (!f.genres.value && d.subject) { const known = new Set(Object.keys(shelf).flatMap(u => books(u).flatMap(b => arr(b.genres)))); const pick = d.subject.filter(s => known.has(s)).slice(0, 2); if (pick.length) f.genres.value = pick.join(", "); }
+        showCover(); results.replaceChildren(); q.value = ""; f.title.focus();
+      } }, d.cover_i ? h("img", { src: "https://covers.openlibrary.org/b/id/" + d.cover_i + "-S.jpg", alt: "" }) : h("span", { class: "noimg" }), h("div", {}, h("b", {}, d.title), h("small", {}, [arr(d.author_name)[0], d.first_publish_year].filter(Boolean).join(" · "))))));
+    } catch (e) { if (n === qn) results.replaceChildren(h("div", { class: "faint" }, "Search needs internet. Fill it in by hand below.")); }
   }
-}
-
-function wireSwap(db) {
-  const form = $("sugForm"), msg = $("sugMsg");
-  form.elements.from.onchange = () => { form.elements.to.value = form.elements.from.value === "jacopo" ? "gaia" : "jacopo"; };
-  form.addEventListener("submit", async e => {
+  const save = async e => {
     e.preventDefault();
-    const f = new FormData(form), title = String(f.get("title")).trim();
-    if (!title) { msg.textContent = "Add a title."; return; }
-    if (f.get("from") === f.get("to")) { msg.textContent = "Pick someone else in To."; return; }
-    $("sugSave").disabled = true; msg.textContent = "Sending";
-    try { await db.collection("suggestions").add({ from: String(f.get("from")), to: String(f.get("to")), title, author: String(f.get("author")).trim(), why: String(f.get("why")).trim(), at: new Date().toISOString().slice(0, 10) });
-      const keepFrom = form.elements.from.value; form.reset(); form.elements.from.value = keepFrom; form.elements.to.value = keepFrom === "jacopo" ? "gaia" : "jacopo"; msg.textContent = "Sent"; }
-    catch (err) { msg.textContent = "Could not send, try again."; }
-    finally { $("sugSave").disabled = false; }
-  });
+    const title = f.title.value.trim(); if (!title) { msg.textContent = "Add a title."; return; }
+    const authors = f.authors.value.split(",").map(s => s.trim()).filter(Boolean);
+    let id = editId || slug(title);
+    if (!editId && shelf[uid]?.[id]) id = slug(title + " " + (authors[0] || Date.now()));
+    if (!editId && shelf[uid]?.[id]) { msg.textContent = "This book is already on the shelf."; return; }
+    const d = { ...(old || {}), title, authors, status: f.status.value, genres: f.genres.value.split(",").map(s => s.trim()).filter(Boolean), type: old?.type || "Book", added: old?.added || today() };
+    const y = parseInt(f.year.value, 10); if (!isNaN(y)) d.year = y; else delete d.year;
+    const s = f.series.value.trim(); if (s) { d.series = s; const n = parseFloat(f.seriesNo.value); if (!isNaN(n)) d.seriesNo = n; else delete d.seriesNo; } else { delete d.series; delete d.seriesNo; }
+    const pl = f.plot.value.trim(); if (pl) d.plot = pl; else delete d.plot;
+    if (cover) d.cover = cover;
+    msg.textContent = "Saving";
+    try { await DB.setBook(uid, id, d); close(); toast(editId ? "Saved" : title + " is on the shelf"); } catch (err) { msg.textContent = "Could not save: " + (err.code || err.message); }
+  };
+  const { close } = sheet(h("form", { onsubmit: save, style: { display: "flex", "flex-direction": "column", gap: "14px" } },
+    h("h2", {}, editId ? "Edit book" : "Add a book"),
+    editId ? null : h("label", { class: "field" }, "Find it online for cover and details", q), results,
+    h("div", { style: { display: "flex", gap: "12px", "align-items": "flex-start" } }, preview, h("div", { style: { flex: "1", display: "flex", "flex-direction": "column", gap: "12px" } }, h("label", { class: "field" }, "Title", f.title), h("label", { class: "field" }, "Author (comma between several)", f.authors))),
+    h("div", { class: "row" }, h("label", { class: "field" }, "Year", f.year), h("label", { class: "field" }, "Status", f.status)),
+    h("label", { class: "field" }, "Genres (comma between several)", f.genres, gl),
+    h("div", { class: "row" }, h("label", { class: "field" }, "Series", f.series), h("label", { class: "field" }, "Number in series", f.seriesNo)),
+    h("label", { class: "field" }, "Plot (optional)", f.plot),
+    h("div", { class: "actions" }, h("button", { class: "btn primary", type: "submit" }, editId ? "Save" : "Put on the shelf"), h("button", { class: "btn ghost", type: "button", onclick: () => close() }, "Cancel")), msg));
+  if (!editId) setTimeout(() => q.focus(), 300);
 }
 
-$("expBtn").onclick = async () => {
-  const blob = new Blob([JSON.stringify(await LDB._all(), null, 1)], { type: "application/json" });
-  const name = "shelves-backup-" + new Date().toISOString().slice(0, 10) + ".json", file = new File([blob], name, { type: "application/json" });
-  if (navigator.canShare && navigator.canShare({ files: [file] })) { try { await navigator.share({ files: [file], title: name }); $("bkMsg").textContent = "Backup ready"; return; } catch (e) { if (e.name === "AbortError") return; } }
-  const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 5000); $("bkMsg").textContent = "Backup saved";
-};
-$("impFile").onchange = async e => {
+/* ---------- letters (book swap) ---------- */
+function renderLetters() {
+  ui.route = "letters"; $app.dataset.view = "letters";
+  const others = Object.entries(profiles).filter(([u]) => DB.mode === "local" || u !== meUid());
+  const fromSel = h("select", {}, Object.entries(profiles).map(([u, p]) => h("option", { value: u }, p.name)));
+  const toSel = h("select", {}, others.map(([u, p]) => h("option", { value: u }, p.name)));
+  if (DB.mode === "local" && others.length > 1) toSel.value = others[1][0];
+  const t = h("input", { required: true, autocomplete: "off" }), a = h("input", { autocomplete: "off" }), w = h("textarea", { rows: 3 }), msg = h("span", { class: "status", role: "status" });
+  const send = async e => {
+    e.preventDefault();
+    const from = DB.mode === "local" ? fromSel.value : meUid(), to = toSel.value;
+    if (!t.value.trim()) { msg.textContent = "Add a title."; return; } if (!to || from === to) { msg.textContent = "Pick someone else to write to."; return; }
+    msg.textContent = "Sending";
+    try { await DB.addSug({ from, to, title: t.value.trim(), author: a.value.trim(), why: w.value.trim(), at: today() }); t.value = a.value = w.value = ""; msg.textContent = "Sent to " + nameOf(to); } catch (err) { msg.textContent = "Could not send: " + (err.code || err.message); }
+  };
+  const letter = (s, incoming) => {
+    const onShelf = Object.values(shelf[s.to] || {}).some(b => (b.title || "").toLowerCase() === (s.title || "").toLowerCase());
+    const acts = h("div", { class: "actions" });
+    if (incoming && canEdit(s.to)) acts.append(h("button", { class: "btn primary", disabled: onShelf, onclick: async () => {
+      watch(s.to);
+      await DB.setBook(s.to, slug(s.title), { title: s.title, authors: s.author ? s.author.split(",").map(x => x.trim()) : [], status: "wishlist", genres: [], type: "Book", added: today(), notes: "Suggested by " + nameOf(s.from) + (s.why ? ": " + s.why : "") });
+      await DB.delSug(s.id); toast("Added to the wishlist");
+    } }, onShelf ? "Already on the shelf" : "Add to my wishlist"));
+    acts.append(h("button", { class: "btn ghost", onclick: async () => { await DB.delSug(s.id); } }, incoming ? "Dismiss" : "Withdraw"));
+    return h("div", { class: "letter" }, h("div", { class: "sc faint" }, (incoming ? "from " + nameOf(s.from) : "to " + nameOf(s.to)) + (s.at ? " · " + s.at : "")), h("div", { class: "t" }, s.title), s.author ? h("div", { class: "muted" }, s.author) : null, s.why ? h("p", {}, "“" + s.why + "”") : null, acts);
+  };
+  const sections = [];
+  if (DB.mode === "local") {
+    Object.entries(profiles).forEach(([u, p]) => { const l = sugs.filter(s => s.to === u); sections.push(h("section", { class: "section" }, h("h2", {}, "For " + p.name, h("small", {}, l.length)), l.length ? h("div", { class: "cards", style: { "margin-top": "0" } }, l.map(s => letter(s, true))) : h("div", { class: "empty" }, "No letters yet."))); });
+  } else {
+    const inbox = sugs.filter(s => s.to === meUid()), sent = sugs.filter(s => s.from === meUid());
+    sections.push(h("section", { class: "section" }, h("h2", {}, "For you", h("small", {}, inbox.length)), inbox.length ? h("div", { class: "cards", style: { "margin-top": "0" } }, inbox.map(s => letter(s, true))) : h("div", { class: "empty" }, "No letters yet.")));
+    if (sent.length) sections.push(h("section", { class: "section" }, h("h2", {}, "Sent", h("small", {}, sent.length)), h("div", { class: "cards", style: { "margin-top": "0" } }, sent.map(s => letter(s, false)))));
+  }
+  mount(
+    h("div", { class: "topbar" }, h("button", { class: "back", onclick: () => closeTo("/") }, "‹ Library")),
+    h("header", { class: "phead" }, h("div", { class: "sc faint" }, "correspondence"), h("h1", {}, "Letters")),
+    h("div", { class: "fleuron" }, "❦"),
+    others.length ? h("form", { class: "card", onsubmit: send },
+      h("h2", { style: { "font-size": "24px" } }, "Recommend a book"),
+      h("div", { class: "row" }, DB.mode === "local" ? h("label", { class: "field" }, "From", fromSel) : null, h("label", { class: "field" }, "To", toSel)),
+      h("div", { class: "row" }, h("label", { class: "field" }, "Title", t), h("label", { class: "field" }, "Author", a)),
+      h("label", { class: "field" }, "Why they should read it", w),
+      h("div", { class: "actions" }, h("button", { class: "btn primary", type: "submit" }, "Send"), msg)) : h("div", { class: "empty" }, "Add another reader to start writing letters."),
+    ...sections
+  );
+}
+
+/* ---------- profiles and auth ---------- */
+function renderNewProfile(first) {
+  ui.route = "new"; $app.dataset.view = "new";
+  if (DB.mode === "firebase" && profiles[meUid()] && !first) { toast("You already have a shelf. New readers join from their own phone."); go("/"); return; }
+  let color = LEATHER[Object.keys(profiles).length % LEATHER.length];
+  const name = h("input", { required: true, autocomplete: "given-name", maxlength: 24 }), msg = h("div", { class: "status", role: "status" });
+  const sw = h("div", { class: "swatches", role: "group", "aria-label": "Binding colour" }, LEATHER.map(c => h("button", { type: "button", class: "swatch", style: { "--c": c }, "aria-label": "Binding " + c, "aria-pressed": c === color ? "true" : "false", onclick: e => { color = c; sw.querySelectorAll(".swatch").forEach(x => x.setAttribute("aria-pressed", x === e.currentTarget ? "true" : "false")); } })));
+  const sources = [["none", "Start with an empty shelf"], ["seed", "Jacopo's books (the original shelf)"]];
+  let legacy = null; try { legacy = JSON.parse(localStorage.getItem("shelves-v1") || "null"); } catch (e) {}
+  if (legacy) { sources.push(["phone-jacopo", "Jacopo's shelf saved on this phone"]); if (Object.keys(legacy.gaia_books || {}).length) sources.push(["phone-gaia", "Gaia's shelf saved on this phone"]); }
+  const src = h("select", {}, sources.map(([v, l]) => h("option", { value: v }, l)));
+  const fileIn = h("input", { type: "file", accept: ".json,application/json" });
+  const go2 = async e => {
+    e.preventDefault(); const n = name.value.trim(); if (!n) { msg.textContent = "Add a name."; return; }
+    msg.textContent = "Binding your volume";
+    try {
+      const uid = DB.mode === "firebase" ? meUid() : (slug(n) + (profiles[slug(n)] ? "-" + Date.now().toString(36) : ""));
+      const p = { name: n, color, created: Date.now() };
+      let seed = null;
+      if (fileIn.files[0]) { const d = JSON.parse(await fileIn.files[0].text()); seed = d.books && !d.profiles ? (src.value === "phone-gaia" ? d.gaia_books : d.books) : null; if (d.profiles) { const k = Object.keys(d.profiles)[0]; seed = d.books?.[k]; } }
+      else if (src.value === "seed") { const d = await fetch("data.json").then(r => r.json()); seed = d.books; p.seedFrom = "data.json"; p.seen = Object.keys(d.books); }
+      else if (src.value === "phone-jacopo") { seed = legacy.books; p.seedFrom = "data.json"; p.seen = Object.keys(legacy.books || {}); }
+      else if (src.value === "phone-gaia") seed = legacy.gaia_books;
+      await DB.saveProfile(uid, p);
+      if (seed && Object.keys(seed).length) { msg.textContent = "Shelving " + Object.keys(seed).length + " books"; await DB.setBooks(uid, seed); }
+      if (DB.mode === "local") DB.use(uid);
+      openShelf(uid);
+    } catch (err) { msg.textContent = "Something went wrong: " + (err.code || err.message); }
+  };
+  mount(
+    first ? null : h("div", { class: "topbar" }, h("button", { class: "back", onclick: () => go("/") }, "‹ Library")),
+    h("header", { class: "titlepage" }, h("div", { class: "kicker" }, "Ex Libris"), h("h1", {}, first ? "Your volume" : "A new reader"), h("p", {}, "Pick a name and a binding for the shelf")),
+    h("div", { class: "fleuron" }, "❦"),
+    h("form", { class: "auth", onsubmit: go2 },
+      h("label", { class: "field" }, "Name on the spine", name),
+      h("div", { class: "field" }, "Binding", sw),
+      h("label", { class: "field" }, "Books to start with", src),
+      h("label", { class: "field" }, "Or load a backup file", fileIn),
+      h("button", { class: "btn primary", type: "submit" }, "Create the shelf"), msg,
+      DB.mode === "firebase" ? h("button", { class: "btn ghost", type: "button", onclick: () => DB.signOut() }, "Sign out") : null)
+  );
+  setTimeout(() => name.focus(), 50);
+}
+
+function renderAuth() {
+  ui.route = "auth"; $app.dataset.view = "auth";
+  let mode = "in";
+  const email = h("input", { type: "email", autocomplete: "email", required: true }), pass = h("input", { type: "password", autocomplete: "current-password", required: true, minlength: 6 }), msg = h("div", { class: "status", role: "status" });
+  const btn = h("button", { class: "btn primary", type: "submit" }, "Sign in"), swap = h("button", { class: "btn ghost", type: "button" }, "New here? Create an account");
+  swap.onclick = () => { mode = mode === "in" ? "up" : "in"; btn.textContent = mode === "in" ? "Sign in" : "Create account"; swap.textContent = mode === "in" ? "New here? Create an account" : "I already have an account"; pass.autocomplete = mode === "in" ? "current-password" : "new-password"; msg.textContent = ""; };
+  const errs = { "auth/invalid-credential": "Wrong email or password.", "auth/email-already-in-use": "That email already has an account, sign in instead.", "auth/weak-password": "Use at least 6 characters.", "auth/invalid-email": "That email does not look right.", "auth/network-request-failed": "No internet connection." };
+  const submit = async e => { e.preventDefault(); btn.disabled = true; msg.textContent = mode === "in" ? "Signing in" : "Creating your account"; try { await (mode === "in" ? DB.signIn : DB.signUp)(email.value.trim(), pass.value); } catch (err) { msg.textContent = errs[err.code] || "Could not sign in: " + err.code; } btn.disabled = false; };
+  mount(
+    h("header", { class: "titlepage" }, h("div", { class: "kicker" }, "Ex Libris"), h("h1", {}, "The Family Library"), h("p", {}, "Sign in to open your shelf")),
+    h("div", { class: "fleuron" }, "❦"),
+    h("form", { class: "auth", onsubmit: submit }, h("label", { class: "field" }, "Email", email), h("label", { class: "field" }, "Password", pass), btn, swap, msg,
+      h("button", { class: "btn ghost", type: "button", onclick: async () => { if (!email.value) { msg.textContent = "Type your email first."; return; } try { await DB.reset(email.value.trim()); msg.textContent = "Check your inbox for a reset link."; } catch (err) { msg.textContent = errs[err.code] || err.code; } } }, "Forgot password"))
+  );
+}
+
+/* ---------- backup (local mode) ---------- */
+async function exportBackup() {
+  const name = "exlibris-backup-" + today() + ".json", blob = new Blob([JSON.stringify(DB.exportAll())], { type: "application/json" }), file = new File([blob], name, { type: "application/json" });
+  if (navigator.canShare?.({ files: [file] })) { try { await navigator.share({ files: [file], title: name }); return; } catch (e) { if (e.name === "AbortError") return; } }
+  const a = h("a", { href: URL.createObjectURL(blob), download: name }); a.click(); toast("Backup saved");
+}
+async function importBackup(e) {
   const f = e.target.files[0]; if (!f) return;
-  try { const data = JSON.parse(await f.text()); if (!data || typeof data.books !== "object") throw 0;
-    if (!confirm("Replace the shelves on this phone with this backup?")) return;
-    await LDB._load(data); $("bkMsg").textContent = "Backup loaded"; }
-  catch (err) { $("bkMsg").textContent = "That file is not a shelves backup."; }
+  try { const d = JSON.parse(await f.text()); if (!d.profiles) throw 0; if (!confirm("Replace the library on this phone with this backup?")) return; await DB.importAll(d); toast("Backup loaded"); } catch (err) { toast("That file is not a library backup"); }
   e.target.value = "";
-};
-if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost")) navigator.serviceWorker.register("sw.js");
-view();
-LDB._all().then(() => { if (window.__added) { const n = window.__added; $("bkMsg").textContent = n + (n === 1 ? " new book" : " new books") + " added from Claude since last time."; } });
-(async () => {
-  const db = LDB;
-  if (!db) { $("counts").textContent = "Could not open storage"; $("homeCounts").textContent = "Sign in to see the shelves"; $("sugForm").hidden = true; return; }
-  DB = db; wireAdd(db); wireSwap(db);
-  for (const k of Object.keys(SHELVES)) {
-    db.collection(SHELVES[k].coll).onSnapshot(snap => { SHELVES[k].data = snap.docs.map(d => ({ id: d.id, ...d.data() })); SHELVES[k].loaded = true; view(); },
-      () => { if (cur === k) $("counts").textContent = "The shelf could not be loaded. Reload to try again."; });
-  }
-  db.collection("suggestions").onSnapshot(snap => { sugs = snap.docs.map(d => ({ id: d.id, ...d.data() })); view(); }, () => {});
-})();
-</script>
+}
 
-</body></html>
+/* ---------- boot ---------- */
+function go(path) { if (location.hash.slice(1) === path) render(); else location.hash = path; }
+window.addEventListener("hashchange", render);
+(async () => {
+  try { DB = FIREBASE_CONFIG ? await firebaseAdapter(FIREBASE_CONFIG) : localAdapter(); }
+  catch (e) { DB = localAdapter(); setTimeout(() => toast("Sync is unreachable, working on this phone only"), 500); }
+  await DB.init();
+  user = DB.user();
+  DB.watchProfiles(p => { profiles = p; Object.keys(p).forEach(watch); render(); });
+  DB.watchSugs(s => { sugs = s; render(); });
+  DB.onAuth(u => { const was = user?.uid; user = u; if (was !== u?.uid) { render(); } });
+  render();
+})();
+if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost")) navigator.serviceWorker.register("sw.js");
+</script>
+</body>
+</html>
