@@ -882,7 +882,7 @@ async function renderRoom3D(uid) {
   const renderer = new THREE.WebGLRenderer({ antialias: true });
   renderer.setPixelRatio(Math.min(devicePixelRatio, 2)); renderer.setSize(W, H);
   renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-  renderer.clippingPlanes = [new THREE.Plane(new THREE.Vector3(0, 1, 0), .22)]; renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = night ? 1 : 1.2; renderer.outputColorSpace = THREE.SRGBColorSpace;
+  renderer.clippingPlanes = [new THREE.Plane(new THREE.Vector3(0, 1, 0), .13)]; renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = night ? 1 : 1.2; renderer.outputColorSpace = THREE.SRGBColorSpace;
   box.replaceChildren(renderer.domElement);
   const scene = new THREE.Scene(); const bg = night ? "#120A06" : "#2A1C12"; scene.background = new THREE.Color(bg);
 
@@ -1142,7 +1142,7 @@ async function renderRoom3D(uid) {
     for (const [k, g] of Object.entries(walls)) {
       const want = R3.mode === "iso" && nearSet[k] ? 0 : 1, d = want - wallLevel[k];
       if (Math.abs(d) < .002) { if (wallLevel[k] === want) continue; wallLevel[k] = want; } else wallLevel[k] += d * .2;
-      g.position.y = -(1 - wallLevel[k]) * (WH - .45);
+      g.position.y = -(1 - wallLevel[k]) * (WH - .32);
       g.traverse(o => { if (o.isSprite) o.visible = wallLevel[k] > .9; if (o.isLight) o.visible = wallLevel[k] > .5; });
     }
   };
