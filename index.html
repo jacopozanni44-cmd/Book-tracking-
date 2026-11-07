@@ -241,6 +241,7 @@ body{overscroll-behavior-y:contain}
 .r3btn[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
 .room3d.decoon{height:min(46vh,520px)}
 body.full3d{overflow:hidden}
+body.full3d #pvbar{display:none}
 body.full3d #app{padding:0;max-width:none}
 .r3full{position:fixed;inset:0;z-index:25;background:#2A1C12}
 .r3full .room3d{position:absolute;inset:0;height:auto;max-width:none;margin:0;border-radius:0;box-shadow:none}
@@ -257,6 +258,7 @@ body.full3d #app{padding:0;max-width:none}
 .r3full .r3bar{margin:0}
 .r3full .r3btn{background:rgba(26,16,9,.72);color:#F4EBD6;border-color:rgba(230,198,122,.5);backdrop-filter:blur(6px)}
 .r3full .r3btn[aria-pressed="true"]{background:#E6C67A;color:#1A1009}
+.r3tag{display:block;font:600 10px Literata,serif;letter-spacing:.12em;text-transform:uppercase;color:#E6C67A;text-align:center}
 .r3hint{color:#F4EBD6;font-style:italic;font-size:14px;text-align:center;text-shadow:0 1px 3px #000;transition:opacity .6s}.r3hint.gone{opacity:0}
 .r3full .deco{width:100%;flex:1;min-height:0;max-height:none;margin:0;background:var(--paper);box-shadow:0 -6px 20px rgba(0,0,0,.3)}
 .r3full.decoon .r3bottom{background:var(--paper);top:auto;height:46vh;justify-content:flex-start;padding-top:10px}
@@ -930,7 +932,7 @@ async function renderRoom3D(uid) {
   const menu = h("details", { class: "r3menu" }, h("summary", { "aria-label": "More" }, "⋯"), h("button", { type: "button", onclick: () => { lsSet("cc-room2d", true); go("/room/" + encodeURIComponent(uid)); } }, "Use the illustrated room"));
   mount(h("div", { class: "r3full" + (mine && R3.deco ? " decoon" : "") },
     box,
-    h("div", { class: "r3top" }, h("button", { class: "r3pill", type: "button", onclick: () => closeTo("/") }, "‹ Club"), h("div", { class: "r3title" }, mine ? "Your room" : p.name + "'s room"), menu),
+    h("div", { class: "r3top" }, h("button", { class: "r3pill", type: "button", onclick: () => closeTo("/") }, "‹ Club"), h("div", { class: "r3title" }, mine ? "Your room" : p.name + "'s room", PREVIEW ? h("small", { class: "r3tag" }, "preview") : null), menu),
     h("div", { class: "r3bottom" }, ...(mine && R3.deco ? [bar, decoPanel(uid)] : [hint, bar]))));
   let THREE, OrbitControls, RoundedBoxGeometry;
   try {
