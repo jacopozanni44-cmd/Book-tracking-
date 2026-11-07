@@ -1520,7 +1520,7 @@ function finishSheet(uid, R, b, mins) {
     if (b) await DB.updateBook(uid, b.id, patch);
     await postAct({ type: "session", bookId: b?.id, book: b?.title || R.book, authors: arr(b?.authors), cover: b?.cover || "", mins: m, pages, from, to, name: name.value.trim() || "Reading", note: note.value.trim(), feel, pr, at: R.manual ? new Date().toISOString() : new Date().toISOString() });
     if (done) await postAct({ type: "finished", bookId: b.id, book: b.title, authors: arr(b.authors), cover: b.cover || "" });
-    lsSet("cc-rec", null); close(); toast(pr.length ? "🏆 New record: " + pr.join(", ") : "Session saved"); go("/feed");
+    lsSet("cc-rec", null); close(true); toast(pr.length ? "🏆 New record: " + pr.join(", ") : "Session saved"); go("/feed");
   };
   const { close } = sheet(h("form", { onsubmit: save, style: { display: "flex", "flex-direction": "column", gap: "12px" } },
     h("h2", {}, R.manual ? "Log a session" : "Nice reading!"), h("div", { class: "muted" }, b?.title || ""),
