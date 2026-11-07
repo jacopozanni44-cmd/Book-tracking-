@@ -1179,13 +1179,13 @@ async function renderRoom3D(uid) {
   const isoTarget = new THREE.Vector3(0, .7, 0);
   const sizeIso = () => { const a = W / H, v = Math.max(7.6, 9.4 / a) * .92; iso.left = -v * a / 2; iso.right = v * a / 2; iso.top = v / 2; iso.bottom = -v / 2; iso.updateProjectionMatrix(); per.aspect = a; per.updateProjectionMatrix(); };
   sizeIso();
-  const placeIso = az => { const d = 20, el = .62; iso.position.set(isoTarget.x + Math.cos(az) * d * Math.cos(el), isoTarget.y + d * Math.sin(el), isoTarget.z + Math.sin(az) * d * Math.cos(el)); iso.lookAt(isoTarget); };
+  const placeIso = az => { const d = 20, el = .5; iso.position.set(isoTarget.x + Math.cos(az) * d * Math.cos(el), isoTarget.y + d * Math.sin(el), isoTarget.z + Math.sin(az) * d * Math.cos(el)); iso.lookAt(isoTarget); };
   let cam, ctl;
   const setMode = mode => {
     R3.mode = mode; ctl?.dispose();
     if (mode === "iso") {
       cam = iso; placeIso(R3.az);
-      ctl = new OrbitControls(iso, renderer.domElement); ctl.target.copy(isoTarget); ctl.enableDamping = true; ctl.enablePan = false; ctl.minZoom = .7; ctl.maxZoom = 4.5; ctl.minPolarAngle = ctl.maxPolarAngle = Math.PI / 2 - .62; ctl.rotateSpeed = .6;
+      ctl = new OrbitControls(iso, renderer.domElement); ctl.target.copy(isoTarget); ctl.enableDamping = true; ctl.enablePan = true; ctl.screenSpacePanning = false; ctl.minZoom = .8; ctl.maxZoom = 4.5; ctl.minPolarAngle = Math.PI / 2 - .85; ctl.maxPolarAngle = Math.PI / 2 - .3; ctl.rotateSpeed = .7; ctl.dampingFactor = .08;
       ceil.visible = false; modeBtn.textContent = "👁 Look around"; rotL.hidden = rotR.hidden = false;
     } else {
       cam = per; per.position.set(.4, 1.65, 2.9);
@@ -1203,17 +1203,15 @@ async function renderRoom3D(uid) {
   };
   zIn.onclick = () => zoomBy(1.35); zOut.onclick = () => zoomBy(1 / 1.35);
   let spin = null;
-  const rotate = dir => { if (R3.mode !== "iso") return; ctl.enableDamping = false; const from = Math.atan2(iso.position.z - isoTarget.z, iso.position.x - isoTarget.x), to = Math.round((from - Math.PI / 4) / (Math.PI / 2)) * (Math.PI / 2) + Math.PI / 4 + dir * Math.PI / 2; spin = { from, to, t0: performance.now() }; };
+  const rotate = dir => { if (R3.mode !== "iso" || spin) return; ctl.enabled = false; const from = Math.atan2(iso.position.z - ctl.target.z, iso.position.x - ctl.target.x); spin = { from, to: from + dir * Math.PI / 2, t0: performance.now() }; };
   rotL.onclick = () => rotate(-1); rotR.onclick = () => rotate(1);
-  let dragFrom = null; renderer.domElement.addEventListener("pointerdown", e => dragFrom = [e.clientX, e.clientY]);
-  renderer.domElement.addEventListener("pointerup", e => { const moved = dragFrom && Math.hypot(e.clientX - dragFrom[0], e.clientY - dragFrom[1]) > 8; dragFrom = null; if (moved && R3.mode === "iso" && !spin && !busy) setTimeout(() => { if (!spin && !busy) rotate(0); }, 150); });
 
   // walls near the camera drop down, like a dollhouse
   const wallLevel = { N: 1, S: 1, E: 1, W: 1 };
   const nearSet = { E: true, S: true, W: false, N: false };
   const updateWalls = () => {
     if (R3.mode === "iso") {
-      const vx = cam.position.x - isoTarget.x, vz = cam.position.z - isoTarget.z, l = Math.hypot(vx, vz), cx = vx / l, cz = vz / l, hy = .17;
+      const vx = cam.position.x - ctl.target.x, vz = cam.position.z - ctl.target.z, l = Math.hypot(vx, vz), cx = vx / l, cz = vz / l, hy = .17;
       if (cx > hy) { nearSet.E = true; nearSet.W = false; } else if (cx < -hy) { nearSet.W = true; nearSet.E = false; }
       if (cz > hy) { nearSet.S = true; nearSet.N = false; } else if (cz < -hy) { nearSet.N = true; nearSet.S = false; }
     }
@@ -1251,7 +1249,7 @@ async function renderRoom3D(uid) {
   new ResizeObserver(onResize).observe(box);
   addEventListener("resize", onResize);
   // gentle opening glide
-  if (R3.keepView) { iso.zoom = R3.zoom; iso.updateProjectionMatrix(); R3.keepView = false; } else if (R3.mode === "iso" && !reduce) { const z1 = iso.zoom; iso.zoom = .7; iso.updateProjectionMatrix(); const t0 = performance.now(); const intro = () => { const k = Math.min(1, (performance.now() - t0) / 900); iso.zoom = .7 + (z1 - .7) * (1 - Math.pow(1 - k, 3)); iso.updateProjectionMatrix(); if (k < 1) requestAnimationFrame(intro); }; intro(); }
+  if (R3.keepView) { iso.zoom = R3.zoom; iso.updateProjectionMatrix(); R3.keepView = false; } else if (R3.mode === "iso" && !reduce) { const z1 = 1.45; iso.zoom = .7; iso.updateProjectionMatrix(); const t0 = performance.now(); const intro = () => { const k = Math.min(1, (performance.now() - t0) / 900); iso.zoom = .7 + (z1 - .7) * (1 - Math.pow(1 - k, 3)); iso.updateProjectionMatrix(); if (k < 1) requestAnimationFrame(intro); }; intro(); }
   const clock = new THREE.Clock();
   const loop = () => {
     if (!renderer.domElement.isConnected) { renderer.dispose(); ctl?.dispose(); removeEventListener("resize", onResize); return; }
@@ -1262,10 +1260,11 @@ async function renderRoom3D(uid) {
     fire.intensity = (night ? 3.2 : 1.8) * (1 + Math.sin(t * 11) * .08 + Math.sin(t * 27) * .05);
     if (ringM.visible) ringM.rotation.z = t * 2;
     const ls = R3.mode === "iso" ? 2 / iso.zoom : .85; labels.forEach(sp => sp.scale.set(sp.userData.base[0] * ls, sp.userData.base[1] * ls, 1));
-    if (spin) { const k = Math.min(1, (performance.now() - spin.t0) / 500), e2 = k * k * (3 - 2 * k); const az = spin.from + (spin.to - spin.from) * e2; const d = Math.hypot(iso.position.x - ctl.target.x, iso.position.z - ctl.target.z), y = iso.position.y; iso.position.set(ctl.target.x + Math.cos(az) * d, y, ctl.target.z + Math.sin(az) * d); iso.lookAt(ctl.target); if (k >= 1) { spin = null; R3.az = az; ctl.enableDamping = true; } }
+    if (spin) { const k = Math.min(1, (performance.now() - spin.t0) / 500), e2 = k * k * (3 - 2 * k); const az = spin.from + (spin.to - spin.from) * e2; const d = Math.hypot(iso.position.x - ctl.target.x, iso.position.z - ctl.target.z), y = iso.position.y; iso.position.set(ctl.target.x + Math.cos(az) * d, y, ctl.target.z + Math.sin(az) * d); iso.lookAt(ctl.target); if (k >= 1) { spin = null; R3.az = az; ctl.enabled = !busy; } }
     if (zoomAnim) { const k = Math.min(1, (performance.now() - zoomAnim.t0) / 260); zoomAnim.f(k * (2 - k)); if (k >= 1) zoomAnim = null; }
     if (ctl.enabled) ctl.update();
-    if (R3.mode === "iso" && !spin) { R3.az = Math.atan2(iso.position.z - isoTarget.z, iso.position.x - isoTarget.x); R3.zoom = iso.zoom; }
+    if (R3.mode === "iso") { const t2 = ctl.target, cx = Math.max(-2.4, Math.min(2.4, t2.x)), cz = Math.max(-2.4, Math.min(2.4, t2.z)), dx = cx - t2.x, dz = cz - t2.z; if (dx || dz) { t2.x += dx; t2.z += dz; iso.position.x += dx; iso.position.z += dz; } }
+    if (R3.mode === "iso" && !spin) { R3.az = Math.atan2(iso.position.z - ctl.target.z, iso.position.x - ctl.target.x); R3.zoom = iso.zoom; }
     updateWalls();
     renderer.render(scene, cam); requestAnimationFrame(loop);
   };
