@@ -277,11 +277,11 @@ body.full3d #app{padding:0;max-width:none}
 .roomhint{text-align:center;font-style:italic;margin-top:12px}
 .result .cover{width:38px;flex:0 0 38px}
 #tabbar{display:none}
-body.tabs #tabbar{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:30;background:var(--paper);border-top:1px solid var(--edge);padding:6px 4px calc(6px + env(safe-area-inset-bottom));box-shadow:0 -4px 14px rgba(60,40,20,.08)}
+body.withtabs #tabbar{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:30;background:var(--paper);border-top:1px solid var(--edge);padding:6px 4px calc(6px + env(safe-area-inset-bottom));box-shadow:0 -4px 14px rgba(60,40,20,.08)}
 #tabbar button{flex:1;border:0;background:none;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11px;color:var(--ink-3);padding:4px 0}
 #tabbar button[aria-current="page"]{color:var(--accent);font-weight:600}
 #tabbar .ti{font-size:21px;line-height:1;position:relative}#tabbar .ti b{position:absolute;top:-5px;right:-12px;background:var(--accent);color:var(--accent-ink);border-radius:9px;font-size:10px;padding:1px 5px}
-body.tabs .page{padding-bottom:150px}body.tabs .fab{bottom:calc(84px + env(safe-area-inset-bottom))}
+body.withtabs .page{padding-bottom:150px}body.withtabs .fab{bottom:calc(84px + env(safe-area-inset-bottom))}
 .mehead{display:flex;gap:16px;align-items:center;padding:10px 0}
 .meport{width:72px;height:92px;flex:0 0 72px;border-radius:4px;background:var(--c);border:4px solid #B08A3E;display:flex;align-items:center;justify-content:center;font-family:var(--display);font-weight:700;font-size:40px;color:#F1D99A;box-shadow:var(--shadow)}
 .mehead h1{font-size:34px}
@@ -466,7 +466,7 @@ function render() {
   const r = location.hash.slice(1) || "/";
   document.body.classList.toggle("full3d", r.startsWith("/room3d/"));
   const showTabs = classic() && (DB.mode === "local" || (user && profiles[user.uid])) && !r.startsWith("/new") && !r.startsWith("/room");
-  document.body.classList.toggle("tabs", showTabs); if (showTabs) drawTabs(r);
+  document.body.classList.toggle("withtabs", showTabs); if (showTabs) drawTabs(r);
   if (r === "/me") return renderMe();
   if (r === "/p/me") { const u = myUid(); if (u) { location.replace("#/p/" + encodeURIComponent(u)); return; } }
   if (DB.mode === "firebase" && !user) return renderAuth();
