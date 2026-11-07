@@ -276,7 +276,7 @@ async function firebaseAdapter(cfg) {
   const V = "10.12.2", base = "https://www.gstatic.com/firebasejs/" + V + "/";
   const [{ initializeApp }, A, F] = await Promise.all([import(base + "firebase-app.js"), import(base + "firebase-auth.js"), import(base + "firebase-firestore.js")]);
   const app = initializeApp(cfg);
-  const auth = A.getAuth(app);
+  let auth; try { auth = A.initializeAuth(app, { persistence: [A.indexedDBLocalPersistence, A.browserLocalPersistence] }); } catch (e) { auth = A.getAuth(app); }
   let fs; try { fs = F.initializeFirestore(app, { localCache: F.persistentLocalCache({ tabManager: F.persistentMultipleTabManager() }) }); } catch (e) { fs = F.getFirestore(app); }
   const books = uid => F.collection(fs, "profiles", uid, "books");
   return {
@@ -345,7 +345,8 @@ function turn({ color, kicker, name, paper, opening }) {
 function render() {
   const r = location.hash.slice(1) || "/";
   if (DB.mode === "firebase" && !user) return renderAuth();
-  if (user && DB.mode === "firebase" && !profiles[user.uid] && !r.startsWith("/new")) return renderNewProfile(true);
+  if (user && DB.mode === "firebase" && !profiles[user.uid] && !r.startsWith("/new")) { if ($app.dataset.view === "new") return; return renderNewProfile(true); }
+  if (r.startsWith("/new") && $app.dataset.view === "new" && ui.creating) return;
   if (r.startsWith("/p/")) return renderShelf(decodeURIComponent(r.slice(3)));
   if (r === "/letters") return renderLetters();
   if (r.startsWith("/new")) return renderNewProfile(false);
@@ -659,6 +660,7 @@ function renderNewProfile(first) {
   const src = h("select", {}, sources.map(([v, l]) => h("option", { value: v }, l)));
   if (v2?.profiles && sources.some(([v]) => v === "v2-jacopo")) src.value = "v2-jacopo";
   const fileIn = h("input", { type: "file", accept: ".json,application/json" });
+  const submit = h("button", { class: "btn primary", type: "submit" }, "Create the shelf");
   const go2 = async e => {
     e.preventDefault(); const n = name.value.trim(); if (!n) { msg.textContent = "Add a name."; return; }
     msg.textContent = "Binding your volume";
@@ -671,11 +673,19 @@ function renderNewProfile(first) {
       else if (src.value === "phone-jacopo") { seed = legacy.books; p.seedFrom = "data.json"; p.seen = Object.keys(legacy.books || {}); }
       else if (src.value === "phone-gaia") seed = legacy.gaia_books;
       else if (src.value.startsWith("v2-")) { const k = src.value.slice(3); seed = v2.books[k]; if (v2.profiles[k].seedFrom) { p.seedFrom = v2.profiles[k].seedFrom; p.seen = v2.profiles[k].seen || []; } if (!name.value.trim()) name.value = v2.profiles[k].name; }
+      ui.creating = true; submit.disabled = true;
       await DB.saveProfile(uid, p);
+      profiles[uid] = { ...(profiles[uid] || {}), ...p };
       if (seed && Object.keys(seed).length) { msg.textContent = "Shelving " + Object.keys(seed).length + " books"; await DB.setBooks(uid, seed); }
       if (DB.mode === "local") DB.use(uid);
-      openShelf(uid);
-    } catch (err) { msg.textContent = "Something went wrong: " + (err.code || err.message); }
+      ui.creating = false; $app.dataset.view = ""; toast("Your shelf is ready");
+      if (location.hash.slice(1) === "/" || !location.hash) render(); else location.hash = "/";
+      window.scrollTo(0, 0);
+    } catch (err) {
+      ui.creating = false; submit.disabled = false;
+      const t = err.code === "permission-denied" ? "Firebase refused the save. Check that the Firestore rules are published." : "Something went wrong: " + (err.code || err.message);
+      msg.textContent = t; toast(t);
+    }
   };
   mount(
     first ? null : h("div", { class: "topbar" }, h("button", { class: "back", onclick: () => go("/") }, "‹ Library")),
@@ -686,7 +696,7 @@ function renderNewProfile(first) {
       h("div", { class: "field" }, "Binding", sw),
       h("label", { class: "field" }, "Books to start with", src),
       h("label", { class: "field" }, "Or load a backup file", fileIn),
-      h("button", { class: "btn primary", type: "submit" }, "Create the shelf"), msg,
+      submit, msg,
       DB.mode === "firebase" ? h("button", { class: "btn ghost", type: "button", onclick: () => DB.signOut() }, "Sign out") : null)
   );
   setTimeout(() => name.focus(), 50);
