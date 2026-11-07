@@ -230,6 +230,14 @@ body{overscroll-behavior-y:contain}
 .book.fav{flex-direction:row;gap:16px;align-items:center}.book.fav .cover{width:110px;flex:0 0 110px}
 .newsrow{display:grid;grid-template-columns:76px 1fr;gap:12px;align-items:start}
 .soon{color:var(--accent);font-weight:600;font-size:14px}
+.room{max-width:460px;margin:0 auto;overflow:hidden;border-radius:14px;box-shadow:var(--shadow);background:#3A2718}
+.roomsvg{display:block;width:100%;height:auto;--rw:#E9DCC1;--rw2:#E3D4B6;--rp:#D6C29E;--rf:#A27850;--rf2:#7F5A38}
+@media (prefers-color-scheme:dark){.roomsvg{--rw:#3A3027;--rw2:#352B23;--rp:#2E251D;--rf:#5A4030;--rf2:#3F2C1F}}
+.roomsvg .obj[role=button]{cursor:pointer;outline:none}
+.roomsvg .obj[role=button]:hover,.roomsvg .obj[role=button]:focus-visible{filter:brightness(1.08) drop-shadow(0 0 6px rgba(255,220,140,.7))}
+.roomsvg .lbl rect{fill:rgba(42,34,28,.78)}.roomsvg .lbl text{fill:#F4EBD6;font:600 11px Literata,Georgia,serif;letter-spacing:.02em}
+.roomhint{text-align:center;font-style:italic;margin-top:12px}
+.result .cover{width:38px;flex:0 0 38px}
 .toast{position:fixed;left:50%;bottom:calc(90px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:10px 16px;border-radius:8px;font-size:14px;z-index:60;box-shadow:var(--shadow);max-width:90vw}
 .auth{max-width:420px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
 </style>
@@ -409,6 +417,7 @@ function render() {
   if (r === "/letters") return renderLetters();
   if (r.startsWith("/year")) return renderYear(decodeURIComponent(r.slice(6)) || myUid());
   if (r === "/news") return renderNews();
+  if (r.startsWith("/room/")) return renderRoom(decodeURIComponent(r.slice(6)));
   if (r.startsWith("/new")) return renderNewProfile(false);
   return renderLibrary();
 }
@@ -427,12 +436,9 @@ function renderLibrary() {
   const forMe = sugs.filter(s => DB.mode === "local" ? true : s.to === meUid()).length;
   const mine = meUid() && profiles[meUid()];
   mount(
-    h("header", { class: "titlepage" }, h("div", { class: "kicker" }, "Ex Libris"), h("h1", {}, "The Codex Club"), h("p", {}, list.length ? "Choose a volume to open it" : "Add the first reader to begin")),
+    h("header", { class: "titlepage" }, h("div", { class: "kicker" }, "Ex Libris"), h("h1", {}, "The Codex Club"), h("p", {}, list.length ? "Open your volume to step into your room" : "Add the first reader to begin")),
     h("div", { class: "case" }, h("div", { class: "spines" }, spines), h("div", { class: "plank" })),
     h("div", { class: "cards" },
-      myUid() ? h("button", { class: "card", onclick: () => go("/news") }, h("h2", {}, "News for you ", newsCount() ? h("span", { class: "badge" }, newsCount()) : null), h("div", { class: "muted" }, "New and upcoming books from your series and the authors you love.")) : null,
-      myUid() ? h("button", { class: "card", onclick: () => go("/year/" + encodeURIComponent(myUid())) }, h("h2", {}, "Year in books"), yearTeaser(myUid())) : null,
-      h("button", { class: "card", onclick: () => go("/letters") }, h("h2", {}, "Letters ", forMe ? h("span", { class: "badge" }, forMe) : null), h("div", { class: "muted" }, "Suggest books to each other and send the good ones straight to a wishlist.")),
       DB.mode === "local" ? h("div", { class: "card" }, h("h2", {}, "Backup"), h("div", { class: "muted" }, "This library lives only on this phone until sync is switched on. Save a backup now and then."),
         h("div", { class: "actions" }, h("button", { class: "btn", onclick: exportBackup }, "Save backup"), h("label", { class: "btn ghost" }, "Load backup", h("input", { type: "file", accept: ".json,application/json", hidden: true, onchange: importBackup })))) : null),
     h("div", { class: "foot" }, h("div", { class: "faint", style: { "font-size": "12px", "margin-bottom": "4px" } }, PREVIEW ? "Preview version" : "Version 7 Nov j"), DB.mode === "firebase" ? ["Signed in as ", mine ? mine.name : user.email, " · ", h("button", { onclick: () => DB.signOut() }, "Sign out")] : "Sync is not set up yet, so changes stay on this phone.")
@@ -444,7 +450,7 @@ async function openShelf(uid) {
   ui.tab = "all"; ui.q = ""; ui.genre = null;
   const t = turn({ color: p.color, kicker: "Ex Libris", name: p.name, opening: true });
   await new Promise(r => setTimeout(r, reduce ? 0 : 160));
-  go("/p/" + encodeURIComponent(uid)); window.scrollTo(0, 0);
+  go("/room/" + encodeURIComponent(uid)); window.scrollTo(0, 0);
   await t; mergeSeed(uid);
 }
 async function closeTo(path) { const t = turn({ paper: true, kicker: "Ex Libris", name: "", opening: false }); await new Promise(r => setTimeout(r, reduce ? 0 : 700)); go(path); window.scrollTo(0, 0); await t; }
@@ -481,7 +487,7 @@ function renderShelf(uid) {
   }
   const authors = new Set(all.filter(b => st(b) !== "wishlist").flatMap(b => arr(b.authors))).size;
   mount(
-    h("div", { class: "topbar" }, h("button", { class: "back", onclick: () => closeTo("/") }, "‹ Library"), h("div", { class: "ribbon", style: { "--c": color } })),
+    h("div", { class: "topbar" }, h("button", { class: "back", onclick: () => go("/room/" + encodeURIComponent(uid)) }, "‹ Room"), h("button", { class: "back", onclick: () => closeTo("/") }, "Club ›")),
     h("header", { class: "phead" }, h("div", { class: "sc faint" }, "the shelf of"), h("h1", {}, p.name), h("div", { class: "actions", style: { "justify-content": "center", "margin-top": "8px" } }, edit ? h("button", { class: "rename", type: "button", onclick: () => editShelf(uid) }, "✎ Edit shelf") : null, h("button", { class: "rename", type: "button", onclick: () => go("/year/" + encodeURIComponent(uid)) }, "◔ Year in books")),
       h("div", { class: "stats sc" }, counts.read + " read · " + counts.reading + " reading · " + counts.wishlist + " wished · " + authors + " authors")),
     h("div", { class: "fleuron" }, "❦"),
@@ -610,6 +616,157 @@ function openBook(uid, id) {
   );
 }
 
+
+/* ---------- the reading room ---------- */
+function roomState(uid) {
+  const all = books(uid), mine = canEdit(uid) && uid === myUid();
+  const read = all.filter(b => stOf(b) === "read").length;
+  const reading = all.filter(b => stOf(b) === "reading").sort((a, b) => (b.started || "").localeCompare(a.started || "") || (b.page || 0) - (a.page || 0));
+  const Y = new Date().getFullYear(), fin = finishedIn(uid, Y).length, goal = profiles[uid]?.goals?.[Y];
+  const mail = sugs.filter(s => s.to === uid).length, news = mine ? newsCount() : 0, lent = all.filter(b => b.lentTo);
+  return { all, mine, read, reading, Y, fin, goal, mail, news, lent };
+}
+function roomSVG(uid, S) {
+  const p = profiles[uid], c = p.color || LEATHER[0], night = matchMedia("(prefers-color-scheme: dark)").matches;
+  const pal = ["#7A2E2A", "#2F4F3A", "#2B3A55", "#A8742B", "#5A3550", "#3F5E63", "#8C6239", "#4A4A4A", "#9B4F3A", "#556B2F"];
+  // spines on the bookcase grow with the books read
+  let spines = "", n = Math.min(52, Math.max(S.read, S.all.length ? 3 : 0)), k = 0;
+  const rows = [58, 158, 258, 358];
+  for (const ry of rows) { let x = 240; while (x < 366 && k < n) { const hh = 58 + (hash("s" + k) % 26), w = 7 + (hash("w" + k) % 5), col = pal[hash("c" + k) % pal.length]; spines += `<rect x="${x}" y="${ry + 84 - hh}" width="${w}" height="${hh}" rx="1" fill="${col}"/><rect x="${x}" y="${ry + 84 - hh + 8}" width="${w}" height="2" fill="#D9B56A" opacity=".7"/>`; x += w + 1; k++; } }
+  const letter = S.mine ? (S.mail
+    ? `<g transform="translate(62 338)"><polygon points="0,0 70,0 70,40 0,40" fill="#F4EBD6" stroke="#8A7B6B"/><polyline points="0,0 35,24 70,0" fill="none" stroke="#8A7B6B"/><circle cx="35" cy="24" r="8" fill="#9E2B25"/><circle cx="35" cy="24" r="4.5" fill="#B8463E"/></g>`
+    : `<g transform="translate(62 330)"><polygon points="0,14 70,14 70,48 0,48" fill="#EFE3C8" stroke="#8A7B6B"/><rect x="8" y="0" width="54" height="40" fill="#FFFDF6" stroke="#B9AE98"/><line x1="15" y1="10" x2="55" y2="10" stroke="#B9AE98"/><line x1="15" y1="17" x2="55" y2="17" stroke="#B9AE98"/><line x1="15" y1="24" x2="45" y2="24" stroke="#B9AE98"/><polyline points="0,14 35,36 70,14" fill="none" stroke="#8A7B6B"/></g>`) : "";
+  const paper = S.mine ? (S.news
+    ? `<g transform="translate(118 548) rotate(-8)"><rect width="62" height="34" fill="#F2EEE4" stroke="#8A8274"/><rect x="5" y="5" width="52" height="7" fill="#2A221C"/><rect x="5" y="15" width="24" height="14" fill="#B9B2A2"/><line x1="33" y1="17" x2="57" y2="17" stroke="#8A8274"/><line x1="33" y1="22" x2="57" y2="22" stroke="#8A8274"/><line x1="33" y1="27" x2="57" y2="27" stroke="#8A8274"/></g><g transform="translate(176 538)"><circle r="12" fill="#B8463E"/><text y="4" text-anchor="middle" font-size="11" font-weight="700" fill="#fff" font-family="Literata,serif">${S.news > 9 ? "9+" : S.news}</text></g>`
+    : `<g transform="translate(112 560) rotate(-4)"><rect width="78" height="26" fill="#EDE8DC" stroke="#8A8274"/><line x1="39" y1="0" x2="39" y2="26" stroke="#8A8274"/><line x1="6" y1="7" x2="34" y2="7" stroke="#A39B8C"/><line x1="6" y1="13" x2="34" y2="13" stroke="#A39B8C"/><line x1="44" y1="7" x2="72" y2="7" stroke="#A39B8C"/><line x1="44" y1="13" x2="72" y2="13" stroke="#A39B8C"/></g>`) : "";
+  const cur = S.reading[0], glow = !!cur || night;
+  const openBook = cur ? `<g transform="translate(300 556)"><path d="M0 8 Q16 0 32 8 L32 26 Q16 18 0 26Z" fill="#FFFBF0" stroke="#8A7B6B"/><path d="M32 8 Q48 0 64 8 L64 26 Q48 18 32 26Z" fill="#FFFBF0" stroke="#8A7B6B"/></g>` : "";
+  const lentBooks = S.lent.length ? `<rect x="205" y="452" width="9" height="22" fill="#2B3A55"/><rect x="215" y="448" width="8" height="26" fill="#7A2E2A"/><rect x="224" y="454" width="9" height="20" fill="#A8742B"/>` : "";
+  const sky = night ? `<rect x="46" y="56" width="98" height="128" fill="#1C2740"/><circle cx="118" cy="82" r="11" fill="#F3E6B8"/><circle cx="112" cy="79" r="10" fill="#1C2740"/><circle cx="66" cy="72" r="1.4" fill="#fff"/><circle cx="84" cy="98" r="1" fill="#fff"/><circle cx="130" cy="130" r="1.2" fill="#fff"/><circle cx="60" cy="140" r="1" fill="#fff"/>`
+    : `<rect x="46" y="56" width="98" height="128" fill="url(#sky)"/><circle cx="120" cy="84" r="12" fill="#FFF3C4"/><path d="M52 160 Q70 140 92 158 T140 150 L140 184 L52 184Z" fill="#9DB89A"/>`;
+  const pct = S.goal ? Math.min(1, S.fin / S.goal) : 0;
+  const label = (x, y, t) => `<g class="lbl" transform="translate(${x} ${y})"><rect x="${-t.length * 3.3 - 8}" y="-11" width="${t.length * 6.6 + 16}" height="18" rx="9"/><text y="2" text-anchor="middle">${t}</text></g>`;
+  const ini = (p.name || "?").trim()[0].toUpperCase();
+  return `<svg class="roomsvg" viewBox="0 0 400 700" role="group" aria-label="${p.name}'s room">
+<defs>
+ <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#A9CBE0"/><stop offset="1" stop-color="#E9F1EE"/></linearGradient>
+ <pattern id="paper" width="22" height="22" patternUnits="userSpaceOnUse"><rect width="22" height="22" fill="var(--rw)"/><rect width="11" height="22" fill="var(--rw2)"/></pattern>
+ <pattern id="planks" width="80" height="24" patternUnits="userSpaceOnUse"><rect width="80" height="24" fill="var(--rf)"/><line x1="0" y1="23.5" x2="80" y2="23.5" stroke="var(--rf2)"/><line x1="52" y1="0" x2="52" y2="24" stroke="var(--rf2)"/></pattern>
+ <radialGradient id="glow"><stop offset="0" stop-color="#FFE7A3" stop-opacity=".75"/><stop offset="1" stop-color="#FFE7A3" stop-opacity="0"/></radialGradient>
+</defs>
+<rect width="400" height="470" fill="url(#paper)"/>
+<rect y="380" width="400" height="90" fill="var(--rp)"/><line x1="0" y1="380" x2="400" y2="380" stroke="var(--rf2)" stroke-width="3"/>
+<rect y="470" width="400" height="230" fill="url(#planks)"/>
+<rect y="466" width="400" height="8" fill="var(--rf2)"/>
+<ellipse cx="200" cy="640" rx="185" ry="42" fill="${c}" opacity=".45"/><ellipse cx="200" cy="640" rx="170" ry="34" fill="none" stroke="#D9B56A" stroke-opacity=".6" stroke-dasharray="4 4"/>
+${glow ? `<circle cx="368" cy="470" r="${cur ? 120 : 80}" fill="url(#glow)"/>` : ""}
+
+<g class="obj" data-go="window" aria-hidden="true">
+ <rect x="38" y="48" width="114" height="144" rx="3" fill="#6B4A2B"/>${sky}
+ <line x1="95" y1="56" x2="95" y2="184" stroke="#6B4A2B" stroke-width="4"/><line x1="46" y1="120" x2="144" y2="120" stroke="#6B4A2B" stroke-width="4"/>
+ <path d="M30 40 L62 40 Q50 120 58 200 L30 200Z" fill="${c}" opacity=".85"/><path d="M160 40 L128 40 Q140 120 132 200 L160 200Z" fill="${c}" opacity=".85"/><rect x="24" y="36" width="142" height="6" rx="3" fill="#5E412A"/>
+</g>
+
+<g class="obj" data-go="profile" role="button" tabindex="0" aria-label="Profile and settings">
+ <line x1="192" y1="40" x2="180" y2="58" stroke="#5E412A"/><line x1="192" y1="40" x2="204" y2="58" stroke="#5E412A"/>
+ <ellipse cx="192" cy="92" rx="24" ry="31" fill="#B08A3E"/><ellipse cx="192" cy="92" rx="19" ry="26" fill="${c}"/>
+ <text x="192" y="101" text-anchor="middle" font-family="Cormorant Garamond,serif" font-weight="700" font-size="26" fill="#F1D99A">${ini}</text>
+ ${label(192, 140, S.mine ? "You" : p.name)}
+</g>
+
+<g class="obj" data-go="year" role="button" tabindex="0" aria-label="Year in books">
+ <circle cx="86" cy="214" r="3" fill="#5E412A"/>
+ <rect x="54" y="220" width="64" height="78" rx="3" fill="#FFFDF6" stroke="#B9AE98"/><rect x="54" y="220" width="64" height="18" rx="3" fill="#9E2B25"/>
+ <text x="86" y="233" text-anchor="middle" font-size="11" font-weight="700" fill="#fff" font-family="Literata,serif">${S.Y}</text>
+ <text x="86" y="268" text-anchor="middle" font-size="22" font-family="Cormorant Garamond,serif" font-weight="700" fill="#2A221C">${S.fin}${S.goal ? "/" + S.goal : ""}</text>
+ <rect x="62" y="280" width="48" height="5" rx="2.5" fill="#E2D6BC"/><rect x="62" y="280" width="${48 * pct}" height="5" rx="2.5" fill="#9E2B25"/>
+ ${label(86, 314, "Year")}
+</g>
+
+<g class="obj" data-go="shelf" role="button" tabindex="0" aria-label="Bookcase, ${S.all.length} books">
+ <rect x="226" y="28" width="158" height="444" rx="4" fill="#5E412A"/><rect x="234" y="40" width="142" height="424" fill="#3A2718"/>
+ ${rows.map(y => `<rect x="230" y="${y + 84}" width="150" height="8" fill="#6B4A2B"/>`).join("")}
+ ${spines}
+ <rect x="222" y="22" width="166" height="10" rx="2" fill="#6B4A2B"/>
+ ${label(305, 494, "Bookcase · " + S.all.length)}
+</g>
+
+<g class="obj" data-go="letters" role="button" tabindex="0" aria-label="${S.mine ? (S.mail ? S.mail + " new letters" : "Letters") : "Desk"}">
+ <rect x="20" y="378" width="190" height="12" rx="2" fill="#6B4A2B"/><rect x="30" y="390" width="170" height="44" fill="#5E412A"/>
+ <rect x="40" y="398" width="70" height="28" rx="2" fill="#6B4A2B"/><rect x="120" y="398" width="70" height="28" rx="2" fill="#6B4A2B"/><circle cx="75" cy="412" r="2.5" fill="#D9B56A"/><circle cx="155" cy="412" r="2.5" fill="#D9B56A"/>
+ <rect x="32" y="434" width="10" height="56" fill="#5E412A"/><rect x="188" y="434" width="10" height="56" fill="#5E412A"/>
+ <rect x="160" y="358" width="18" height="20" rx="4" fill="#2A221C"/><path d="M170 360 Q186 320 200 300" stroke="#F4EBD6" stroke-width="3" fill="none"/>
+ ${letter}
+ ${S.mine && S.mail ? `<g transform="translate(140 336)"><circle r="11" fill="#B8463E"/><text y="4" text-anchor="middle" font-size="11" font-weight="700" fill="#fff" font-family="Literata,serif">${S.mail}</text></g>` : ""}
+ ${S.mine ? label(115, 510, S.mail ? "New letter" : "Letters") : ""}
+</g>
+
+<g class="obj" data-go="lent" role="button" tabindex="0" aria-label="Lent books, ${S.lent.length}">
+ ${lentBooks}
+ <path d="M200 470 L240 470 L234 504 L206 504Z" fill="#B88A55"/><path d="M200 470 L240 470" stroke="#8C6239" stroke-width="3"/>
+ <path d="M204 480 L237 480 M205 490 L236 490" stroke="#8C6239" stroke-width="1.5"/>
+</g>
+
+<g class="obj" data-go="news" role="button" tabindex="0" aria-label="${S.mine ? (S.news ? S.news + " new books in the news" : "News") : "Sofa"}">
+ <rect x="16" y="512" width="214" height="62" rx="16" fill="${c}"/><rect x="16" y="512" width="214" height="62" rx="16" fill="#000" opacity=".12"/>
+ <rect x="30" y="566" width="186" height="38" rx="8" fill="${c}"/>
+ <rect x="8" y="548" width="34" height="62" rx="12" fill="${c}"/><rect x="204" y="548" width="34" height="62" rx="12" fill="${c}"/>
+ <rect x="8" y="548" width="34" height="62" rx="12" fill="#000" opacity=".08"/><rect x="204" y="548" width="34" height="62" rx="12" fill="#000" opacity=".08"/>
+ <rect x="22" y="610" width="8" height="14" fill="#3A2718"/><rect x="216" y="610" width="8" height="14" fill="#3A2718"/>
+ ${paper}
+ ${S.mine ? label(123, 646, S.news ? "News · " + S.news : "News") : ""}
+</g>
+
+<g class="obj" data-go="reading" role="button" tabindex="0" aria-label="${cur ? "Reading " + cur.title.replace(/"/g, "") : "Armchair, nothing on the go"}">
+ <rect x="262" y="500" width="112" height="78" rx="22" fill="#8C6239"/><rect x="262" y="500" width="112" height="78" rx="22" fill="#000" opacity=".1"/>
+ <rect x="272" y="570" width="94" height="36" rx="8" fill="#8C6239"/>
+ <rect x="252" y="540" width="28" height="70" rx="11" fill="#7A5434"/><rect x="358" y="540" width="28" height="70" rx="11" fill="#7A5434"/>
+ <rect x="266" y="610" width="7" height="16" fill="#3A2718"/><rect x="364" y="610" width="7" height="16" fill="#3A2718"/>
+ ${openBook}
+ <line x1="378" y1="458" x2="378" y2="628" stroke="#2A221C" stroke-width="4"/><ellipse cx="378" cy="630" rx="14" ry="4" fill="#2A221C"/>
+ <path d="M356 456 L400 456 L392 424 L364 424Z" fill="${glow ? "#F3D58A" : "#C9B48A"}" stroke="#8C6239"/>
+ ${label(318, 646, cur ? (cur.title.length > 16 ? cur.title.slice(0, 15) + "…" : cur.title) : "Armchair")}
+</g>
+</svg>`;
+}
+function renderRoom(uid) {
+  const p = profiles[uid]; if (!p) { if (Object.keys(profiles).length) go("/"); return; }
+  watch(uid); ui.route = "room:" + uid; $app.dataset.view = ui.route;
+  const S = roomState(uid), mine = S.mine;
+  const wrap = h("div", { class: "room" }); wrap.innerHTML = roomSVG(uid, S);
+  const act = {
+    shelf: () => { ui.tab = "all"; ui.q = ""; ui.genre = null; go("/p/" + encodeURIComponent(uid)); },
+    letters: () => mine && go("/letters"),
+    news: () => mine && go("/news"),
+    year: () => go("/year/" + encodeURIComponent(uid)),
+    profile: () => mine ? editShelf(uid) : toast(p.name + "'s room"),
+    reading: () => S.reading[0] ? openBook(uid, S.reading[0].id) : (ui.tab = "reading", go("/p/" + encodeURIComponent(uid))),
+    lent: () => lentSheet(uid, S.lent),
+    window: () => {}
+  };
+  const svg = wrap.querySelector("svg");
+  wrap.querySelectorAll(".obj[role=button]").forEach(g => {
+    const run = () => {
+      const key = g.dataset.go; if (key === "letters" && !mine) return; if (key === "news" && !mine) return;
+      const instant = key === "profile" || key === "lent" || (key === "reading" && S.reading[0]);
+      if (instant || reduce) { act[key](); return; }
+      const bb = g.getBBox();
+      svg.style.transformOrigin = ((bb.x + bb.width / 2) / 4) + "% " + ((bb.y + bb.height / 2) / 7) + "%";
+      svg.animate([{ transform: "scale(1)", opacity: 1 }, { transform: "scale(2.2)", opacity: 0 }], { duration: 380, easing: "ease-in", fill: "forwards" }).onfinish = () => { window.scrollTo(0, 0); act[key](); };
+    };
+    g.addEventListener("click", run); g.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); run(); } });
+  });
+  mount(
+    h("div", { class: "topbar" }, h("button", { class: "back", onclick: () => closeTo("/") }, "‹ Club"), h("div", { class: "sc faint" }, mine ? "your room" : p.name + "'s room")),
+    wrap,
+    h("p", { class: "faint roomhint" }, mine ? (S.mail ? "A sealed letter is waiting on your desk. " : "") + "Tap anything in the room." : "You are visiting " + p.name + ". Tap the bookcase, the armchair or the calendar.")
+  );
+}
+function lentSheet(uid, lent) {
+  const { close } = sheet(h("h2", {}, "Lent books"),
+    lent.length ? h("div", { class: "results" }, lent.map(b => h("button", { class: "result", type: "button", onclick: () => { close(true); openBook(uid, b.id); } }, coverEl(b), h("div", {}, h("b", {}, b.title), h("small", {}, "With " + b.lentTo + (b.lentOn ? " since " + fmtDate(b.lentOn) : "")))))) : h("p", { class: "muted" }, "The basket is empty. Open a book and use Lend this book to keep track of who has it."));
+}
+
 /* ---------- year in books ---------- */
 function finishedIn(uid, Y) { return books(uid).filter(b => stOf(b) === "read" && String(b.finished || "").startsWith(String(Y))); }
 function yearTeaser(uid) {
@@ -631,7 +788,7 @@ function renderYear(uid) {
   const goalIn = h("input", { type: "number", min: "1", inputmode: "numeric", value: goal || "", placeholder: "24", style: { width: "90px" } });
   const board = Object.entries(profiles).map(([u, q]) => [q.name, finishedIn(u, Y).length]).sort((a, b) => b[1] - a[1]);
   mount(
-    h("div", { class: "topbar" }, h("button", { class: "back", onclick: () => history.length > 1 ? history.back() : go("/") }, "‹ Back"), h("div", { class: "ribbon", style: { "--c": color } })),
+    h("div", { class: "topbar" }, h("button", { class: "back", onclick: () => go("/room/" + encodeURIComponent(uid)) }, "‹ Room"), h("div", { class: "ribbon", style: { "--c": color } })),
     h("header", { class: "phead" }, h("div", { class: "sc faint" }, p.name + "'s year in books"),
       h("div", { class: "yearnav" }, h("button", { class: "back", "aria-label": "Previous year", onclick: () => { ui.year = Y - 1; render(); } }, "‹"), h("h1", {}, String(Y)), h("button", { class: "back", "aria-label": "Next year", disabled: Y >= new Date().getFullYear(), onclick: () => { ui.year = Y + 1; render(); } }, "›"))),
     h("div", { class: "fleuron" }, "❦"),
@@ -706,7 +863,7 @@ function renderNews() {
       h("button", { class: "btn ghost", type: "button", onclick: () => { lsSet("cc-news-hide-" + uid, [...lsGet("cc-news-hide-" + uid, []), i.key]); render(); } }, "Not interested")));
   const favs = arr(profiles[uid]?.favAuthors);
   mount(
-    h("div", { class: "topbar" }, h("button", { class: "back", onclick: () => go("/") }, "‹ Library")),
+    h("div", { class: "topbar" }, h("button", { class: "back", onclick: () => go("/room/" + encodeURIComponent(uid)) }, "‹ Room")),
     h("header", { class: "phead" }, h("div", { class: "sc faint" }, "fresh from the press"), h("h1", {}, "News for you")),
     h("div", { class: "fleuron" }, "❦"),
     h("p", { class: "muted", style: { "text-align": "center" } }, c ? "Watching " + (c.series?.length || 0) + " series and " + (c.authors?.length || 0) + " authors. Checked " + new Date(c.at).toLocaleString("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) + "." : "Looking for new books for the first time."),
@@ -928,7 +1085,7 @@ function renderLetters() {
     if (sent.length) sections.push(h("section", { class: "section" }, h("h2", {}, "Sent", h("small", {}, sent.length)), h("div", { class: "cards", style: { "margin-top": "0" } }, sent.map(s => letter(s, false)))));
   }
   mount(
-    h("div", { class: "topbar" }, h("button", { class: "back", onclick: () => closeTo("/") }, "‹ Library")),
+    h("div", { class: "topbar" }, h("button", { class: "back", onclick: () => myUid() ? go("/room/" + encodeURIComponent(myUid())) : closeTo("/") }, myUid() ? "‹ Room" : "‹ Club")),
     h("header", { class: "phead" }, h("div", { class: "sc faint" }, "correspondence"), h("h1", {}, "Letters")),
     h("div", { class: "fleuron" }, "❦"),
     others.length ? h("form", { class: "card", onsubmit: send },
