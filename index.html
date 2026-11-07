@@ -481,7 +481,7 @@ function renderLibrary() {
     h("div", { class: "cards" },
       DB.mode === "local" ? h("div", { class: "card" }, h("h2", {}, "Backup"), h("div", { class: "muted" }, "This library lives only on this phone until sync is switched on. Save a backup now and then."),
         h("div", { class: "actions" }, h("button", { class: "btn", onclick: exportBackup }, "Save backup"), h("label", { class: "btn ghost" }, "Load backup", h("input", { type: "file", accept: ".json,application/json", hidden: true, onchange: importBackup })))) : null),
-    h("div", { class: "foot" }, h("div", { class: "faint", style: { "font-size": "12px", "margin-bottom": "4px" } }, PREVIEW ? "Preview version" : "Version 7 Nov j"), DB.mode === "firebase" ? ["Signed in as ", mine ? mine.name : user.email, " · ", h("button", { onclick: () => DB.signOut() }, "Sign out")] : "Sync is not set up yet, so changes stay on this phone.")
+    h("div", { class: "foot" }, h("div", { class: "faint", style: { "font-size": "12px", "margin-bottom": "4px" } }, PREVIEW ? "Preview version" : "Version 7 Nov k"), DB.mode === "firebase" ? ["Signed in as ", mine ? mine.name : user.email, " · ", h("button", { onclick: () => DB.signOut() }, "Sign out")] : "Sync is not set up yet, so changes stay on this phone.")
   );
 }
 
