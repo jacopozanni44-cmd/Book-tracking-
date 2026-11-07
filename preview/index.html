@@ -292,6 +292,34 @@ body.withtabs .page{padding-bottom:150px}body.withtabs .fab{bottom:calc(84px + e
 .chipx{border:0;background:none;margin-left:6px;padding:0 2px;color:var(--ink-3);font-size:13px}
 .addauthor{display:flex;gap:8px;margin-top:10px}.addauthor input{flex:1;min-width:0;font-size:16px;background:var(--paper);border:1px solid var(--edge);border-radius:8px;padding:8px 10px}
 .quotes blockquote cite{display:block;font-style:normal;font-size:12px;color:var(--ink-3);margin-top:4px}
+.ava{border-radius:50%;background:var(--c);color:#F1D99A;font-family:var(--display);font-weight:700;display:flex;align-items:center;justify-content:center;flex:0 0 auto;box-shadow:inset 0 0 0 2px rgba(225,190,110,.6)}
+.feedhead{display:flex;align-items:center;justify-content:space-between;margin:6px 0 14px}.feedhead h1{font-size:38px}
+.btn.rec,.r3btn.rec{background:#C2410C;border-color:#C2410C;color:#fff;font-weight:700}
+.feed{display:flex;flex-direction:column;gap:14px;margin-top:16px}
+.act{border:1px solid var(--edge);background:var(--paper-2);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:10px}
+.ahead{display:flex;gap:10px;align-items:center}.aname{font-family:var(--display);font-size:24px;font-weight:700;line-height:1.1}
+.anote{margin:0;font-style:italic;color:var(--ink-2)}
+.astats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.astats small{display:block;font-size:12px;color:var(--ink-3)}.astats b{font-size:22px;font-family:var(--display)}
+.abook{display:grid;grid-template-columns:56px 1fr;gap:12px;align-items:center;background:var(--paper);border-radius:10px;padding:8px}.abook.big{grid-template-columns:90px 1fr}.abook .t{font-weight:600}
+.prs{display:flex;gap:6px;flex-wrap:wrap}.pr{background:#FDF0C4;color:#7A5A10;border-radius:12px;padding:2px 10px;font-size:13px;font-weight:600}
+.abar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;border-top:1px solid var(--edge);padding-top:8px}
+.kudos{border:1px solid var(--edge);background:var(--paper);border-radius:18px;padding:6px 14px;font-size:15px}.kudos.on{background:#C2410C;color:#fff;border-color:#C2410C}.kudos:disabled{opacity:.6}
+.linkbtn{border:0;background:none;color:var(--ink-3);text-decoration:underline;font-size:13px;margin-left:auto;padding:4px}
+.acoms{display:flex;flex-direction:column;gap:6px;font-size:14px}.acin{display:flex;gap:6px}.acin input{flex:1;min-width:0;font-size:16px;background:var(--paper);border:1px solid var(--edge);border-radius:18px;padding:6px 12px}.acin .btn{padding:6px 12px}
+.wk{margin-top:4px}.wkhead{display:flex;align-items:center;justify-content:space-between}.streak{background:#FFE7D1;color:#9A3412;border-radius:14px;padding:3px 10px;font-weight:700;font-size:14px}
+.wbars{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;height:70px;align-items:end;margin:6px 0}.wbars.tall{grid-template-columns:repeat(12,1fr);height:110px}
+.wcol{display:flex;flex-direction:column;align-items:center;gap:3px;height:100%;justify-content:flex-end}.wcol i{width:100%;background:#C2410C;border-radius:3px 3px 0 0}.wcol small{font-size:11px;color:var(--ink-3);min-height:13px}
+.recwrap{display:flex;flex-direction:column;align-items:center;gap:16px;text-align:center;padding-top:10px}.recwrap .field{width:100%;max-width:420px;text-align:left}
+.recgo{width:110px;height:110px;border-radius:50%;border:0;background:#C2410C;color:#fff;font-size:44px;box-shadow:0 10px 30px rgba(194,65,12,.4)}
+.clock{font-family:var(--display);font-size:84px;font-weight:700;letter-spacing:.02em;line-height:1;font-variant-numeric:tabular-nums}
+.recbook{display:grid;grid-template-columns:70px 1fr;gap:12px;align-items:center;text-align:left;max-width:360px;width:100%}
+.btn.big{font-size:18px;padding:14px 26px;border-radius:30px}
+.heat{display:grid;grid-template-rows:repeat(7,1fr);grid-auto-flow:column;gap:3px;margin:8px 0}.heat i{aspect-ratio:1;border-radius:2px;background:var(--paper-3)}
+.heat i.h1{background:#FED7AA}.heat i.h2{background:#FB923C}.heat i.h3{background:#EA580C}.heat i.h4{background:#9A3412}
+.recs{display:flex;flex-direction:column;gap:8px}.recrow{display:grid;grid-template-columns:1fr auto;gap:2px 10px;border-bottom:1px solid var(--edge);padding-bottom:6px}.recrow small{grid-column:1/-1}
+.board{display:flex;flex-direction:column;gap:8px}.brow2{display:grid;grid-template-columns:20px 30px 1fr auto auto;gap:8px;align-items:center}.brow2.me .bname{font-weight:700}.rank{color:var(--ink-3);font-weight:700}
+.chal{display:grid;grid-template-columns:90px 1fr auto;gap:8px;align-items:center;font-size:14px}
+#tabbar button:nth-child(3) .ti{background:#C2410C;color:#fff;border-radius:50%;width:34px;height:34px;display:flex;align-items:center;justify-content:center;font-size:16px;margin-top:-6px}
 .toast{position:fixed;left:50%;bottom:calc(90px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:10px 16px;border-radius:8px;font-size:14px;z-index:60;box-shadow:var(--shadow);max-width:90vw}
 .auth{max-width:420px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
 </style>
@@ -353,7 +381,7 @@ const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
 function localAdapter(KEY = "exlibris-v2", sandbox = false) {
   let db; const subs = { profiles: [], sugs: [], books: {} };
   const save = () => { try { localStorage.setItem(KEY, JSON.stringify(db)); } catch (e) { toast("Storage is full, change not saved"); } };
-  const emit = () => { subs.profiles.forEach(f => f(structuredClone(db.profiles))); subs.sugs.forEach(f => f(Object.entries(db.sugs).map(([id, d]) => ({ id, ...d })))); for (const [u, fs] of Object.entries(subs.books)) fs.forEach(f => f(db.books[u] || {})); };
+  const emit = () => { (subs.acts || []).forEach(f => f(Object.entries(db.acts || {}).map(([id, d]) => ({ id, ...d })))); subs.profiles.forEach(f => f(structuredClone(db.profiles))); subs.sugs.forEach(f => f(Object.entries(db.sugs).map(([id, d]) => ({ id, ...d })))); for (const [u, fs] of Object.entries(subs.books)) fs.forEach(f => f(db.books[u] || {})); };
   let me = null; const authSubs = [];
   return {
     mode: "local",
@@ -369,6 +397,7 @@ function localAdapter(KEY = "exlibris-v2", sandbox = false) {
         if (sandbox) { db.profiles.gaia = { name: "Gaia (test)", color: LEATHER[4], created: 2 }; db.books.gaia = { "circe": { title: "Circe", authors: ["Madeline Miller"], status: "read", rating: 5, genres: ["Fantasy"], finished: today(), added: today() }, "dune": { title: "Dune", authors: ["Frank Herbert"], status: "reading", page: 120, pages: 600, started: today(), genres: ["Science fiction"], added: today() } }; db.sugs.s1 = { from: "gaia", to: "jacopo", title: "The Song of Achilles", author: "Madeline Miller", why: "A test letter, so the sealed envelope shows.", at: today() }; }
         save();
       }
+      if (!db.acts) { db.acts = sandbox ? demoActs(db) : {}; save(); }
       me = sessionStorage.getItem("exlibris-me") || null; if (me && !db.profiles[me]) me = null;
     },
     user: () => me ? { uid: me } : null,
@@ -382,6 +411,10 @@ function localAdapter(KEY = "exlibris-v2", sandbox = false) {
     async deleteBook(uid, id) { delete db.books[uid][id]; save(); emit(); },
     async setBooks(uid, map) { db.books[uid] = { ...(db.books[uid] || {}), ...map }; save(); emit(); },
     watchSugs(f) { subs.sugs.push(f); f(Object.entries(db.sugs).map(([id, d]) => ({ id, ...d }))); },
+    watchActs(f) { (subs.acts = subs.acts || []).push(f); f(Object.entries(db.acts || {}).map(([id, d]) => ({ id, ...d }))); },
+    async addAct(d) { const id = "a" + Date.now().toString(36) + Math.random().toString(36).slice(2, 5); (db.acts = db.acts || {})[id] = d; save(); emit(); return id; },
+    async updateAct(id, p) { if (db.acts?.[id]) { Object.assign(db.acts[id], p); save(); emit(); } },
+    async delAct(id) { delete db.acts[id]; save(); emit(); },
     async addSug(d) { db.sugs["s" + Date.now().toString(36)] = d; save(); emit(); },
     async delSug(id) { delete db.sugs[id]; save(); emit(); },
     exportAll: () => structuredClone(db),
@@ -415,12 +448,16 @@ async function firebaseAdapter(cfg) {
     async setBooks(uid, map) { const ids = Object.keys(map); for (let i = 0; i < ids.length; i += 400) { const b = F.writeBatch(fs); ids.slice(i, i + 400).forEach(id => b.set(F.doc(books(uid), id), map[id])); await b.commit(); } },
     watchSugs(f) { return F.onSnapshot(F.collection(fs, "suggestions"), s => f(s.docs.map(d => ({ id: d.id, ...d.data() }))), () => {}); },
     addSug: d => F.addDoc(F.collection(fs, "suggestions"), d),
+    watchActs(f) { return F.onSnapshot(F.query(F.collection(fs, "activity"), F.orderBy("at", "desc"), F.limit(150)), s => f(s.docs.map(d => ({ id: d.id, ...d.data() }))), () => {}); },
+    addAct: d => F.addDoc(F.collection(fs, "activity"), JSON.parse(JSON.stringify(d))).then(r => r.id),
+    updateAct: (id, p) => F.updateDoc(F.doc(fs, "activity", id), p),
+    delAct: id => F.deleteDoc(F.doc(fs, "activity", id)),
     delSug: id => F.deleteDoc(F.doc(fs, "suggestions", id))
   };
 }
 
 /* ---------- state ---------- */
-let DB, profiles = {}, sugs = [], user = null;
+let DB, profiles = {}, sugs = [], acts = [], user = null;
 const shelf = {}; const unsub = {};
 const ui = { route: "", tab: "all", q: "", genre: null, group: localStorage.getItem("exl-group") || "genre", sort: localStorage.getItem("exl-sort") || "title" };
 const meUid = () => user?.uid || null;
@@ -483,11 +520,14 @@ function turn({ color, kicker, name, paper, opening }) {
 
 /* ---------- views ---------- */
 function render() {
+  if (!location.hash && classic() && myUid()) { location.replace("#/feed"); return; }
   const r = location.hash.slice(1) || "/";
   document.body.classList.toggle("full3d", r.startsWith("/room3d/"));
   const showTabs = classic() && (DB.mode === "local" || (user && profiles[user.uid])) && !r.startsWith("/new") && !r.startsWith("/room");
   document.body.classList.toggle("withtabs", showTabs); if (showTabs) drawTabs(r);
   if (r === "/me") return renderMe();
+  if (r === "/feed") return renderFeed();
+  if (r === "/record") return renderRecord();
   if (r === "/p/me") { const u = myUid(); if (u) { location.replace("#/p/" + encodeURIComponent(u)); return; } }
   if (DB.mode === "firebase" && !user) return renderAuth();
   if (user && DB.mode === "firebase" && !profiles[user.uid] && !r.startsWith("/new")) { if ($app.dataset.view === "new") return; return renderNewProfile(true); }
@@ -518,7 +558,10 @@ function renderLibrary() {
   mount(
     h("header", { class: "titlepage" }, h("div", { class: "kicker" }, "Ex Libris"), h("h1", {}, "The Codex Club"), h("p", {}, list.length ? "Open your volume to step into your room" : "Add the first reader to begin")),
     h("div", { class: "case" }, h("div", { class: "spines" }, spines), h("div", { class: "plank" })),
+    classic() && myUid() ? clubBoards() : null,
     h("div", { class: "cards" },
+      classic() && myUid() ? h("button", { class: "card", onclick: () => go("/letters") }, h("h2", {}, "Letters ", sugs.filter(x => x.to === myUid()).length ? h("span", { class: "badge" }, sugs.filter(x => x.to === myUid()).length) : null), h("div", { class: "muted" }, "Recommend books to each other.")) : null,
+      classic() && myUid() ? h("button", { class: "card", onclick: () => go("/news") }, h("h2", {}, "News ", newsCount() ? h("span", { class: "badge" }, newsCount()) : null), h("div", { class: "muted" }, "New books from your series and authors.")) : null,
       DB.mode === "local" ? h("div", { class: "card" }, h("h2", {}, "Backup"), h("div", { class: "muted" }, PREVIEW ? "Test sandbox: a copy of your shelf to play with. Reset it any time by loading a backup." : "This library lives only on this phone until sync is switched on. Save a backup now and then."),
         h("div", { class: "actions" }, h("button", { class: "btn", onclick: exportBackup }, "Save backup"), h("label", { class: "btn ghost" }, "Load backup", h("input", { type: "file", accept: ".json,application/json", hidden: true, onchange: importBackup })))) : null),
     h("div", { class: "actions", style: { "justify-content": "center", "margin-top": "18px" } }, myUid() ? h("button", { class: "rename", type: "button", onclick: () => setView(classic() ? "room" : "classic") }, classic() ? "◈ Switch to the 3D room" : "▤ Switch to the classic layout") : null),
@@ -686,7 +729,7 @@ function openBook(uid, id) {
     h("div", { class: "detail" }, coverEl(b), h("div", {}, h("h2", {}, b.title), b.altTitle ? h("div", { class: "faint", style: { "font-style": "italic" } }, b.altTitle) : null, h("div", { class: "meta", style: { "margin-top": "6px" } }, meta), arr(b.genres).length ? h("div", { class: "meta faint" }, arr(b.genres).join(" · ")) : null)),
     edit ? h("div", { class: "seg", role: "group", "aria-label": "Status" }, ["wishlist", "reading", "read"].map(k => h("button", { "aria-pressed": st === k ? "true" : "false", onclick: async () => {
       const p = { status: k }; if (k === "reading" && !b.started) p.started = today(); if (k === "read" && !b.finished) p.finished = today(); if (k === "read" && b.pages) p.page = b.pages; if (k === "read" && !b.started && b.status === "wishlist") p.started = today();
-      await DB.updateBook(uid, id, p); close(); toast(k === "read" ? "Finished! Give it some stars" : "Moved to " + STATUS[k]); if (k === "read") setTimeout(() => openBook(uid, id), 400);
+      await DB.updateBook(uid, id, p); if (k !== st && k !== "wishlist" && uid === myUid()) postAct({ type: k === "read" ? "finished" : "started", bookId: id, book: b.title, authors: arr(b.authors), cover: b.cover || "" }); close(); toast(k === "read" ? "Finished! Give it some stars" : "Moved to " + STATUS[k]); if (k === "read") setTimeout(() => openBook(uid, id), 400);
     } }, STATUS[k]))) : h("div", { class: "sc faint", style: { margin: "14px 0" } }, STATUS[st]),
     ...parts, alsoEl,
     b.plot ? h("p", { class: "plot" }, b.plot) : h("p", { class: "faint", style: { "font-style": "italic" } }, "No summary yet."),
@@ -922,7 +965,7 @@ function renderRoom(uid) {
 }
 
 /* ---------- 3D room (beta) ---------- */
-const classic = () => lsGet("cc-view", "room") === "classic";
+const classic = () => lsGet("cc-view", PREVIEW ? "classic" : "room") === "classic";
 const roomPath = uid => classic() ? "/p/" + encodeURIComponent(uid) : (webglOK() ? "/room3d/" : "/room/") + encodeURIComponent(uid);
 const backLabel = () => classic() ? "‹ Club" : "‹ Room";
 function setView(v) { lsSet("cc-view", v); const u = myUid(); toast(v === "classic" ? "Classic layout on" : "3D room on"); go(v === "classic" ? "/me" : u ? "/room3d/" + encodeURIComponent(u) : "/"); }
@@ -972,7 +1015,8 @@ async function renderRoom3D(uid) {
   const modeBtn = h("button", { class: "r3btn wide", type: "button" }), rotL = h("button", { class: "r3btn", type: "button", "aria-label": "Rotate left" }, "↺"), rotR = h("button", { class: "r3btn", type: "button", "aria-label": "Rotate right" }, "↻");
   const zIn = h("button", { class: "r3btn", type: "button", "aria-label": "Zoom in" }, "+"), zOut = h("button", { class: "r3btn", type: "button", "aria-label": "Zoom out" }, "−");
   const decoBtn = mine ? h("button", { class: "r3btn wide", type: "button", "aria-pressed": R3.deco ? "true" : "false", onclick: () => { R3.deco = !R3.deco; if (!R3.deco) R3.draft = null; rebuildRoom(); } }, "🎨 Decorate") : null;
-  const bar = h("div", { class: "r3bar" }, zOut, rotL, modeBtn, rotR, zIn, decoBtn);
+  const recBtn = mine ? h("button", { class: "r3btn wide rec", type: "button", onclick: () => go("/record") }, "● Record") : null;
+  const bar = h("div", { class: "r3bar" }, zOut, rotL, modeBtn, rotR, zIn, recBtn, decoBtn);
   const hint = h("div", { class: "r3hint" }, (mine && S.mail ? "A sealed letter is waiting on your desk. " : "") + "Drag to turn, pinch to zoom, two fingers to move, tap to open.");
   setTimeout(() => hint.classList.add("gone"), 5000);
   const menu = h("details", { class: "r3menu" }, h("summary", { "aria-label": "More" }, "⋯"), h("button", { type: "button", onclick: () => setView("classic") }, "Switch to the classic layout"));
@@ -1312,7 +1356,7 @@ function drawTabs(r) {
   let bar = document.getElementById("tabbar");
   if (!bar) { bar = h("nav", { id: "tabbar", "aria-label": "Sections" }); document.body.append(bar); }
   const u = myUid(), mail = u ? sugs.filter(x => x.to === u).length : 0, news = newsCount();
-  const tabs = [["/", "🏛", "Club"], ["/p/" + encodeURIComponent(u || ""), "📖", "My shelf"], ["/news", "✨", "News", news], ["/letters", "✉", "Letters", mail], ["/me", "👤", "Me"]];
+  const tabs = [["/feed", "🏠", "Feed"], ["/p/" + encodeURIComponent(u || ""), "📖", "Shelf"], ["/record", "●", "Record"], ["/", "🏛", "Club", mail + news], ["/me", "👤", "You"]];
   const cur = r === "/" ? "/" : r.startsWith("/p/") && decodeURIComponent(r.slice(3)) === u ? tabs[1][0] : r;
   bar.replaceChildren(...tabs.map(([path, ic, label, n]) => h("button", { type: "button", "aria-current": cur === path ? "page" : null, onclick: () => { if (path === "/") go("/"); else { ui.tab = "all"; go(path); } } }, h("span", { class: "ti" }, ic, n ? h("b", {}, n > 9 ? "9+" : n) : null), h("span", {}, label))));
 }
@@ -1342,6 +1386,7 @@ function renderMe() {
     h("header", { class: "mehead" }, h("div", { class: "meport", style: { "--c": color } }, (p.name || "?")[0].toUpperCase()),
       h("div", {}, h("h1", {}, p.name), h("div", { class: "muted" }, all.filter(b => stOf(b) === "read").length + " read · " + reading.length + " reading · " + all.filter(b => stOf(b) === "wishlist").length + " wished"),
         h("div", { class: "actions", style: { "margin-top": "8px" } }, h("button", { class: "rename", type: "button", onclick: () => editShelf(uid) }, "✎ Edit shelf"), h("button", { class: "rename", type: "button", onclick: () => go("/year/" + encodeURIComponent(uid)) }, "◔ Year in books")))),
+    ...statsBlock(uid),
     h("section", { class: "section card" }, h("h2", { style: { "font-size": "22px" } }, Y + " so far"), h("div", { class: "muted" }, fin + (goal ? " of " + goal : "") + " books finished"), goal ? h("div", { class: "bigprog" }, h("i", { style: { width: Math.min(100, fin / goal * 100) + "%" } })) : null),
     h("section", { class: "section" }, h("h2", {}, "Reading now", h("small", {}, reading.length)), reading.length ? h("div", { class: "rcards" }, reading.map(b => readingCard(uid, b))) : h("div", { class: "empty" }, "Nothing on the go. Pick something from your wishlist.")),
     h("section", { class: "section" }, h("h2", {}, "Authors"),
@@ -1360,6 +1405,152 @@ function renderMe() {
       h("div", { class: "faint", style: { "font-size": "13px" } }, PREVIEW ? "Test version" : "Version 7 Nov m"),
       DB.mode === "firebase" ? h("button", { class: "btn ghost", type: "button", onclick: () => DB.signOut() }, "Sign out") : null)
   );
+}
+
+
+/* ---------- Strava for books: sessions, feed, kudos, records ---------- */
+const fmtMin = m => m >= 60 ? Math.floor(m / 60) + "h " + String(Math.round(m % 60)).padStart(2, "0") + "m" : Math.round(m) + "m";
+const ago = iso => { const d = (Date.now() - new Date(iso)) / 60000; if (d < 1) return "just now"; if (d < 60) return Math.round(d) + " min ago"; if (d < 1440) return Math.round(d / 60) + " h ago"; if (d < 2880) return "Yesterday"; return new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short" }); };
+const dayKey = iso => new Date(iso).toLocaleDateString("en-CA");
+const sessionName = d => { const hh = new Date(d).getHours(); return hh < 5 ? "Night reading" : hh < 12 ? "Morning reading" : hh < 17 ? "Afternoon reading" : hh < 22 ? "Evening reading" : "Late night reading"; };
+function demoActs(db) {
+  const out = {}, now = Date.now(), mk = (uid, daysAgo, hour, d) => { const at = new Date(now - daysAgo * 864e5); at.setHours(hour, 10, 0, 0); out["d" + uid + daysAgo + hour] = { uid, at: at.toISOString(), ...d }; };
+  const jb = db.books.jacopo || {}, pick = id => jb[id] || Object.values(jb).find(b => b.status === "reading") || {};
+  const lw = Object.entries(jb).find(([, b]) => /leviathan/i.test(b.title)) || Object.entries(jb).find(([, b]) => b.status === "reading") || ["x", {}];
+  const cm = Object.entries(jb).find(([, b]) => /crown of midnight/i.test(b.title)) || lw;
+  [[9, 22, 38, 31, 0], [8, 21, 52, 44, 31], [6, 7, 25, 18, 75], [5, 22, 64, 57, 93], [3, 21, 41, 36, 150], [2, 13, 30, 22, 186], [1, 22, 72, 61, 208], [0, 8, 28, 20, 269]].forEach(([dA, hr, mins, pages, from], i) => {
+    const [id, b] = i % 3 === 2 ? cm : lw; mk("jacopo", dA, hr, { type: "session", bookId: id, book: b.title, authors: arr(b.authors), cover: b.cover || "", mins, pages, from, to: from + pages, feel: ["🙂", "😍", "🤯", "😴"][i % 4], name: sessionName(new Date(now - dA * 864e5).setHours(hr)), kudos: i % 2 ? ["gaia"] : [], comments: i === 6 ? [{ uid: "gaia", text: "72 minutes, what a session!", at: new Date(now - 864e5 * .9).toISOString() }] : [] });
+  });
+  Object.values(out).forEach(x => { const bk = jb[x.bookId]; if (bk && x.to > (bk.page || 0)) { bk.page = x.to; bk.pages = bk.pages || (/leviathan/i.test(bk.title) ? 592 : 418); } });
+  [[7, 20, 45, 40, 30], [4, 21, 35, 28, 70], [2, 9, 50, 22, 98], [0, 18, 40, 30, 90]].forEach(([dA, hr, mins, pages, from], i) => mk("gaia", dA, hr, { type: "session", bookId: "dune", book: "Dune", authors: ["Frank Herbert"], cover: "", mins, pages, from, to: from + pages, feel: "😍", name: sessionName(new Date(now - dA * 864e5).setHours(hr)), kudos: i % 2 ? [] : ["jacopo"], comments: [] }));
+  mk("gaia", 5, 23, { type: "finished", bookId: "circe", book: "Circe", authors: ["Madeline Miller"], cover: "", rating: 5, kudos: ["jacopo"], comments: [{ uid: "jacopo", text: "Adding it to my wishlist", at: new Date(now - 864e5 * 4.8).toISOString() }] });
+  return out;
+}
+const userActs = uid => acts.filter(a => a.uid === uid);
+function streakOf(uid) { const days = new Set(userActs(uid).filter(a => a.type === "session").map(a => dayKey(a.at))); let n = 0; const d = new Date(); if (!days.has(dayKey(d))) d.setDate(d.getDate() - 1); while (days.has(dayKey(d))) { n++; d.setDate(d.getDate() - 1); } return n; }
+function weekStats(uid, weeksAgo = 0) {
+  const start = new Date(); start.setHours(0, 0, 0, 0); start.setDate(start.getDate() - ((start.getDay() + 6) % 7) - 7 * weeksAgo); const end = new Date(start); end.setDate(end.getDate() + 7);
+  const list = userActs(uid).filter(a => a.type === "session" && new Date(a.at) >= start && new Date(a.at) < end), days = Array(7).fill(0);
+  list.forEach(a => days[(new Date(a.at).getDay() + 6) % 7] += a.mins || 0);
+  return { mins: list.reduce((x, a) => x + (a.mins || 0), 0), pages: list.reduce((x, a) => x + (a.pages || 0), 0), n: list.length, days };
+}
+function records(uid) {
+  const ss = userActs(uid).filter(a => a.type === "session"); if (!ss.length) return [];
+  const best = (f, l, fmt) => { const a = ss.reduce((m, x) => f(x) > f(m) ? x : m); return [l, fmt(f(a)), a]; };
+  const r = [best(a => a.mins || 0, "Longest session", fmtMin), best(a => a.pages || 0, "Most pages in a session", v => v + " pages"), best(a => (a.mins >= 10 ? (a.pages || 0) / a.mins * 60 : 0), "Fastest pace", v => Math.round(v) + " pages/hour")];
+  const byDay = {}; ss.forEach(a => byDay[dayKey(a.at)] = (byDay[dayKey(a.at)] || 0) + (a.pages || 0)); const top = Object.entries(byDay).sort((a, b) => b[1] - a[1])[0];
+  r.push(["Biggest reading day", top[1] + " pages", null]);
+  let run = 0, bestRun = 0, prev = null; [...new Set(ss.map(a => dayKey(a.at)))].sort().forEach(d => { run = prev && (new Date(d) - new Date(prev)) / 864e5 === 1 ? run + 1 : 1; bestRun = Math.max(bestRun, run); prev = d; });
+  r.push(["Longest streak", bestRun + " days", null]);
+  return r;
+}
+async function postAct(d) { const uid = myUid(); if (!uid || !DB.addAct) return; try { return await DB.addAct({ uid, at: new Date().toISOString(), kudos: [], comments: [], ...d }); } catch (e) { toast("Could not post to the feed: " + (e.code || e.message)); } }
+function avatar(uid, size = 40) { const p = profiles[uid] || {}; return h("div", { class: "ava", style: { "--c": p.color || LEATHER[0], width: size + "px", height: size + "px", "font-size": size * .48 + "px" } }, (p.name || "?")[0].toUpperCase()); }
+function actCard(a) {
+  const me = myUid(), mine = a.uid === me, who = profiles[a.uid]?.name || "Someone", kud = arr(a.kudos), com = arr(a.comments);
+  const head = h("div", { class: "ahead" }, avatar(a.uid), h("div", {}, h("b", {}, who), h("div", { class: "faint", style: { "font-size": "13px" } }, ago(a.at) + (a.type === "session" ? " · " + (a.feel || "") : ""))));
+  let body;
+  if (a.type === "session") {
+    const pace = a.mins >= 5 ? Math.round((a.pages || 0) / a.mins * 60) : null;
+    body = [h("div", { class: "aname" }, a.name || "Reading"), a.note ? h("p", { class: "anote" }, a.note) : null,
+      h("div", { class: "astats" }, h("div", {}, h("small", {}, "Time"), h("b", {}, fmtMin(a.mins || 0))), h("div", {}, h("small", {}, "Pages"), h("b", {}, a.pages || 0)), h("div", {}, h("small", {}, "Pace"), h("b", {}, pace ? pace + " p/h" : "–"))),
+      arr(a.pr).length ? h("div", { class: "prs" }, arr(a.pr).map(t => h("span", { class: "pr" }, "🏆 " + t))) : null,
+      h("div", { class: "abook" }, coverEl({ title: a.book, authors: a.authors, cover: a.cover }), h("div", {}, h("div", { class: "t" }, a.book), h("div", { class: "faint" }, arr(a.authors).join(", ")), a.to ? h("div", { class: "faint", style: { "font-size": "13px" } }, "Pages " + (a.from || 0) + " → " + a.to) : null))];
+  } else if (a.type === "finished") body = [h("div", { class: "aname" }, "🎉 Finished a book"), h("div", { class: "abook big" }, coverEl({ title: a.book, authors: a.authors, cover: a.cover }), h("div", {}, h("div", { class: "t" }, a.book), h("div", { class: "faint" }, arr(a.authors).join(", ")), a.rating ? starsEl(a.rating) : null))];
+  else body = [h("div", { class: "aname" }, "📖 Started reading"), h("div", { class: "abook" }, coverEl({ title: a.book, authors: a.authors, cover: a.cover }), h("div", {}, h("div", { class: "t" }, a.book), h("div", { class: "faint" }, arr(a.authors).join(", "))))];
+  const iGave = kud.includes(me);
+  const kudosBtn = h("button", { class: "kudos" + (iGave ? " on" : ""), type: "button", disabled: mine, onclick: async () => { const next = iGave ? kud.filter(x => x !== me) : [...kud, me]; navigator.vibrate?.(15); await DB.updateAct(a.id, { kudos: next }); } }, "👏 " + (kud.length || ""));
+  const kudosTxt = kud.length ? h("span", { class: "faint", style: { "font-size": "13px" } }, kud.map(u => profiles[u]?.name || "Someone").slice(0, 2).join(", ") + (kud.length > 2 ? " and " + (kud.length - 2) + " more" : "") + " gave kudos") : null;
+  const cin = h("input", { placeholder: "Add a comment", maxlength: 280 });
+  const comments = h("div", { class: "acoms" }, com.slice(-3).map(c => h("div", { class: "acom" }, h("b", {}, (profiles[c.uid]?.name || "Someone") + " "), c.text)),
+    h("form", { class: "acin", onsubmit: async e => { e.preventDefault(); const t = cin.value.trim(); if (!t) return; cin.value = ""; await DB.updateAct(a.id, { comments: [...com, { uid: me, text: t, at: new Date().toISOString() }] }); } }, cin, h("button", { class: "btn", type: "submit" }, "Send")));
+  return h("article", { class: "act" }, head, ...body, h("div", { class: "abar" }, kudosBtn, kudosTxt, mine ? h("button", { class: "linkbtn", type: "button", onclick: async () => { if (confirm("Delete this activity?")) await DB.delAct(a.id); } }, "Delete") : null), comments);
+}
+function weekCard(uid) {
+  const w = weekStats(uid), last = weekStats(uid, 1), max = Math.max(30, ...w.days), st = streakOf(uid);
+  return h("section", { class: "card wk" }, h("div", { class: "wkhead" }, h("h2", { style: { "font-size": "22px" } }, "This week"), st ? h("span", { class: "streak" }, "🔥 " + st + " day" + (st > 1 ? "s" : "")) : null),
+    h("div", { class: "astats" }, h("div", {}, h("small", {}, "Time"), h("b", {}, fmtMin(w.mins))), h("div", {}, h("small", {}, "Pages"), h("b", {}, w.pages)), h("div", {}, h("small", {}, "Sessions"), h("b", {}, w.n))),
+    h("div", { class: "wbars" }, w.days.map((m, i) => h("div", { class: "wcol" }, h("i", { style: { height: Math.max(3, m / max * 100) + "%", opacity: m ? 1 : .25 } }), h("small", {}, "MTWTFSS"[i])))),
+    h("div", { class: "faint", style: { "font-size": "13px" } }, last.mins ? (w.mins >= last.mins ? "▲ " : "▼ ") + fmtMin(Math.abs(w.mins - last.mins)) + " vs last week" : "Record a session to start your week."));
+}
+function renderFeed() {
+  ui.route = "feed"; $app.dataset.view = "feed";
+  const uid = myUid(); if (!uid) { go("/"); return; } watch(uid);
+  mount(h("header", { class: "feedhead" }, h("h1", {}, "Feed"), h("button", { class: "btn primary rec", type: "button", onclick: () => go("/record") }, "● Record")),
+    weekCard(uid),
+    acts.length ? h("div", { class: "feed" }, acts.slice(0, 60).map(actCard)) : h("div", { class: "empty", style: { "margin-top": "16px" } }, "No activity yet. Tap Record when you sit down to read."));
+}
+let recTick = null;
+function renderRecord() {
+  ui.route = "record"; $app.dataset.view = "record"; clearInterval(recTick);
+  const uid = myUid(); if (!uid) { go("/"); return; } watch(uid);
+  const R = lsGet("cc-rec", null), mineB = books(uid), reading = mineB.filter(b => stOf(b) === "reading");
+  if (R) {
+    const b = mineB.find(x => x.id === R.bookId) || { title: R.book };
+    const elapsed = () => (R.acc || 0) + (R.run ? Date.now() - R.run : 0);
+    const clock = h("div", { class: "clock" }), fmt = ms => { const t = Math.floor(ms / 1000); return (t >= 3600 ? Math.floor(t / 3600) + ":" : "") + String(Math.floor(t / 60) % 60).padStart(2, "0") + ":" + String(t % 60).padStart(2, "0"); };
+    const tick = () => { if (!clock.isConnected) { clearInterval(recTick); return; } clock.textContent = fmt(elapsed()); }; tick(); recTick = setInterval(tick, 500);
+    const pause = h("button", { class: "btn big", type: "button", onclick: () => { if (R.run) { R.acc = elapsed(); R.run = null; } else R.run = Date.now(); lsSet("cc-rec", R); renderRecord(); } }, R.run ? "❚❚ Pause" : "▶ Resume");
+    const finish = h("button", { class: "btn primary big", type: "button", onclick: () => finishSheet(uid, R, b, Math.max(1, Math.round(elapsed() / 60000))) }, "■ Finish");
+    mount(h("div", { class: "recwrap" }, h("div", { class: "sc faint" }, R.run ? "recording" : "paused"), clock, h("div", { class: "recbook" }, coverEl(b), h("div", {}, h("div", { class: "t" }, b.title), h("div", { class: "faint" }, "Started at page " + (R.from || 0)))),
+      h("div", { class: "actions", style: { "justify-content": "center" } }, pause, finish), h("button", { class: "linkbtn", type: "button", onclick: () => { if (confirm("Discard this session?")) { lsSet("cc-rec", null); renderRecord(); } } }, "Discard")));
+    return;
+  }
+  const pickable = [...reading, ...mineB.filter(b => stOf(b) === "wishlist")];
+  const sel = h("select", {}, reading.length ? h("optgroup", { label: "Reading now" }, reading.map(b => h("option", { value: b.id }, b.title))) : null, h("optgroup", { label: "From the wishlist" }, mineB.filter(b => stOf(b) === "wishlist").map(b => h("option", { value: b.id }, b.title))));
+  const start = () => { const b = mineB.find(x => x.id === sel.value); if (!b) return; lsSet("cc-rec", { bookId: b.id, book: b.title, from: b.page || 0, run: Date.now(), acc: 0, began: new Date().toISOString() }); renderRecord(); };
+  mount(h("div", { class: "recwrap" }, h("h1", {}, "Record"), h("p", { class: "muted" }, "Start the clock when you sit down to read. It keeps running even if you close the app."),
+    pickable.length ? [h("label", { class: "field" }, "What are you reading?", sel), h("button", { class: "recgo", type: "button", onclick: start, "aria-label": "Start" }, "▶"), h("div", { class: "faint" }, "Start")] : h("div", { class: "empty" }, "Add a book to your shelf first."),
+    pickable.length ? h("button", { class: "linkbtn", type: "button", onclick: () => finishSheet(uid, { bookId: sel.value, from: mineB.find(x => x.id === sel.value)?.page || 0, began: new Date().toISOString(), manual: true }, mineB.find(x => x.id === sel.value), 30) }, "Log a past session instead") : null));
+}
+function finishSheet(uid, R, b, mins) {
+  const minsIn = h("input", { type: "number", min: "1", value: mins, inputmode: "numeric" }), toIn = h("input", { type: "number", min: String(R.from || 0), value: R.from || 0, inputmode: "numeric" });
+  const pagesTot = h("input", { type: "number", min: "1", value: b?.pages || "", inputmode: "numeric", placeholder: "e.g. 420" });
+  const name = h("input", { value: sessionName(R.began || new Date()) }), note = h("textarea", { rows: 2, placeholder: "How was it? A thought, a scene, a quote" });
+  let feel = "🙂"; const feels = h("div", { class: "seg" }, ["😴", "🙂", "😍", "🤯"].map(f => h("button", { type: "button", "aria-pressed": f === feel ? "true" : "false", onclick: e => { feel = f; feels.querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", x === e.currentTarget ? "true" : "false")); } }, f)));
+  const msg = h("div", { class: "status" });
+  const save = async e => {
+    e.preventDefault(); const to = parseInt(toIn.value, 10) || 0, from = R.from || 0, m = parseInt(minsIn.value, 10) || 0, tot = parseInt(pagesTot.value, 10) || b?.pages || 0;
+    if (to < from) { msg.textContent = "The end page is before the start page."; return; } if (!m) { msg.textContent = "Add how many minutes."; return; }
+    const pages = to - from, prev = userActs(uid).filter(a => a.type === "session"), pr = [];
+    if (prev.length && m > Math.max(...prev.map(a => a.mins || 0))) pr.push("Longest session");
+    if (prev.length && pages > Math.max(...prev.map(a => a.pages || 0))) pr.push("Most pages");
+    msg.textContent = "Saving";
+    const patch = { page: to }; if (tot) patch.pages = tot; if (b && stOf(b) === "wishlist") { patch.status = "reading"; patch.started = patch.started || today(); }
+    const done = tot && to >= tot; if (done) { patch.status = "read"; patch.finished = today(); }
+    if (b) await DB.updateBook(uid, b.id, patch);
+    await postAct({ type: "session", bookId: b?.id, book: b?.title || R.book, authors: arr(b?.authors), cover: b?.cover || "", mins: m, pages, from, to, name: name.value.trim() || "Reading", note: note.value.trim(), feel, pr, at: R.manual ? new Date().toISOString() : new Date().toISOString() });
+    if (done) await postAct({ type: "finished", bookId: b.id, book: b.title, authors: arr(b.authors), cover: b.cover || "" });
+    lsSet("cc-rec", null); close(true); toast(pr.length ? "🏆 New record: " + pr.join(", ") : "Session saved"); go("/feed");
+  };
+  const { close } = sheet(h("form", { onsubmit: save, style: { display: "flex", "flex-direction": "column", gap: "12px" } },
+    h("h2", {}, R.manual ? "Log a session" : "Nice reading!"), h("div", { class: "muted" }, b?.title || ""),
+    h("div", { class: "row" }, h("label", { class: "field" }, "Minutes", minsIn), h("label", { class: "field" }, "Stopped at page", toIn)),
+    !b?.pages ? h("label", { class: "field" }, "Total pages in the book (for progress)", pagesTot) : null,
+    h("label", { class: "field" }, "Title", name), h("div", { class: "field" }, "How did it feel?", feels), h("label", { class: "field" }, "Note (optional)", note),
+    h("div", { class: "actions" }, h("button", { class: "btn primary", type: "submit" }, "Save session"), h("button", { class: "btn ghost", type: "button", onclick: () => close() }, "Back")), msg));
+  setTimeout(() => toIn.select(), 300);
+}
+function statsBlock(uid) {
+  const weeks = Array.from({ length: 12 }, (_, i) => weekStats(uid, 11 - i)), maxW = Math.max(30, ...weeks.map(w => w.mins));
+  const days = new Map(); userActs(uid).filter(a => a.type === "session").forEach(a => days.set(dayKey(a.at), (days.get(dayKey(a.at)) || 0) + (a.mins || 0)));
+  const start = new Date(); start.setDate(start.getDate() - 7 * 15 - ((start.getDay() + 6) % 7));
+  const cells = []; for (let i = 0; i < 16 * 7; i++) { const d = new Date(start); d.setDate(d.getDate() + i); const m = days.get(dayKey(d)) || 0; cells.push(h("i", { title: dayKey(d) + (m ? " · " + fmtMin(m) : ""), class: m >= 60 ? "h4" : m >= 30 ? "h3" : m >= 15 ? "h2" : m ? "h1" : "", style: d > new Date() ? { visibility: "hidden" } : null })); }
+  const month = (() => { const now = new Date(), ss = userActs(uid).filter(a => a.type === "session" && new Date(a.at).getMonth() === now.getMonth() && new Date(a.at).getFullYear() === now.getFullYear()); return { mins: ss.reduce((x, a) => x + (a.mins || 0), 0), pages: ss.reduce((x, a) => x + (a.pages || 0), 0), n: ss.length }; })();
+  const rec = records(uid);
+  return [h("section", { class: "section card" }, h("h2", { style: { "font-size": "22px" } }, "Last 12 weeks"),
+      h("div", { class: "wbars tall" }, weeks.map((w, i) => h("div", { class: "wcol" }, h("i", { style: { height: Math.max(3, w.mins / maxW * 100) + "%", opacity: w.mins ? 1 : .25 } }), h("small", {}, i === 11 ? "now" : "")))),
+      h("div", { class: "astats" }, h("div", {}, h("small", {}, "This month"), h("b", {}, fmtMin(month.mins))), h("div", {}, h("small", {}, "Pages"), h("b", {}, month.pages)), h("div", {}, h("small", {}, "Sessions"), h("b", {}, month.n)))),
+    h("section", { class: "section card" }, h("h2", { style: { "font-size": "22px" } }, "Reading days"), h("div", { class: "heat" }, cells), h("div", { class: "faint", style: { "font-size": "12px" } }, "Darker squares are longer reading days.")),
+    rec.length ? h("section", { class: "section card" }, h("h2", { style: { "font-size": "22px" } }, "🏆 Personal records"), h("div", { class: "recs" }, rec.map(([l, v, a]) => h("div", { class: "recrow" }, h("span", {}, l), h("b", {}, v), a ? h("small", { class: "faint" }, a.book + " · " + fmtDate(dayKey(a.at))) : null)))) : null];
+}
+function clubBoards() {
+  const ids = Object.keys(profiles), board = ids.map(u => [u, weekStats(u)]).sort((a, b) => b[1].mins - a[1].mins);
+  const now = new Date(), mname = now.toLocaleDateString("en-GB", { month: "long" }), GOAL = 600;
+  const monthMins = u => userActs(u).filter(a => a.type === "session" && new Date(a.at).getMonth() === now.getMonth() && new Date(a.at).getFullYear() === now.getFullYear()).reduce((x, a) => x + (a.mins || 0), 0);
+  return h("div", { class: "cards", style: { "margin-top": "22px" } },
+    h("section", { class: "card" }, h("h2", {}, "This week's leaderboard"), h("div", { class: "board" }, board.map(([u, w], i) => h("div", { class: "brow2" + (u === myUid() ? " me" : "") }, h("span", { class: "rank" }, i + 1), avatar(u, 30), h("span", { class: "bname" }, profiles[u].name), h("b", {}, fmtMin(w.mins)), h("small", { class: "faint" }, w.pages + " p"))))),
+    h("section", { class: "card" }, h("h2", {}, "📅 " + mname + " challenge"), h("div", { class: "muted" }, "Read for 10 hours this month."), ...ids.map(u => { const m = monthMins(u); return h("div", { class: "chal" }, h("span", {}, profiles[u].name + (m >= GOAL ? " ✅" : "")), h("div", { class: "bigprog" }, h("i", { style: { width: Math.min(100, m / GOAL * 100) + "%" } })), h("small", { class: "faint" }, fmtMin(m) + " / 10h")); })));
 }
 
 /* ---------- year in books ---------- */
@@ -1782,12 +1973,13 @@ async function importBackup(e) {
 function go(path) { if (location.hash.slice(1) === path) render(); else location.hash = path; }
 window.addEventListener("hashchange", render);
 (async () => {
-  try { DB = PREVIEW ? localAdapter("exlibris-preview-sandbox", true) : FIREBASE_CONFIG ? await firebaseAdapter(FIREBASE_CONFIG) : localAdapter(); }
+  try { DB = PREVIEW ? localAdapter("exlibris-preview-sandbox-2", true) : FIREBASE_CONFIG ? await firebaseAdapter(FIREBASE_CONFIG) : localAdapter(); }
   catch (e) { DB = localAdapter(); setTimeout(() => toast("Sync is unreachable, working on this phone only"), 500); }
   await DB.init();
   user = DB.user();
   DB.watchProfiles(p => { profiles = p; const me = myUid(); if (DB.mode === "local") Object.keys(p).forEach(watch); else if (me) watch(me); render(); });
   DB.watchSugs(s => { sugs = s; render(); });
+  DB.watchActs?.(a => { acts = a.sort((x, y) => (y.at || "").localeCompare(x.at || "")); if (!["record"].includes(ui.route)) render(); });
   setTimeout(() => { const u = myUid(); if (u && navigator.onLine) fetchNews(u); }, 4000);
   DB.onAuth(u => { const was = user?.uid; user = u; if (was !== u?.uid) { render(); } });
   render();
