@@ -688,7 +688,7 @@ ${glow ? `<circle cx="368" cy="470" r="${cur ? 120 : 80}" fill="url(#glow)"/>` :
  ${rows.map(y => `<rect x="230" y="${y + 84}" width="150" height="8" fill="#6B4A2B"/>`).join("")}
  ${spines}
  <rect x="222" y="22" width="166" height="10" rx="2" fill="#6B4A2B"/>
- ${label(305, 494, "Bookcase · " + S.all.length)}
+ ${label(305, 486, "Bookcase · " + S.all.length)}
 </g>
 
 <g class="obj" data-go="letters" role="button" tabindex="0" aria-label="${S.mine ? (S.mail ? S.mail + " new letters" : "Letters") : "Desk"}">
@@ -698,7 +698,7 @@ ${glow ? `<circle cx="368" cy="470" r="${cur ? 120 : 80}" fill="url(#glow)"/>` :
  <rect x="160" y="358" width="18" height="20" rx="4" fill="#2A221C"/><path d="M170 360 Q186 320 200 300" stroke="#F4EBD6" stroke-width="3" fill="none"/>
  ${letter}
  ${S.mine && S.mail ? `<g transform="translate(140 336)"><circle r="11" fill="#B8463E"/><text y="4" text-anchor="middle" font-size="11" font-weight="700" fill="#fff" font-family="Literata,serif">${S.mail}</text></g>` : ""}
- ${S.mine ? label(115, 510, S.mail ? "New letter" : "Letters") : ""}
+ ${S.mine ? label(115, 458, S.mail ? "New letter" : "Letters") : ""}
 </g>
 
 <g class="obj" data-go="lent" role="button" tabindex="0" aria-label="Lent books, ${S.lent.length}">
