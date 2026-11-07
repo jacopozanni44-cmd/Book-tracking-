@@ -549,7 +549,7 @@ function renderShelf(uid) {
   }
   const authors = new Set(all.filter(b => st(b) !== "wishlist").flatMap(b => arr(b.authors))).size;
   mount(
-    h("div", { class: "topbar" }, h("button", { class: "back", onclick: () => classic() ? go("/") : go(roomPath(uid)) }, backLabel()), h("button", { class: "back", onclick: () => closeTo("/") }, "Club ›")),
+    h("div", { class: "topbar" }, h("button", { class: "back", onclick: () => classic() ? go("/") : go(roomPath(uid)) }, backLabel()), classic() ? null : h("button", { class: "back", onclick: () => closeTo("/") }, "Club ›")),
     h("header", { class: "phead" }, h("div", { class: "sc faint" }, "the shelf of"), h("h1", {}, p.name), h("div", { class: "actions", style: { "justify-content": "center", "margin-top": "8px" } }, edit ? h("button", { class: "rename", type: "button", onclick: () => editShelf(uid) }, "✎ Edit shelf") : null, h("button", { class: "rename", type: "button", onclick: () => go("/year/" + encodeURIComponent(uid)) }, "◔ Year in books")),
       h("div", { class: "stats sc" }, counts.read + " read · " + counts.reading + " reading · " + counts.wishlist + " wished · " + authors + " authors")),
     h("div", { class: "fleuron" }, "❦"),
