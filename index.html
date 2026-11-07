@@ -386,7 +386,7 @@ function renderLibrary() {
       h("button", { class: "card", onclick: () => go("/letters") }, h("h2", {}, "Letters ", forMe ? h("span", { class: "badge" }, forMe) : null), h("div", { class: "muted" }, "Suggest books to each other and send the good ones straight to a wishlist.")),
       DB.mode === "local" ? h("div", { class: "card" }, h("h2", {}, "Backup"), h("div", { class: "muted" }, "This library lives only on this phone until sync is switched on. Save a backup now and then."),
         h("div", { class: "actions" }, h("button", { class: "btn", onclick: exportBackup }, "Save backup"), h("label", { class: "btn ghost" }, "Load backup", h("input", { type: "file", accept: ".json,application/json", hidden: true, onchange: importBackup })))) : null),
-    h("div", { class: "foot" }, h("div", { class: "faint", style: { "font-size": "12px", "margin-bottom": "4px" } }, "Version 7 Nov i"), DB.mode === "firebase" ? ["Signed in as ", mine ? mine.name : user.email, " · ", h("button", { onclick: () => DB.signOut() }, "Sign out")] : "Sync is not set up yet, so changes stay on this phone.")
+    h("div", { class: "foot" }, h("div", { class: "faint", style: { "font-size": "12px", "margin-bottom": "4px" } }, "Version 7 Nov j"), DB.mode === "firebase" ? ["Signed in as ", mine ? mine.name : user.email, " · ", h("button", { onclick: () => DB.signOut() }, "Sign out")] : "Sync is not set up yet, so changes stay on this phone.")
   );
 }
 
@@ -518,17 +518,22 @@ function addBook(uid, editId) {
   q.oninput = () => { clearTimeout(qt); const v = q.value.trim(); if (v.length < 3) { results.replaceChildren(); return; } qt = setTimeout(() => lookup(v), 400); };
   async function lookup(v) {
     const n = ++qn; results.replaceChildren(h("div", { class: "faint" }, "Searching"));
-    try {
-      const r = await fetch("https://openlibrary.org/search.json?" + new URLSearchParams({ q: v, limit: 6, fields: "title,author_name,first_publish_year,cover_i,subject" })).then(x => x.json());
-      if (n !== qn) return;
-      if (!r.docs?.length) { results.replaceChildren(h("div", { class: "faint" }, "Nothing found, fill it in by hand below.")); return; }
-      results.replaceChildren(...r.docs.map(d => h("button", { class: "result", type: "button", onclick: () => {
-        f.title.value = d.title || ""; f.authors.value = arr(d.author_name).slice(0, 2).join(", "); f.year.value = d.first_publish_year || "";
-        if (d.cover_i) cover = "https://covers.openlibrary.org/b/id/" + d.cover_i + "-M.jpg";
-        if (!f.genres.value && d.subject) { const known = new Set(Object.keys(shelf).flatMap(u => books(u).flatMap(b => arr(b.genres)))); const pick = d.subject.filter(s => known.has(s)).slice(0, 2); if (pick.length) f.genres.value = pick.join(", "); }
-        showCover(); results.replaceChildren(); q.value = ""; f.title.focus();
-      } }, d.cover_i ? h("img", { src: "https://covers.openlibrary.org/b/id/" + d.cover_i + "-S.jpg", alt: "" }) : h("span", { class: "noimg" }), h("div", {}, h("b", {}, d.title), h("small", {}, [arr(d.author_name)[0], d.first_publish_year].filter(Boolean).join(" · "))))));
-    } catch (e) { if (n === qn) results.replaceChildren(h("div", { class: "faint" }, "Search needs internet. Fill it in by hand below.")); }
+    const ol = fetch("https://openlibrary.org/search.json?" + new URLSearchParams({ q: v, limit: 5, fields: "title,author_name,first_publish_year,cover_i,subject" })).then(x => x.json())
+      .then(r => (r.docs || []).map(d => ({ title: d.title, authors: arr(d.author_name).slice(0, 2), year: d.first_publish_year || "", cover: d.cover_i ? "https://covers.openlibrary.org/b/id/" + d.cover_i + "-M.jpg" : "", thumb: d.cover_i ? "https://covers.openlibrary.org/b/id/" + d.cover_i + "-S.jpg" : "", subject: d.subject || [] }))).catch(() => []);
+    const gb = fetch("https://www.googleapis.com/books/v1/volumes?" + new URLSearchParams({ q: v, maxResults: 5, printType: "books" })).then(x => x.json())
+      .then(r => (r.items || []).map(i => i.volumeInfo).map(d => { const t = d.imageLinks?.thumbnail?.replace("http:", "https:").replace("&edge=curl", ""); return { title: d.title + (d.subtitle ? ": " + d.subtitle : ""), authors: arr(d.authors).slice(0, 2), year: parseInt(d.publishedDate, 10) || "", cover: t || "", thumb: d.imageLinks?.smallThumbnail?.replace("http:", "https:") || t || "", plot: d.description || "", subject: d.categories || [] }; })).catch(() => []);
+    const [A, B] = await Promise.all([ol, gb]);
+    if (n !== qn) return;
+    const seen = new Set(), list = [];
+    for (const d of [...A, ...B]) { const k = (d.title || "").toLowerCase().replace(/[^a-z0-9]/g, "").slice(0, 30) + "|" + (d.authors[0] || "").toLowerCase().split(" ").pop(); if (!d.title || seen.has(k)) continue; seen.add(k); list.push(d); }
+    if (!list.length) { results.replaceChildren(h("div", { class: "faint" }, "Nothing found, fill it in by hand below.")); return; }
+    results.replaceChildren(...list.slice(0, 8).map(d => h("button", { class: "result", type: "button", onclick: () => {
+      f.title.value = d.title || ""; f.authors.value = d.authors.join(", "); f.year.value = d.year || "";
+      if (d.cover && !String(cover).startsWith("data:")) cover = d.cover;
+      if (d.plot && !f.plot.value) f.plot.value = d.plot.slice(0, 900);
+      if (!f.genres.value && d.subject.length) { const known = new Set(Object.keys(shelf).flatMap(u => books(u).flatMap(b => arr(b.genres)))); const pick = d.subject.filter(s => known.has(s)).slice(0, 2); if (pick.length) f.genres.value = pick.join(", "); }
+      showCover(); results.replaceChildren(); q.value = ""; say("Filled in from " + d.title); f.title.focus();
+    } }, d.thumb ? h("img", { src: d.thumb, alt: "" }) : h("span", { class: "noimg" }), h("div", {}, h("b", {}, d.title), h("small", {}, [d.authors[0], d.year].filter(Boolean).join(" · "))))));
   }
   const pmsg = h("div", { class: "status", role: "status" }); const say = t => { pmsg.textContent = t; };
   const camIn = mode => { const i = h("input", { type: "file", accept: "image/*", hidden: true }); i.onchange = () => { const fl = i.files[0]; i.value = ""; if (fl) (mode === "scan" ? scan(fl) : photoCover(fl)); }; return i; };
@@ -537,6 +542,9 @@ function addBook(uid, editId) {
   const cropBox = h("div", { class: "cropwrap", hidden: true });
   async function photoCover(fl) {
     let im; try { im = await loadImg(fl); } catch (e) { say("Could not read that image."); return; }
+    // a barcode anywhere in the picture beats reading text
+    let isbnFound = false;
+    getBD().then(BD => new BD({ formats: ["ean_13", "upc_a", "ean_8"] }).detect(im)).then(c => { const isbn = pickIsbn(c); if (isbn) { isbnFound = true; cropBox.hidden = true; cropBox.replaceChildren(); byIsbn(isbn); } }).catch(() => {});
     const NW = im.naturalWidth, NH = im.naturalHeight;
     // frame in natural pixels, 2:3, starts as the largest that fits, centred
     let fh = Math.min(NH, NW * 1.5), fw = fh / 1.5, fx = (NW - fw) / 2, fy = (NH - fh) / 2;
@@ -558,7 +566,7 @@ function addBook(uid, editId) {
       c.getContext("2d").drawImage(im, fx, fy, fw, fh, 0, 0, 320, 480);
       let data = c.toDataURL("image/webp", 0.72); if (!data.startsWith("data:image/webp")) data = c.toDataURL("image/jpeg", 0.72);
       cover = data; showCover(); cropBox.hidden = true; cropBox.replaceChildren();
-      if (ocrOn.checked) readCover(im, fx, fy, fw, fh); else say("Cover set");
+      if (ocrOn.checked && !isbnFound) readCover(im, fx, fy, fw, fh); else if (!isbnFound) say("Cover set");
     };
     cropBox.replaceChildren(h("div", { class: "faint", style: { "font-size": "14px" } }, "Drag the frame over the cover, use the slider to resize it"), stage, h("label", { class: "field" }, "Frame size", size),
       h("label", { style: { display: "flex", gap: "8px", "align-items": "center", "font-size": "14px" } }, ocrOn, "Read title and author from the image"),
