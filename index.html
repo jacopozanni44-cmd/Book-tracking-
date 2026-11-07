@@ -480,6 +480,35 @@ function addBook(uid, editId) {
       } }, d.cover_i ? h("img", { src: "https://covers.openlibrary.org/b/id/" + d.cover_i + "-S.jpg", alt: "" }) : h("span", { class: "noimg" }), h("div", {}, h("b", {}, d.title), h("small", {}, [arr(d.author_name)[0], d.first_publish_year].filter(Boolean).join(" · "))))));
     } catch (e) { if (n === qn) results.replaceChildren(h("div", { class: "faint" }, "Search needs internet. Fill it in by hand below.")); }
   }
+  const camIn = mode => { const i = h("input", { type: "file", accept: "image/*", capture: "environment", hidden: true }); i.onchange = () => { const fl = i.files[0]; i.value = ""; if (fl) (mode === "scan" ? scan(fl) : photoCover(fl)); }; return i; };
+  const scanIn = camIn("scan"), photoIn = camIn("photo");
+  async function loadImg(fl) { const url = URL.createObjectURL(fl); const im = new Image(); im.src = url; await im.decode(); return im; }
+  async function photoCover(fl) {
+    try {
+      const im = await loadImg(fl), W = 320, H = 480, c = document.createElement("canvas"); c.width = W; c.height = H;
+      const r = Math.max(W / im.naturalWidth, H / im.naturalHeight), w = im.naturalWidth * r, hh = im.naturalHeight * r;
+      c.getContext("2d").drawImage(im, (W - w) / 2, (H - hh) / 2, w, hh);
+      let data = c.toDataURL("image/webp", 0.72); if (!data.startsWith("data:image/webp")) data = c.toDataURL("image/jpeg", 0.72);
+      cover = data; showCover(); msg.textContent = "Photo set as the cover";
+    } catch (e) { msg.textContent = "Could not read that photo."; }
+  }
+  async function scan(fl) {
+    msg.textContent = "Reading the barcode";
+    try {
+      let BD = window.BarcodeDetector;
+      if (!BD || !(await BD.getSupportedFormats?.() || []).includes("ean_13")) BD = (await import("https://cdn.jsdelivr.net/npm/barcode-detector@2.3.1/+esm")).BarcodeDetector;
+      const im = await loadImg(fl), codes = await new BD({ formats: ["ean_13", "upc_a"] }).detect(im);
+      const isbn = codes.map(c => c.rawValue).find(v => /^97[89]\d{10}$/.test(v)) || codes[0]?.rawValue;
+      if (!isbn) { msg.textContent = "No barcode found. Try closer, with good light, or type the title."; return; }
+      msg.textContent = "Looking up ISBN " + isbn;
+      const r = await fetch("https://openlibrary.org/search.json?" + new URLSearchParams({ isbn, limit: 1, fields: "title,author_name,first_publish_year,cover_i,subject" })).then(x => x.json());
+      const d = r.docs?.[0];
+      if (!d) { msg.textContent = "ISBN " + isbn + " is not in the online catalogue. Type the title and use Photo for the cover."; return; }
+      f.title.value = d.title || ""; f.authors.value = arr(d.author_name).slice(0, 2).join(", "); f.year.value = d.first_publish_year || "";
+      if (d.cover_i) cover = "https://covers.openlibrary.org/b/id/" + d.cover_i + "-M.jpg";
+      showCover(); msg.textContent = "Found it: " + d.title;
+    } catch (e) { msg.textContent = "Barcode reading needs internet. Type the title instead."; }
+  }
   const save = async e => {
     e.preventDefault();
     const title = f.title.value.trim(); if (!title) { msg.textContent = "Add a title."; return; }
@@ -498,6 +527,7 @@ function addBook(uid, editId) {
   const { close } = sheet(h("form", { onsubmit: save, style: { display: "flex", "flex-direction": "column", gap: "14px" } },
     h("h2", {}, editId ? "Edit book" : "Add a book"),
     editId ? null : h("label", { class: "field" }, "Find it online for cover and details", q), results,
+    h("div", { class: "actions" }, editId ? null : h("button", { class: "btn", type: "button", onclick: () => scanIn.click() }, "▥ Scan barcode"), h("button", { class: "btn", type: "button", onclick: () => photoIn.click() }, "📷 Photo for cover"), scanIn, photoIn),
     h("div", { style: { display: "flex", gap: "12px", "align-items": "flex-start" } }, preview, h("div", { style: { flex: "1", display: "flex", "flex-direction": "column", gap: "12px" } }, h("label", { class: "field" }, "Title", f.title), h("label", { class: "field" }, "Author (comma between several)", f.authors))),
     h("div", { class: "row" }, h("label", { class: "field" }, "Year", f.year), h("label", { class: "field" }, "Status", f.status)),
     h("label", { class: "field" }, "Genres (comma between several)", f.genres, gl),
