@@ -874,9 +874,9 @@ async function renderRoom3D(uid) {
   renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = night ? .95 : 1.15; renderer.outputColorSpace = THREE.SRGBColorSpace;
   box.replaceChildren(renderer.domElement);
   const scene = new THREE.Scene(); scene.background = new THREE.Color("#140B06"); scene.fog = new THREE.Fog("#140B06", 9, 16);
-  const cam = new THREE.PerspectiveCamera(52, W / H, .05, 40); cam.position.set(0, 1.55, 4.6);
+  const cam = new THREE.PerspectiveCamera(60, W / H, .05, 40); cam.position.set(0, 1.75, 5.6);
   const ctl = new OrbitControls(cam, renderer.domElement);
-  ctl.target.set(0, 1.25, -1); ctl.enableDamping = true; ctl.enablePan = false; ctl.minDistance = 1.6; ctl.maxDistance = 6.2;
+  ctl.target.set(0, 1.25, -1); ctl.enableDamping = true; ctl.enablePan = false; ctl.minDistance = 1.6; ctl.maxDistance = 7;
   ctl.minPolarAngle = 1.05; ctl.maxPolarAngle = 1.72; ctl.minAzimuthAngle = -.75; ctl.maxAzimuthAngle = .75; ctl.rotateSpeed = .55;
 
   const tex = (w, hh, draw) => { const cv = document.createElement("canvas"); cv.width = w; cv.height = hh; draw(cv.getContext("2d"), w, hh); const t = new THREE.CanvasTexture(cv); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4; return t; };
@@ -894,7 +894,7 @@ async function renderRoom3D(uid) {
       const x0 = (w - tw) / 2; g.beginPath(); g.roundRect(x0, 14, tw, 68, 34); g.fill(); g.stroke(); g.fillStyle = "#F4EBD6"; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText(text, w / 2, 50);
     });
     const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex === null ? null : t, depthTest: false, transparent: true }));
-    sp.scale.set(badge ? .16 : .8, badge ? .16 : .15, 1); sp.position.set(x, y, z); sp.renderOrder = 10; parent.add(sp); return sp;
+    sp.scale.set(badge ? .3 : 1.7, badge ? .3 : .32, 1); sp.position.set(x, y, z); sp.renderOrder = 10; parent.add(sp); return sp;
   };
 
   // room shell
@@ -926,7 +926,7 @@ async function renderRoom3D(uid) {
   pos.forEach(([x, y, z, w, hh, d, cl, lean], i) => { q.setFromEuler(new THREE.Euler(0, 0, lean ? .22 : 0)); m4.compose(new THREE.Vector3(x, y - (lean ? .01 : 0), z), q, new THREE.Vector3(w, hh, d)); im.setMatrixAt(i, m4); im.setColorAt(i, col.set(cl)); });
   const shelfG = group("shelf", 0, 0, 0); shelfG.add(im);
   const hit = new THREE.Mesh(B(8.8, 3.1, .3), new THREE.MeshBasicMaterial({ visible: false })); hit.position.set(0, 1.55, -2.6); shelfG.add(hit);
-  sprite("Bookcase · " + total, 2.9, 3.05, -2.4, shelfG);
+  sprite("Bookcase · " + total, 2.6, 2.95, -2.3, shelfG);
   // shelf glow
   [[-2.9, 2.2], [2.9, 2.2], [-2.9, 1.1], [2.9, 1.1]].forEach(([x, y]) => { const l = new THREE.PointLight("#FFD27A", night ? 1.3 : .8, 2.6, 2); l.position.set(x, y, -2.2); scene.add(l); });
 
@@ -942,7 +942,7 @@ async function renderRoom3D(uid) {
   add(B(.36, .008, .24), mat(S.mail ? "#F1E6CC" : "#FFFDF6"), 0, 0, 0, env);
   if (mine && S.mail) { const seal = add(new THREE.CylinderGeometry(.035, .035, .012, 20), mat("#8E1F1A", { roughness: .35 }), 0, .01, .02, env); sprite(String(S.mail), .2, .2, 0, env, true); }
   else if (mine) { const pg = add(B(.28, .004, .3), mat("#FFFDF6"), .02, .012, -.08, env); pg.rotation.x = -.5; }
-  if (mine) sprite(S.mail ? "New letter" : "Letters", 0, 1.2, .45, desk);
+  if (mine) sprite(S.mail ? "New letter" : "Letters", -.5, 1.12, .45, desk);
   const lampG = new THREE.Group(); lampG.position.set(.85, .82, -.1); desk.add(lampG);
   add(new THREE.CylinderGeometry(.07, .08, .03, 20), brass, 0, .015, 0, lampG); add(new THREE.CylinderGeometry(.01, .01, .35, 8), brass, 0, .19, 0, lampG);
   const shade = add(new THREE.CylinderGeometry(.06, .16, .1, 20, 1, true, 0, Math.PI), mat("#2F5A3A", { side: THREE.DoubleSide, roughness: .3, emissive: "#1A3A22", emissiveIntensity: .4 }), 0, .38, 0, lampG); shade.rotation.set(0, Math.PI / 2, Math.PI / 2);
@@ -950,16 +950,16 @@ async function renderRoom3D(uid) {
   const yearG = group("year", .35, .82, -2.15);
   const calT = tex(256, 256, (g, w) => { g.fillStyle = "#FFFDF6"; g.fillRect(0, 0, w, w); g.fillStyle = "#8E1F1A"; g.fillRect(0, 0, w, 64); g.fillStyle = "#fff"; g.font = "bold 44px Georgia"; g.textAlign = "center"; g.fillText(String(S.Y), w / 2, 48); g.fillStyle = "#2A221C"; g.font = "bold 96px Georgia"; g.fillText(S.fin + (S.goal ? "/" + S.goal : ""), w / 2, 170); if (S.goal) { g.fillStyle = "#E2D6BC"; g.fillRect(40, 200, 176, 16); g.fillStyle = "#8E1F1A"; g.fillRect(40, 200, 176 * Math.min(1, S.fin / S.goal), 16); } });
   const cal = add(B(.26, .26, .02), mat("#fff", { map: calT }), 0, .13, 0, yearG); cal.rotation.x = -.25;
-  sprite("Year", 0, .42, 0, yearG);
+  sprite("Year", .35, .5, .1, yearG);
   const portG = group("profile", 0, 1.55, -2.97);
   add(B(.62, .78, .04), brass, 0, 0, 0, portG);
   const porT = tex(256, 320, (g, w, hh) => { g.fillStyle = c; g.fillRect(0, 0, w, hh); const gr = g.createLinearGradient(0, 0, 0, hh); gr.addColorStop(0, "rgba(255,255,255,.15)"); gr.addColorStop(1, "rgba(0,0,0,.35)"); g.fillStyle = gr; g.fillRect(0, 0, w, hh); g.fillStyle = "#F1D99A"; g.font = "bold 170px Georgia"; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText((p.name || "?")[0].toUpperCase(), w / 2, hh / 2 + 10); });
   add(B(.52, .68, .01), mat("#fff", { map: porT }), 0, 0, .025, portG);
-  sprite(mine ? "You" : p.name, 0, -.52, .1, portG);
+  sprite(mine ? "You" : p.name, 0, .58, .1, portG);
   [-.75, .75].forEach(x => { add(B(.04, .14, .04), brass, x, 1.62, -2.95); const sl = new THREE.PointLight("#FFD9A0", night ? .9 : .5, 1.6, 2); sl.position.set(x, 1.75, -2.8); scene.add(sl); add(new THREE.CylinderGeometry(.05, .07, .1, 16), mat("#F3E3B5", { emissive: "#FFD9A0", emissiveIntensity: 1.2 }), x, 1.75, -2.9); });
 
   // chesterfield sofa with the newspaper
-  const sofa = group("news", -1.7, 0, .5, .35);
+  const sofa = group("news", -1.2, 0, .6, .5);
   const sm = leather(c);
   add(new RoundedBoxGeometry(2.1, .42, .9, 4, .08), sm, 0, .38, 0, sofa);
   add(new RoundedBoxGeometry(2.3, .55, .22, 4, .08), sm, 0, .78, -.38, sofa);
@@ -970,7 +970,7 @@ async function renderRoom3D(uid) {
 
   // wingback armchair with floor lamp
   const cur = S.reading[0];
-  const arm = group("reading", 1.75, 0, .55, -.45);
+  const arm = group("reading", 1.25, 0, .65, -.6);
   const am = leather("#6E3420");
   add(new RoundedBoxGeometry(.95, .4, .85, 4, .08), am, 0, .36, 0, arm);
   add(new RoundedBoxGeometry(.95, 1.05, .2, 4, .09), am, 0, .9, -.38, arm);
@@ -978,7 +978,7 @@ async function renderRoom3D(uid) {
   [-.4, .4].forEach(x => [-.35, .35].forEach(z => add(new THREE.CylinderGeometry(.03, .025, .16, 10), walnutDark, x, .08, z, arm)));
   if (cur) { const bk = new THREE.Group(); bk.position.set(0, .58, .1); bk.rotation.x = -.15; arm.add(bk); [-1, 1].forEach(sd => { const pg = add(B(.17, .012, .24), mat("#FFFBF0"), sd * .088, 0, 0, bk); pg.rotation.z = -sd * .12; }); }
   sprite(cur ? (cur.title.length > 18 ? cur.title.slice(0, 17) + "…" : cur.title) : "Armchair", 0, 1.65, 0, arm);
-  const fl = new THREE.Group(); fl.position.set(2.65, 0, .1); scene.add(fl);
+  const fl = new THREE.Group(); fl.position.set(2.05, 0, .05); scene.add(fl);
   add(new THREE.CylinderGeometry(.14, .16, .03, 20), brass, 0, .015, 0, fl); add(new THREE.CylinderGeometry(.015, .015, 1.55, 8), brass, 0, .8, 0, fl);
   add(new THREE.CylinderGeometry(.15, .24, .26, 20, 1, true), mat(cur ? "#F7DE9A" : "#CDBA8E", { side: THREE.DoubleSide, emissive: cur ? "#FFD27A" : "#000", emissiveIntensity: cur ? .9 : 0 }), 0, 1.62, 0, fl);
   if (cur) { const ll = new THREE.PointLight("#FFD08A", night ? 3 : 2, 4, 2); ll.position.set(0, 1.5, 0); ll.castShadow = true; ll.shadow.mapSize.set(512, 512); fl.add(ll); }
