@@ -427,7 +427,27 @@ const meUid = () => user?.uid || null;
 const canEdit = uid => DB.mode === "local" || uid === meUid();
 const nameOf = uid => profiles[uid]?.name || "Someone";
 function books(uid) { return Object.entries(shelf[uid] || {}).map(([id, d]) => ({ id, ...d })); }
-function watch(uid) { if (unsub[uid] !== undefined) return; unsub[uid] = null; let sync = true; const u = DB.watchBooks(uid, o => { shelf[uid] = o; if (!sync) render(); }); sync = false; if (shelf[uid]) queueMicrotask(render); unsub[uid] = u || null; }
+let sumT = null;
+function shelfSummary(uid) {
+  const all = books(uid), cnt = { read: 0, reading: 0, wish: 0 }, fy = {};
+  all.forEach(b => { const st = stOf(b); cnt[st === "wishlist" ? "wish" : st]++; if (st === "read" && b.finished) { const y = b.finished.slice(0, 4); fy[y] = (fy[y] || 0) + 1; } });
+  const cur = all.filter(b => stOf(b) === "reading").sort((a, b) => (b.started || "").localeCompare(a.started || ""))[0];
+  return { n: cnt.read + cnt.reading, ...cnt, fy, cur: cur ? { id: cur.id, title: cur.title } : null, t: all.map(b => norm(b.title) + "|" + ({ read: "r", reading: "g", wishlist: "w" })[stOf(b)] + (b.rating || "")).filter(x => x.length > 3).sort() };
+}
+function syncSummary(uid) {
+  clearTimeout(sumT);
+  sumT = setTimeout(() => { if (!profiles[uid] || !canEdit(uid) || !shelf[uid]) return; const sum = shelfSummary(uid); if (JSON.stringify(sum) === JSON.stringify(profiles[uid].sum)) return; DB.saveProfile(uid, { sum }).catch(() => {}); }, 1500);
+}
+// what we know about someone's shelf without loading it: their full books if loaded, otherwise the digest
+function shelfCount(uid) { return shelf[uid] ? books(uid).filter(b => stOf(b) !== "wishlist").length : profiles[uid]?.sum?.n; }
+function hasTitle(uid, title) {
+  const k = norm(title);
+  if (shelf[uid]) { const o = books(uid).find(x => norm(x.title) === k); return o ? { st: stOf(o), rating: o.rating || 0 } : null; }
+  const hit = arr(profiles[uid]?.sum?.t).find(x => x.split("|")[0] === k); if (!hit) return null;
+  const code = hit.split("|")[1]; return { st: code[0] === "w" ? "wishlist" : code[0] === "g" ? "reading" : "read", rating: +code.slice(1) || 0 };
+}
+function finishedCount(uid, Y) { return shelf[uid] ? finishedIn(uid, Y).length : (profiles[uid]?.sum?.fy?.[Y] || 0); }
+function watch(uid) { if (unsub[uid] !== undefined) return; unsub[uid] = null; let sync = true; const u = DB.watchBooks(uid, o => { shelf[uid] = o; if (uid === myUid()) syncSummary(uid); if (!sync) render(); }); sync = false; if (shelf[uid]) queueMicrotask(render); unsub[uid] = u || null; }
 
 /* ---------- seed merge: books Claude adds to data.json ---------- */
 async function mergeSeed(uid) {
@@ -488,9 +508,9 @@ function renderLibrary() {
   const list = Object.entries(profiles).sort((a, b) => (a[1].created || 0) - (b[1].created || 0));
   const heights = [230, 210, 240, 200, 225, 215];
   const spines = list.map(([uid, p], i) => {
-    watch(uid); const n = Object.values(shelf[uid] || {}).filter(b => b.status !== "wishlist").length;
+    const n = shelfCount(uid);
     return h("button", { class: "spine", style: { "--c": p.color || LEATHER[0], height: heights[i % heights.length] + "px" }, "aria-label": "Open " + p.name + "'s shelf", onclick: () => openShelf(uid) },
-      h("div", { class: "band" }), h("div", { class: "band" }), h("div", { class: "name" }, p.name), h("div", { class: "num" }, shelf[uid] ? n : "·"), h("div", { class: "band" }));
+      h("div", { class: "band" }), h("div", { class: "band" }), h("div", { class: "name" }, p.name), h("div", { class: "num" }, n ?? "·"), h("div", { class: "band" }));
   });
   spines.push(h("button", { class: "spine add", style: { height: "180px" }, "aria-label": "Add a reader", onclick: () => go("/new") }, h("div", { class: "name" }, "+ Add a reader")));
   const forMe = sugs.filter(s => DB.mode === "local" ? true : s.to === meUid()).length;
@@ -638,7 +658,7 @@ function openBook(uid, id) {
     } else if (b.started || b.finished) parts.push(h("div", { class: "meta" }, [b.started ? "Started " + fmtDate(b.started) : "", b.finished ? "Finished " + fmtDate(b.finished) : ""].filter(Boolean).join(" · ")));
   }
   // who else has it
-  const k = norm(b.title), others = Object.entries(profiles).filter(([u]) => u !== uid).map(([u, p]) => { const o = books(u).find(x => norm(x.title) === k); return o ? p.name + (stOf(o) === "wishlist" ? " wants it" : stOf(o) === "reading" ? " is reading it" : " has read it" + (o.rating ? " " + "★".repeat(o.rating) : "")) : null; }).filter(Boolean);
+  const others = Object.entries(profiles).filter(([u]) => u !== uid).map(([u, p]) => { const o = hasTitle(u, b.title); return o ? p.name + (o.st === "wishlist" ? " wants it" : o.st === "reading" ? " is reading it" : " has read it" + (o.rating ? " " + "★".repeat(o.rating) : "")) : null; }).filter(Boolean);
   const alsoEl = others.length ? h("div", { class: "also" }, "👥 " + others.join(" · ")) : null;
   // quotes
   const quotes = arr(b.quotes).slice(), qlist = h("div", { class: "quotes" });
@@ -944,6 +964,7 @@ async function renderRoom3D(uid) {
   const p = profiles[uid]; if (!p) { if (Object.keys(profiles).length) go("/"); return; }
   watch(uid);
   if ($app.dataset.view === "room3d:" + uid && $app.querySelector(".room3d canvas")) return;
+  if (!shelf[uid]) { ui.route = "room3d-wait"; $app.dataset.view = "room3d-wait"; mount(h("div", { class: "r3full" }, h("div", { class: "room3d" }, h("div", { class: "r3msg" }, "Opening " + (uid === myUid() ? "your" : p.name + "'s") + " room…")))); return; }
   if (!webglOK()) { location.replace("#/room/" + encodeURIComponent(uid)); return; }
   ui.route = "room3d:" + uid; $app.dataset.view = ui.route;
   const S = roomState(uid), mine = S.mine, cfg = roomCfg(uid);
@@ -1360,7 +1381,7 @@ function renderYear(uid) {
   const undated = books(uid).filter(b => stOf(b) === "read" && !b.finished).length;
   const bars = (rows) => h("div", { class: "hbars" }, rows.map(([k, n]) => h("div", { class: "hbar" }, h("span", {}, k), h("b", { style: { width: Math.max(8, n / rows[0][1] * 100) + "%", "--c": color } }, n))));
   const goalIn = h("input", { type: "number", min: "1", inputmode: "numeric", value: goal || "", placeholder: "24", style: { width: "90px" } });
-  const board = Object.entries(profiles).map(([u, q]) => [q.name, finishedIn(u, Y).length]).sort((a, b) => b[1] - a[1]);
+  const board = Object.entries(profiles).map(([u, q]) => [q.name, finishedCount(u, Y)]).sort((a, b) => b[1] - a[1]);
   mount(
     h("div", { class: "topbar" }, h("button", { class: "back", onclick: () => classic() ? go("/") : go(roomPath(uid)) }, backLabel()), h("div", { class: "ribbon", style: { "--c": color } })),
     h("header", { class: "phead" }, h("div", { class: "sc faint" }, p.name + "'s year in books"),
@@ -1640,7 +1661,7 @@ function renderLetters() {
     try { await DB.addSug({ from, to, title: t.value.trim(), author: a.value.trim(), why: w.value.trim(), at: today() }); t.value = a.value = w.value = ""; msg.textContent = "Sent to " + nameOf(to); } catch (err) { msg.textContent = "Could not send: " + (err.code || err.message); }
   };
   const letter = (s, incoming) => {
-    const onShelf = Object.values(shelf[s.to] || {}).some(b => (b.title || "").toLowerCase() === (s.title || "").toLowerCase());
+    const onShelf = !!hasTitle(s.to, s.title);
     const acts = h("div", { class: "actions" });
     if (incoming && canEdit(s.to)) acts.append(h("button", { class: "btn primary", disabled: onShelf, onclick: async () => {
       watch(s.to);
@@ -1765,7 +1786,7 @@ window.addEventListener("hashchange", render);
   catch (e) { DB = localAdapter(); setTimeout(() => toast("Sync is unreachable, working on this phone only"), 500); }
   await DB.init();
   user = DB.user();
-  DB.watchProfiles(p => { profiles = p; Object.keys(p).forEach(watch); render(); });
+  DB.watchProfiles(p => { profiles = p; const me = myUid(); if (DB.mode === "local") Object.keys(p).forEach(watch); else if (me) watch(me); render(); });
   DB.watchSugs(s => { sugs = s; render(); });
   setTimeout(() => { const u = myUid(); if (u && navigator.onLine) fetchNews(u); }, 4000);
   DB.onAuth(u => { const was = user?.uid; user = u; if (was !== u?.uid) { render(); } });
