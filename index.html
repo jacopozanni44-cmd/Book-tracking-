@@ -156,6 +156,11 @@ button.card:hover{border-color:var(--ink-3)}
 .result{display:flex;gap:10px;align-items:center;border:1px solid var(--edge);background:var(--paper-2);border-radius:8px;padding:6px;text-align:left}
 .result img,.result .noimg{width:38px;height:56px;object-fit:cover;border-radius:2px;background:var(--paper-3);flex:0 0 38px}
 .result div{min-width:0}.result b{display:block;font-weight:600;font-size:15px}.result small{color:var(--ink-3)}
+.cropwrap{display:flex;flex-direction:column;gap:10px;padding:12px;border:1px solid var(--edge);border-radius:10px;background:var(--paper-2)}
+.cropstage{position:relative;touch-action:none;user-select:none;line-height:0;align-self:center;max-width:100%}
+.cropimg{display:block;max-width:100%;max-height:52vh;width:auto;height:auto}
+.cropframe{position:absolute;border:2px solid #fff;box-shadow:0 0 0 9999px rgba(0,0,0,.5),inset 0 0 0 1px rgba(0,0,0,.4);cursor:move;touch-action:none}
+.cropstage{overflow:hidden;border-radius:6px}
 .swatches{display:flex;gap:10px;flex-wrap:wrap}
 .swatch{width:40px;height:56px;border-radius:3px;border:0;background:var(--c);box-shadow:inset 0 0 0 1px rgba(0,0,0,.2)}
 .swatch[aria-pressed="true"]{outline:3px solid var(--ink);outline-offset:2px}
@@ -495,17 +500,56 @@ function addBook(uid, editId) {
       } }, d.cover_i ? h("img", { src: "https://covers.openlibrary.org/b/id/" + d.cover_i + "-S.jpg", alt: "" }) : h("span", { class: "noimg" }), h("div", {}, h("b", {}, d.title), h("small", {}, [arr(d.author_name)[0], d.first_publish_year].filter(Boolean).join(" · "))))));
     } catch (e) { if (n === qn) results.replaceChildren(h("div", { class: "faint" }, "Search needs internet. Fill it in by hand below.")); }
   }
-  const camIn = mode => { const i = h("input", { type: "file", accept: "image/*", capture: "environment", hidden: true }); i.onchange = () => { const fl = i.files[0]; i.value = ""; if (fl) (mode === "scan" ? scan(fl) : photoCover(fl)); }; return i; };
+  const camIn = mode => { const i = h("input", { type: "file", accept: "image/*", hidden: true }); i.onchange = () => { const fl = i.files[0]; i.value = ""; if (fl) (mode === "scan" ? scan(fl) : photoCover(fl)); }; return i; };
   const scanIn = camIn("scan"), photoIn = camIn("photo");
   async function loadImg(fl) { const url = URL.createObjectURL(fl); const im = new Image(); im.src = url; await im.decode(); return im; }
+  const cropBox = h("div", { class: "cropwrap", hidden: true });
   async function photoCover(fl) {
-    try {
-      const im = await loadImg(fl), W = 320, H = 480, c = document.createElement("canvas"); c.width = W; c.height = H;
-      const r = Math.max(W / im.naturalWidth, H / im.naturalHeight), w = im.naturalWidth * r, hh = im.naturalHeight * r;
-      c.getContext("2d").drawImage(im, (W - w) / 2, (H - hh) / 2, w, hh);
+    let im; try { im = await loadImg(fl); } catch (e) { msg.textContent = "Could not read that image."; return; }
+    const NW = im.naturalWidth, NH = im.naturalHeight;
+    // frame in natural pixels, 2:3, starts as the largest that fits, centred
+    let fh = Math.min(NH, NW * 1.5), fw = fh / 1.5, fx = (NW - fw) / 2, fy = (NH - fh) / 2;
+    const frame = h("div", { class: "cropframe" }), stage = h("div", { class: "cropstage" }, im, frame);
+    im.className = "cropimg"; im.alt = "Picked image";
+    const maxH = Math.min(NH, NW * 1.5);
+    const size = h("input", { type: "range", min: "15", max: "100", value: "100", "aria-label": "Frame size" });
+    const draw = () => { const k = stage.clientWidth / NW; Object.assign(frame.style, { left: fx * k + "px", top: fy * k + "px", width: fw * k + "px", height: fh * k + "px" }); };
+    const clamp = () => { fx = Math.max(0, Math.min(NW - fw, fx)); fy = Math.max(0, Math.min(NH - fh, fy)); };
+    size.oninput = () => { const cx = fx + fw / 2, cy = fy + fh / 2; fh = maxH * size.value / 100; fw = fh / 1.5; fx = cx - fw / 2; fy = cy - fh / 2; clamp(); draw(); };
+    let drag = null;
+    frame.addEventListener("pointerdown", e => { drag = { x: e.clientX, y: e.clientY, fx, fy }; frame.setPointerCapture(e.pointerId); e.preventDefault(); });
+    frame.addEventListener("pointermove", e => { if (!drag) return; const k = stage.clientWidth / NW; fx = drag.fx + (e.clientX - drag.x) / k; fy = drag.fy + (e.clientY - drag.y) / k; clamp(); draw(); });
+    frame.addEventListener("pointerup", () => drag = null);
+    const ocrOn = h("input", { type: "checkbox", checked: !editId });
+    const use = h("button", { class: "btn primary", type: "button" }, "Use as cover");
+    use.onclick = async () => {
+      const c = document.createElement("canvas"); c.width = 320; c.height = 480;
+      c.getContext("2d").drawImage(im, fx, fy, fw, fh, 0, 0, 320, 480);
       let data = c.toDataURL("image/webp", 0.72); if (!data.startsWith("data:image/webp")) data = c.toDataURL("image/jpeg", 0.72);
-      cover = data; showCover(); msg.textContent = "Photo set as the cover";
-    } catch (e) { msg.textContent = "Could not read that photo."; }
+      cover = data; showCover(); cropBox.hidden = true; cropBox.replaceChildren();
+      if (ocrOn.checked) readCover(im, fx, fy, fw, fh); else msg.textContent = "Cover set";
+    };
+    cropBox.replaceChildren(h("div", { class: "faint", style: { "font-size": "14px" } }, "Drag the frame over the cover, use the slider to resize it"), stage, h("label", { class: "field" }, "Frame size", size),
+      h("label", { style: { display: "flex", gap: "8px", "align-items": "center", "font-size": "14px" } }, ocrOn, "Read title and author from the image"),
+      h("div", { class: "actions" }, use, h("button", { class: "btn ghost", type: "button", onclick: () => { cropBox.hidden = true; cropBox.replaceChildren(); } }, "Cancel")));
+    cropBox.hidden = false; requestAnimationFrame(draw); im.onload = draw; new ResizeObserver(draw).observe(stage);
+    cropBox.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+  async function readCover(im, sx, sy, sw, sh) {
+    msg.textContent = "Reading the cover, this takes a few seconds the first time";
+    try {
+      if (!window.Tesseract) await new Promise((ok, ko) => document.head.append(h("script", { src: "https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js", onload: ok, onerror: ko })));
+      const c = document.createElement("canvas"), H = 1200, W = 800; c.width = W; c.height = H;
+      const g = c.getContext("2d"); g.filter = "grayscale(1) contrast(1.4)"; g.drawImage(im, sx, sy, sw, sh, 0, 0, W, H);
+      const w = await Tesseract.createWorker("eng+ita");
+      const { data } = await w.recognize(c); await w.terminate();
+      const lines = (data.lines || []).filter(l => l.confidence > 45).map(l => l.text.replace(/[^\p{L}\p{N}'’ .,:&-]/gu, " ").replace(/\s+/g, " ").trim()).filter(t => t.replace(/[^\p{L}]/gu, "").length >= 3);
+      if (!lines.length) { msg.textContent = "Could not read any text. Type the title above."; return; }
+      const guess = lines.slice(0, 4).join(" ").slice(0, 90);
+      q.value = guess; msg.textContent = "Read: \u201C" + guess + "\u201D. Pick the right book below, or fix the words in the search box.";
+      await lookup(guess); q.scrollIntoView({ behavior: "smooth", block: "start" });
+      if (!f.title.value) f.title.value = lines[0];
+    } catch (e) { msg.textContent = "Reading text needs internet. Type the title above."; }
   }
   async function scan(fl) {
     msg.textContent = "Reading the barcode";
@@ -542,7 +586,7 @@ function addBook(uid, editId) {
   const { close } = sheet(h("form", { onsubmit: save, style: { display: "flex", "flex-direction": "column", gap: "14px" } },
     h("h2", {}, editId ? "Edit book" : "Add a book"),
     editId ? null : h("label", { class: "field" }, "Find it online for cover and details", q), results,
-    h("div", { class: "actions" }, editId ? null : h("button", { class: "btn", type: "button", onclick: () => scanIn.click() }, "▥ Scan barcode"), h("button", { class: "btn", type: "button", onclick: () => photoIn.click() }, "📷 Photo for cover"), scanIn, photoIn),
+    h("div", { class: "actions" }, editId ? null : h("button", { class: "btn", type: "button", onclick: () => scanIn.click() }, "▥ Scan barcode"), h("button", { class: "btn", type: "button", onclick: () => photoIn.click() }, "📷 Photo or screenshot"), scanIn, photoIn), cropBox,
     h("div", { style: { display: "flex", gap: "12px", "align-items": "flex-start" } }, preview, h("div", { style: { flex: "1", display: "flex", "flex-direction": "column", gap: "12px" } }, h("label", { class: "field" }, "Title", f.title), h("label", { class: "field" }, "Author (comma between several)", f.authors))),
     h("div", { class: "row" }, h("label", { class: "field" }, "Year", f.year), h("label", { class: "field" }, "Status", f.status)),
     h("label", { class: "field" }, "Genres (comma between several)", f.genres, gl),
