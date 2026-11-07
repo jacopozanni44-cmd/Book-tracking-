@@ -240,6 +240,29 @@ body{overscroll-behavior-y:contain}
 .r3btn.wide{font-size:15px;padding:0 18px}
 .r3btn[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
 .room3d.decoon{height:min(46vh,520px)}
+body.full3d{overflow:hidden}
+body.full3d #pvbar{display:none}
+body.full3d #app{padding:0;max-width:none}
+.r3full{position:fixed;inset:0;z-index:25;background:#2A1C12}
+.r3full .room3d{position:absolute;inset:0;height:auto;max-width:none;margin:0;border-radius:0;box-shadow:none}
+.r3full.decoon .room3d{bottom:46vh}
+.r3top{position:absolute;left:0;right:0;top:0;padding:calc(env(safe-area-inset-top) + 10px) 12px 10px;display:flex;align-items:center;justify-content:space-between;gap:10px;background:linear-gradient(rgba(20,12,6,.65),rgba(20,12,6,0));pointer-events:none}
+.r3top>*{pointer-events:auto}
+.r3title{font-family:var(--display);font-size:22px;color:#F4EBD6;text-shadow:0 1px 4px #000}
+.r3pill{border:1px solid rgba(230,198,122,.5);background:rgba(26,16,9,.7);color:#F4EBD6;border-radius:20px;padding:8px 14px;font-family:var(--display);font-size:17px;backdrop-filter:blur(6px)}
+.r3menu{position:relative}.r3menu summary{list-style:none;cursor:pointer;width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1px solid rgba(230,198,122,.5);background:rgba(26,16,9,.7);color:#F4EBD6;font-size:20px}
+.r3menu summary::-webkit-details-marker{display:none}
+.r3menu button{position:absolute;right:0;top:46px;white-space:nowrap;border:1px solid var(--edge);background:var(--paper);color:var(--ink);border-radius:10px;padding:10px 14px;box-shadow:var(--shadow)}
+.r3bottom{position:absolute;left:0;right:0;bottom:0;padding:10px 10px calc(env(safe-area-inset-bottom) + 12px);display:flex;flex-direction:column;align-items:center;gap:8px;background:linear-gradient(rgba(20,12,6,0),rgba(20,12,6,.6));pointer-events:none}
+.r3bottom>*{pointer-events:auto}
+.r3full .r3bar{margin:0}
+.r3full .r3btn{background:rgba(26,16,9,.72);color:#F4EBD6;border-color:rgba(230,198,122,.5);backdrop-filter:blur(6px)}
+.r3full .r3btn[aria-pressed="true"]{background:#E6C67A;color:#1A1009}
+.r3tag{display:block;font:600 10px Literata,serif;letter-spacing:.12em;text-transform:uppercase;color:#E6C67A;text-align:center}
+.r3hint{color:#F4EBD6;font-style:italic;font-size:14px;text-align:center;text-shadow:0 1px 3px #000;transition:opacity .6s}.r3hint.gone{opacity:0}
+.r3full .deco{width:100%;flex:1;min-height:0;max-height:none;margin:0;background:var(--paper);box-shadow:0 -6px 20px rgba(0,0,0,.3)}
+.r3full.decoon .r3bottom{background:var(--paper);top:auto;height:46vh;justify-content:flex-start;padding-top:10px}
+.r3full.decoon .r3btn{background:var(--paper-2);color:var(--ink);border-color:var(--edge)}
 .deco{max-height:34vh;overflow:auto;max-width:560px;margin:10px auto 0;border:1px solid var(--edge);background:var(--paper-2);border-radius:12px;padding:12px 14px}
 .decorow{margin:8px 0}.decoopts{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
 .dswatch{width:34px;height:34px;border-radius:50%;border:2px solid var(--paper);background:var(--c);box-shadow:0 0 0 1px var(--edge)}
@@ -425,6 +448,7 @@ function turn({ color, kicker, name, paper, opening }) {
 /* ---------- views ---------- */
 function render() {
   const r = location.hash.slice(1) || "/";
+  document.body.classList.toggle("full3d", r.startsWith("/room3d/") && !lsGet("cc-room2d", false));
   if (DB.mode === "firebase" && !user) return renderAuth();
   if (user && DB.mode === "firebase" && !profiles[user.uid] && !r.startsWith("/new")) { if ($app.dataset.view === "new") return; return renderNewProfile(true); }
   if (r.startsWith("/new") && $app.dataset.view === "new" && ui.creating) return;
@@ -903,12 +927,13 @@ async function renderRoom3D(uid) {
   const zIn = h("button", { class: "r3btn", type: "button", "aria-label": "Zoom in" }, "+"), zOut = h("button", { class: "r3btn", type: "button", "aria-label": "Zoom out" }, "−");
   const decoBtn = mine ? h("button", { class: "r3btn wide", type: "button", "aria-pressed": R3.deco ? "true" : "false", onclick: () => { R3.deco = !R3.deco; if (!R3.deco) R3.draft = null; rebuildRoom(); } }, "🎨 Decorate") : null;
   const bar = h("div", { class: "r3bar" }, zOut, rotL, modeBtn, rotR, zIn, decoBtn);
-  mount(
-    h("div", { class: "topbar" }, h("button", { class: "back", onclick: () => closeTo("/") }, "‹ Club"), h("div", { class: "sc faint" }, mine ? "your room" : p.name + "'s room")),
-    box, bar, mine && R3.deco ? decoPanel(uid) : null,
-    h("p", { class: "faint roomhint" }, (mine && S.mail ? "A sealed letter is waiting on your desk. " : "") + "Drag to turn the room, pinch to zoom, tap an object to open it."),
-    h("p", { class: "roomhint" }, h("button", { class: "rename", type: "button", onclick: () => { lsSet("cc-room2d", true); go("/room/" + encodeURIComponent(uid)); } }, "Use the illustrated room instead"))
-  );
+  const hint = h("div", { class: "r3hint" }, (mine && S.mail ? "A sealed letter is waiting on your desk. " : "") + "Drag to turn, pinch to zoom, tap to open.");
+  setTimeout(() => hint.classList.add("gone"), 5000);
+  const menu = h("details", { class: "r3menu" }, h("summary", { "aria-label": "More" }, "⋯"), h("button", { type: "button", onclick: () => { lsSet("cc-room2d", true); go("/room/" + encodeURIComponent(uid)); } }, "Use the illustrated room"));
+  mount(h("div", { class: "r3full" + (mine && R3.deco ? " decoon" : "") },
+    box,
+    h("div", { class: "r3top" }, h("button", { class: "r3pill", type: "button", onclick: () => closeTo("/") }, "‹ Club"), h("div", { class: "r3title" }, mine ? "Your room" : p.name + "'s room", PREVIEW ? h("small", { class: "r3tag" }, "preview") : null), menu),
+    h("div", { class: "r3bottom" }, ...(mine && R3.deco ? [bar, decoPanel(uid)] : [hint, bar]))));
   let THREE, OrbitControls, RoundedBoxGeometry;
   try {
     THREE = await import("three");
@@ -1222,7 +1247,8 @@ async function renderRoom3D(uid) {
     else { const from = per.position.clone(), to = wp.clone().add(new THREE.Vector3(0, .3, 1.2));
       const fly = () => { const k = Math.min(1, (performance.now() - t0) / 600), e2 = k * k * (3 - 2 * k); per.position.lerpVectors(from, to, e2); per.lookAt(wp); if (k < 1) requestAnimationFrame(fly); else actions[key](); }; fly(); }
   });
-  const onResize = () => { if (!box.isConnected) return; W = box.clientWidth; H = box.clientHeight; renderer.setSize(W, H); sizeIso(); };
+  const onResize = () => { if (!box.isConnected || !box.clientHeight) return; W = box.clientWidth; H = box.clientHeight; renderer.setSize(W, H); sizeIso(); };
+  new ResizeObserver(onResize).observe(box);
   addEventListener("resize", onResize);
   // gentle opening glide
   if (R3.keepView) { iso.zoom = R3.zoom; iso.updateProjectionMatrix(); R3.keepView = false; } else if (R3.mode === "iso" && !reduce) { const z1 = iso.zoom; iso.zoom = .7; iso.updateProjectionMatrix(); const t0 = performance.now(); const intro = () => { const k = Math.min(1, (performance.now() - t0) / 900); iso.zoom = .7 + (z1 - .7) * (1 - Math.pow(1 - k, 3)); iso.updateProjectionMatrix(); if (k < 1) requestAnimationFrame(intro); }; intro(); }
@@ -1684,7 +1710,7 @@ window.addEventListener("hashchange", render);
 (() => {
   const ind = h("div", { class: "ptr", "aria-hidden": "true" }, h("span", {}, "↻")); document.body.append(ind);
   let y0 = null, dy = 0, busy = false;
-  const ready = () => !busy && window.scrollY <= 0 && !document.querySelector(".scrim,.turn");
+  const ready = () => !busy && window.scrollY <= 0 && !document.querySelector(".scrim,.turn,.r3full");
   addEventListener("touchstart", e => { y0 = ready() && e.touches.length === 1 ? e.touches[0].clientY : null; dy = 0; ind.style.transition = "none"; }, { passive: true });
   addEventListener("touchmove", e => { if (y0 == null) return; dy = e.touches[0].clientY - y0; if (dy <= 0 || window.scrollY > 0) { ind.style.transform = "translate(-50%,-70px)"; return; } const d = Math.min(dy * 0.5, 90); ind.style.transform = "translate(-50%," + (d - 60) + "px)"; ind.firstChild.style.transform = "rotate(" + dy * 2 + "deg)"; ind.style.opacity = Math.min(1, dy / 120); }, { passive: true });
   addEventListener("touchend", async () => {
