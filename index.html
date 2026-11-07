@@ -276,12 +276,28 @@ body.full3d #app{padding:0;max-width:none}
 .roomsvg .lbl rect{fill:rgba(26,16,9,.82);stroke:rgba(230,198,122,.55);stroke-width:.8}.roomsvg .lbl text{fill:#F4EBD6;font:600 11px Literata,Georgia,serif;letter-spacing:.02em}
 .roomhint{text-align:center;font-style:italic;margin-top:12px}
 .result .cover{width:38px;flex:0 0 38px}
+#tabbar{display:none}
+body.tabs #tabbar{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:30;background:var(--paper);border-top:1px solid var(--edge);padding:6px 4px calc(6px + env(safe-area-inset-bottom));box-shadow:0 -4px 14px rgba(60,40,20,.08)}
+#tabbar button{flex:1;border:0;background:none;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11px;color:var(--ink-3);padding:4px 0}
+#tabbar button[aria-current="page"]{color:var(--accent);font-weight:600}
+#tabbar .ti{font-size:21px;line-height:1;position:relative}#tabbar .ti b{position:absolute;top:-5px;right:-12px;background:var(--accent);color:var(--accent-ink);border-radius:9px;font-size:10px;padding:1px 5px}
+body.tabs .page{padding-bottom:150px}body.tabs .fab{bottom:calc(84px + env(safe-area-inset-bottom))}
+.mehead{display:flex;gap:16px;align-items:center;padding:10px 0}
+.meport{width:72px;height:92px;flex:0 0 72px;border-radius:4px;background:var(--c);border:4px solid #B08A3E;display:flex;align-items:center;justify-content:center;font-family:var(--display);font-weight:700;font-size:40px;color:#F1D99A;box-shadow:var(--shadow)}
+.mehead h1{font-size:34px}
+.rcards{display:flex;flex-direction:column;gap:12px}
+.rcard{display:grid;grid-template-columns:84px 1fr;gap:14px;align-items:start;border:1px solid var(--edge);background:var(--paper-2);border-radius:12px;padding:12px}
+.rbody{display:flex;flex-direction:column;gap:6px;min-width:0}.rbody .t{font-family:var(--display);font-size:20px;font-weight:600;line-height:1.15}
+.chip.on{background:var(--paper-2);color:var(--ink)}.chip.muted{opacity:.55;text-decoration:line-through}
+.chipx{border:0;background:none;margin-left:6px;padding:0 2px;color:var(--ink-3);font-size:13px}
+.addauthor{display:flex;gap:8px;margin-top:10px}.addauthor input{flex:1;min-width:0;font-size:16px;background:var(--paper);border:1px solid var(--edge);border-radius:8px;padding:8px 10px}
+.quotes blockquote cite{display:block;font-style:normal;font-size:12px;color:var(--ink-3);margin-top:4px}
 .toast{position:fixed;left:50%;bottom:calc(90px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:10px 16px;border-radius:8px;font-size:14px;z-index:60;box-shadow:var(--shadow);max-width:90vw}
 .auth{max-width:420px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
 </style>
 </head>
 <body>
-<div id="pvbar" hidden>Preview version. Changes to books are real, the new features are being tested.</div>
+<div id="pvbar" hidden>Test version. This is a sandbox with a copy of your books: nothing you do here reaches the real app.</div>
 <div id="app" class="page"><div class="titlepage"><div class="kicker">Ex Libris</div><h1>Opening the library</h1></div></div>
 <script type="module">
 /* ------------------------------------------------------------------
@@ -334,8 +350,7 @@ function toast(msg) { document.querySelector(".toast")?.remove(); const t = h("d
 const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 /* ---------- local adapter (this phone only) ---------- */
-function localAdapter() {
-  const KEY = "exlibris-v2";
+function localAdapter(KEY = "exlibris-v2", sandbox = false) {
   let db; const subs = { profiles: [], sugs: [], books: {} };
   const save = () => { try { localStorage.setItem(KEY, JSON.stringify(db)); } catch (e) { toast("Storage is full, change not saved"); } };
   const emit = () => { subs.profiles.forEach(f => f(structuredClone(db.profiles))); subs.sugs.forEach(f => f(Object.entries(db.sugs).map(([id, d]) => ({ id, ...d })))); for (const [u, fs] of Object.entries(subs.books)) fs.forEach(f => f(db.books[u] || {})); };
@@ -346,11 +361,12 @@ function localAdapter() {
       try { db = JSON.parse(localStorage.getItem(KEY) || "null"); } catch (e) { db = null; }
       if (!db) {
         db = { profiles: {}, books: {}, sugs: {} };
-        let old = null; try { old = JSON.parse(localStorage.getItem("shelves-v1") || "null"); } catch (e) {}
+        let old = null; if (!sandbox) try { old = JSON.parse(localStorage.getItem("shelves-v1") || "null"); } catch (e) {}
         const seed = old || await fetch("data.json").then(r => r.json()).catch(() => ({ books: {} }));
         db.profiles.jacopo = { name: "Jacopo", color: LEATHER[0], created: 1, seedFrom: "data.json", seen: Object.keys(seed.books || {}) };
         db.books.jacopo = seed.books || {};
         if (old && Object.keys(old.gaia_books || {}).length) { db.profiles.gaia = { name: "Gaia", color: LEATHER[4], created: 2 }; db.books.gaia = old.gaia_books; }
+        if (sandbox) { db.profiles.gaia = { name: "Gaia (test)", color: LEATHER[4], created: 2 }; db.books.gaia = { "circe": { title: "Circe", authors: ["Madeline Miller"], status: "read", rating: 5, genres: ["Fantasy"], finished: today(), added: today() }, "dune": { title: "Dune", authors: ["Frank Herbert"], status: "reading", page: 120, pages: 600, started: today(), genres: ["Science fiction"], added: today() } }; db.sugs.s1 = { from: "gaia", to: "jacopo", title: "The Song of Achilles", author: "Madeline Miller", why: "A test letter, so the sealed envelope shows.", at: today() }; }
         save();
       }
       me = sessionStorage.getItem("exlibris-me") || null; if (me && !db.profiles[me]) me = null;
@@ -448,7 +464,11 @@ function turn({ color, kicker, name, paper, opening }) {
 /* ---------- views ---------- */
 function render() {
   const r = location.hash.slice(1) || "/";
-  document.body.classList.toggle("full3d", r.startsWith("/room3d/") && !lsGet("cc-room2d", false));
+  document.body.classList.toggle("full3d", r.startsWith("/room3d/"));
+  const showTabs = classic() && (DB.mode === "local" || (user && profiles[user.uid])) && !r.startsWith("/new") && !r.startsWith("/room");
+  document.body.classList.toggle("tabs", showTabs); if (showTabs) drawTabs(r);
+  if (r === "/me") return renderMe();
+  if (r === "/p/me") { const u = myUid(); if (u) { location.replace("#/p/" + encodeURIComponent(u)); return; } }
   if (DB.mode === "firebase" && !user) return renderAuth();
   if (user && DB.mode === "firebase" && !profiles[user.uid] && !r.startsWith("/new")) { if ($app.dataset.view === "new") return; return renderNewProfile(true); }
   if (r.startsWith("/new") && $app.dataset.view === "new" && ui.creating) return;
@@ -479,14 +499,16 @@ function renderLibrary() {
     h("header", { class: "titlepage" }, h("div", { class: "kicker" }, "Ex Libris"), h("h1", {}, "The Codex Club"), h("p", {}, list.length ? "Open your volume to step into your room" : "Add the first reader to begin")),
     h("div", { class: "case" }, h("div", { class: "spines" }, spines), h("div", { class: "plank" })),
     h("div", { class: "cards" },
-      DB.mode === "local" ? h("div", { class: "card" }, h("h2", {}, "Backup"), h("div", { class: "muted" }, "This library lives only on this phone until sync is switched on. Save a backup now and then."),
+      DB.mode === "local" ? h("div", { class: "card" }, h("h2", {}, "Backup"), h("div", { class: "muted" }, PREVIEW ? "Test sandbox: a copy of your shelf to play with. Reset it any time by loading a backup." : "This library lives only on this phone until sync is switched on. Save a backup now and then."),
         h("div", { class: "actions" }, h("button", { class: "btn", onclick: exportBackup }, "Save backup"), h("label", { class: "btn ghost" }, "Load backup", h("input", { type: "file", accept: ".json,application/json", hidden: true, onchange: importBackup })))) : null),
+    h("div", { class: "actions", style: { "justify-content": "center", "margin-top": "18px" } }, myUid() ? h("button", { class: "rename", type: "button", onclick: () => setView(classic() ? "room" : "classic") }, classic() ? "◈ Switch to the 3D room" : "▤ Switch to the classic layout") : null),
     h("div", { class: "foot" }, h("div", { class: "faint", style: { "font-size": "12px", "margin-bottom": "4px" } }, PREVIEW ? "Preview version" : "Version 7 Nov k"), DB.mode === "firebase" ? ["Signed in as ", mine ? mine.name : user.email, " · ", h("button", { onclick: () => DB.signOut() }, "Sign out")] : "Sync is not set up yet, so changes stay on this phone.")
   );
 }
 
 async function openShelf(uid) {
   const p = profiles[uid]; watch(uid);
+  if (DB.mode === "local") DB.use(uid);
   ui.tab = "all"; ui.q = ""; ui.genre = null;
   const t = turn({ color: p.color, kicker: "Ex Libris", name: p.name, opening: true });
   await new Promise(r => setTimeout(r, reduce ? 0 : 160));
@@ -527,7 +549,7 @@ function renderShelf(uid) {
   }
   const authors = new Set(all.filter(b => st(b) !== "wishlist").flatMap(b => arr(b.authors))).size;
   mount(
-    h("div", { class: "topbar" }, h("button", { class: "back", onclick: () => go(roomPath(uid)) }, "‹ Room"), h("button", { class: "back", onclick: () => closeTo("/") }, "Club ›")),
+    h("div", { class: "topbar" }, h("button", { class: "back", onclick: () => classic() ? go("/") : go(roomPath(uid)) }, backLabel()), h("button", { class: "back", onclick: () => closeTo("/") }, "Club ›")),
     h("header", { class: "phead" }, h("div", { class: "sc faint" }, "the shelf of"), h("h1", {}, p.name), h("div", { class: "actions", style: { "justify-content": "center", "margin-top": "8px" } }, edit ? h("button", { class: "rename", type: "button", onclick: () => editShelf(uid) }, "✎ Edit shelf") : null, h("button", { class: "rename", type: "button", onclick: () => go("/year/" + encodeURIComponent(uid)) }, "◔ Year in books")),
       h("div", { class: "stats sc" }, counts.read + " read · " + counts.reading + " reading · " + counts.wishlist + " wished · " + authors + " authors")),
     h("div", { class: "fleuron" }, "❦"),
@@ -880,7 +902,10 @@ function renderRoom(uid) {
 }
 
 /* ---------- 3D room (beta) ---------- */
-const roomPath = uid => (lsGet("cc-room2d", false) ? "/room/" : "/room3d/") + encodeURIComponent(uid);
+const classic = () => lsGet("cc-view", "room") === "classic";
+const roomPath = uid => classic() ? "/p/" + encodeURIComponent(uid) : (webglOK() ? "/room3d/" : "/room/") + encodeURIComponent(uid);
+const backLabel = () => classic() ? "‹ Club" : "‹ Room";
+function setView(v) { lsSet("cc-view", v); const u = myUid(); toast(v === "classic" ? "Classic layout on" : "3D room on"); go(v === "classic" ? "/me" : u ? "/room3d/" + encodeURIComponent(u) : "/"); }
 const R3 = { mode: "iso", az: Math.PI / 4, zoom: 1, draft: null, deco: false };
 const DECO = {
   wall: [["#C9B08A", "Warm plaster"], ["#E8E2D6", "Ivory"], ["#2F4535", "Forest green"], ["#27344D", "Navy"], ["#7A2E2A", "Oxblood"], ["#5A6B5A", "Sage"], ["#B5654A", "Terracotta"], ["#3B3B3B", "Charcoal"]],
@@ -927,9 +952,9 @@ async function renderRoom3D(uid) {
   const zIn = h("button", { class: "r3btn", type: "button", "aria-label": "Zoom in" }, "+"), zOut = h("button", { class: "r3btn", type: "button", "aria-label": "Zoom out" }, "−");
   const decoBtn = mine ? h("button", { class: "r3btn wide", type: "button", "aria-pressed": R3.deco ? "true" : "false", onclick: () => { R3.deco = !R3.deco; if (!R3.deco) R3.draft = null; rebuildRoom(); } }, "🎨 Decorate") : null;
   const bar = h("div", { class: "r3bar" }, zOut, rotL, modeBtn, rotR, zIn, decoBtn);
-  const hint = h("div", { class: "r3hint" }, (mine && S.mail ? "A sealed letter is waiting on your desk. " : "") + "Drag to turn, pinch to zoom, tap to open.");
+  const hint = h("div", { class: "r3hint" }, (mine && S.mail ? "A sealed letter is waiting on your desk. " : "") + "Drag to turn, pinch to zoom, two fingers to move, tap to open.");
   setTimeout(() => hint.classList.add("gone"), 5000);
-  const menu = h("details", { class: "r3menu" }, h("summary", { "aria-label": "More" }, "⋯"), h("button", { type: "button", onclick: () => { lsSet("cc-room2d", true); go("/room/" + encodeURIComponent(uid)); } }, "Use the illustrated room"));
+  const menu = h("details", { class: "r3menu" }, h("summary", { "aria-label": "More" }, "⋯"), h("button", { type: "button", onclick: () => setView("classic") }, "Switch to the classic layout"));
   mount(h("div", { class: "r3full" + (mine && R3.deco ? " decoon" : "") },
     box,
     h("div", { class: "r3top" }, h("button", { class: "r3pill", type: "button", onclick: () => closeTo("/") }, "‹ Club"), h("div", { class: "r3title" }, mine ? "Your room" : p.name + "'s room", PREVIEW ? h("small", { class: "r3tag" }, "preview") : null), menu),
@@ -937,7 +962,6 @@ async function renderRoom3D(uid) {
   let THREE, OrbitControls, RoundedBoxGeometry;
   try {
     THREE = await import("three");
-    ({ OrbitControls } = await import("three/addons/controls/OrbitControls.js"));
     ({ RoundedBoxGeometry } = await import("three/addons/geometries/RoundedBoxGeometry.js"));
   } catch (e) { location.replace("#/room/" + encodeURIComponent(uid)); setTimeout(() => toast("The 3D room needs internet the first time"), 400); return; }
   if (!box.isConnected) return;
@@ -1174,49 +1198,46 @@ async function renderRoom3D(uid) {
 
   // things high on a wall disappear when that wall is lowered
   Object.values(walls).forEach(g => g.traverse(o => { if (o.isMesh && !o.userData.keep && o.parent === g && o.position.y > 1.1) o.userData.high = true; }));
-  // cameras
-  const iso = new THREE.OrthographicCamera(-1, 1, 1, -1, .1, 100), per = new THREE.PerspectiveCamera(62, W / H, .05, 40);
-  const isoTarget = new THREE.Vector3(0, .7, 0);
-  const sizeIso = () => { const a = W / H, v = Math.max(7.6, 9.4 / a) * .92; iso.left = -v * a / 2; iso.right = v * a / 2; iso.top = v / 2; iso.bottom = -v / 2; iso.updateProjectionMatrix(); per.aspect = a; per.updateProjectionMatrix(); };
-  sizeIso();
-  const placeIso = az => { const d = 20, el = .5; iso.position.set(isoTarget.x + Math.cos(az) * d * Math.cos(el), isoTarget.y + d * Math.sin(el), isoTarget.z + Math.sin(az) * d * Math.cos(el)); iso.lookAt(isoTarget); };
-  let cam, ctl;
-  const setMode = mode => {
-    R3.mode = mode; ctl?.dispose();
-    if (mode === "iso") {
-      cam = iso; placeIso(R3.az);
-      ctl = new OrbitControls(iso, renderer.domElement); ctl.target.copy(isoTarget); ctl.enableDamping = true; ctl.enablePan = true; ctl.screenSpacePanning = false; ctl.minZoom = .8; ctl.maxZoom = 4.5; ctl.minPolarAngle = Math.PI / 2 - .85; ctl.maxPolarAngle = Math.PI / 2 - .3; ctl.rotateSpeed = .7; ctl.dampingFactor = .08;
-      ceil.visible = false; modeBtn.textContent = "👁 Look around"; rotL.hidden = rotR.hidden = false;
-    } else {
-      cam = per; per.position.set(.4, 1.65, 2.9);
-      ctl = new OrbitControls(per, renderer.domElement); ctl.target.set(0, 1.35, -1.2); ctl.enableDamping = true; ctl.enablePan = false; ctl.minDistance = .8; ctl.maxDistance = 3.2; ctl.minPolarAngle = 1.05; ctl.maxPolarAngle = 1.75; ctl.rotateSpeed = .55;
-      ceil.visible = true; modeBtn.textContent = "⌂ Room view"; rotL.hidden = rotR.hidden = true;
-    }
-    ctl.update();
-  };
-  setMode(R3.mode);
-  modeBtn.onclick = () => setMode(R3.mode === "iso" ? "fp" : "iso");
-  let zoomAnim = null;
-  const zoomBy = f => {
-    if (R3.mode === "iso") { const z0 = iso.zoom, z1 = Math.max(ctl.minZoom, Math.min(ctl.maxZoom, z0 * f)); zoomAnim = { t0: performance.now(), f: k => { iso.zoom = z0 + (z1 - z0) * k; iso.updateProjectionMatrix(); } }; }
-    else { const p0 = per.position.clone(), dir = p0.clone().sub(ctl.target), d0 = dir.length(), d1 = Math.max(ctl.minDistance, Math.min(ctl.maxDistance, d0 / f)); dir.normalize(); zoomAnim = { t0: performance.now(), f: k => per.position.copy(ctl.target).addScaledVector(dir, d0 + (d1 - d0) * k) }; }
-  };
-  zIn.onclick = () => zoomBy(1.35); zOut.onclick = () => zoomBy(1 / 1.35);
-  let spin = null;
-  const rotate = dir => { if (R3.mode !== "iso" || spin) return; ctl.enabled = false; const from = Math.atan2(iso.position.z - ctl.target.z, iso.position.x - ctl.target.x); spin = { from, to: from + dir * Math.PI / 2, t0: performance.now() }; };
-  rotL.onclick = () => rotate(-1); rotR.onclick = () => rotate(1);
+  // camera: orthographic dollhouse view, driven by our own gestures
+  const cam = new THREE.OrthographicCamera(-1, 1, 1, -1, .1, 100); ceil.visible = false;
+  const V = R3.keepView ? { ...R3.v } : { az: R3.v?.az ?? Math.PI / 4, zoom: .75, tx: 0, tz: 0 }, EL = .5, ZMIN = .8, ZMAX = 4.5;
+  const zGoal = R3.keepView ? V.zoom : 1.45; R3.keepView = false;
+  const sizeCam = () => { const a = W / H, v = Math.max(7.6, 9.4 / a) * .92; cam.left = -v * a / 2; cam.right = v * a / 2; cam.top = v / 2; cam.bottom = -v / 2; };
+  sizeCam();
+  const place = () => { V.tx = Math.max(-2.4, Math.min(2.4, V.tx)); V.tz = Math.max(-2.4, Math.min(2.4, V.tz)); V.zoom = Math.max(.6, Math.min(ZMAX, V.zoom));
+    const d = 20, tx = V.tx, tz = V.tz; cam.position.set(tx + Math.cos(V.az) * d * Math.cos(EL), .7 + d * Math.sin(EL), tz + Math.sin(V.az) * d * Math.cos(EL)); cam.lookAt(tx, .7, tz); cam.zoom = V.zoom; cam.updateProjectionMatrix(); R3.v = { ...V }; };
+  place();
+  modeBtn.textContent = "▤ Classic layout"; modeBtn.onclick = () => setView("classic");
+  let anim = null; const animate = (to, ms = 420) => { const from = { ...V }; anim = { from, to, t0: performance.now(), ms }; };
+  if (!reduce) animate({ zoom: zGoal }, 900); else V.zoom = zGoal;
+  zIn.onclick = () => animate({ zoom: Math.min(ZMAX, (anim?.to.zoom ?? V.zoom) * 1.35) }, 260);
+  zOut.onclick = () => animate({ zoom: Math.max(ZMIN, (anim?.to.zoom ?? V.zoom) / 1.35) }, 260);
+  rotL.onclick = () => animate({ az: (anim?.to.az ?? V.az) - Math.PI / 2 }, 480);
+  rotR.onclick = () => animate({ az: (anim?.to.az ?? V.az) + Math.PI / 2 }, 480);
+  // gestures: one finger turns the room, two fingers pinch to zoom and slide to move
+  const el = renderer.domElement, pts = new Map(); let vAz = 0, pinch = null, moved = 0, tapStart = null;
+  el.addEventListener("pointerdown", e => { el.setPointerCapture(e.pointerId); pts.set(e.pointerId, { x: e.clientX, y: e.clientY }); vAz = 0; anim = null; if (pts.size === 1) { moved = 0; tapStart = [e.clientX, e.clientY]; } if (pts.size === 2) { const [a1, b1] = [...pts.values()]; pinch = { d: Math.hypot(a1.x - b1.x, a1.y - b1.y), mx: (a1.x + b1.x) / 2, my: (a1.y + b1.y) / 2, zoom: V.zoom }; tapStart = null; } });
+  el.addEventListener("pointermove", e => {
+    const prev = pts.get(e.pointerId); if (!prev) return; const cur = { x: e.clientX, y: e.clientY }; pts.set(e.pointerId, cur);
+    if (pts.size === 1 && !pinch) { const dx = cur.x - prev.x; moved += Math.abs(dx) + Math.abs(cur.y - prev.y); const d = dx * (Math.PI * 1.2 / W); V.az += d; vAz = d; place(); }
+    else if (pts.size === 2 && pinch) { const [a1, b1] = [...pts.values()], dd = Math.hypot(a1.x - b1.x, a1.y - b1.y), mx = (a1.x + b1.x) / 2, my = (a1.y + b1.y) / 2;
+      V.zoom = Math.max(ZMIN, Math.min(ZMAX, pinch.zoom * dd / pinch.d));
+      const wpp = (cam.right - cam.left) / V.zoom / W, dmx = (mx - pinch.mx) * wpp, dmy = (my - pinch.my) * wpp / Math.sin(EL);
+      const rx = -Math.sin(V.az), rz = Math.cos(V.az), fx = -Math.cos(V.az), fz = -Math.sin(V.az);
+      V.tx -= rx * dmx - fx * dmy; V.tz -= rz * dmx - fz * dmy; pinch.mx = mx; pinch.my = my; place(); }
+  });
+  const end = e => { pts.delete(e.pointerId); if (pts.size < 2) pinch = null; if (pts.size === 1) { const p1 = [...pts.values()][0]; pts.set([...pts.keys()][0], { ...p1 }); } };
+  el.addEventListener("pointerup", end); el.addEventListener("pointercancel", end);
+  el.addEventListener("wheel", e => { e.preventDefault(); V.zoom = Math.max(ZMIN, Math.min(ZMAX, V.zoom * (e.deltaY < 0 ? 1.1 : 1 / 1.1))); place(); }, { passive: false });
 
-  // walls near the camera drop down, like a dollhouse
-  const wallLevel = { N: 1, S: 1, E: 1, W: 1 };
-  const nearSet = { E: true, S: true, W: false, N: false };
+  // walls nearest the camera drop down, like a dollhouse
+  const wallLevel = { N: 1, S: 1, E: 1, W: 1 }, nearSet = { E: true, S: true, W: false, N: false };
   const updateWalls = () => {
-    if (R3.mode === "iso") {
-      const vx = cam.position.x - ctl.target.x, vz = cam.position.z - ctl.target.z, l = Math.hypot(vx, vz), cx = vx / l, cz = vz / l, hy = .17;
-      if (cx > hy) { nearSet.E = true; nearSet.W = false; } else if (cx < -hy) { nearSet.W = true; nearSet.E = false; }
-      if (cz > hy) { nearSet.S = true; nearSet.N = false; } else if (cz < -hy) { nearSet.N = true; nearSet.S = false; }
-    }
+    const cx = Math.cos(V.az), cz = Math.sin(V.az), hy = .17;
+    if (cx > hy) { nearSet.E = true; nearSet.W = false; } else if (cx < -hy) { nearSet.W = true; nearSet.E = false; }
+    if (cz > hy) { nearSet.S = true; nearSet.N = false; } else if (cz < -hy) { nearSet.N = true; nearSet.S = false; }
     for (const [k, g] of Object.entries(walls)) {
-      const want = R3.mode === "iso" && nearSet[k] ? 0 : 1, d = want - wallLevel[k];
+      const want = nearSet[k] ? 0 : 1, d = want - wallLevel[k];
       if (Math.abs(d) < .002) { if (wallLevel[k] === want) continue; wallLevel[k] = want; } else wallLevel[k] += d * .2;
       g.position.y = -(1 - wallLevel[k]) * (WH - .32);
       g.traverse(o => { if (o.isSprite) o.visible = wallLevel[k] > .9; if (o.isLight) o.visible = wallLevel[k] > .5; });
@@ -1224,47 +1245,36 @@ async function renderRoom3D(uid) {
   };
 
   // taps: highlight ring, glide, then open
-  const ray = new THREE.Raycaster(), ptr = new THREE.Vector2(); let down = null, busy = false;
+  const ray = new THREE.Raycaster(), ptr = new THREE.Vector2(); let busy = false;
   const ringM = new THREE.Mesh(new THREE.TorusGeometry(.6, .025, 8, 48), new THREE.MeshBasicMaterial({ color: "#7CFF6B", transparent: true, opacity: .9 })); ringM.rotation.x = Math.PI / 2; ringM.visible = false; scene.add(ringM);
   const actions = { shelf: () => { ui.tab = "all"; ui.q = ""; ui.genre = null; go("/p/" + encodeURIComponent(uid)); }, letters: () => go("/letters"), news: () => go("/news"), year: () => go("/year/" + encodeURIComponent(uid)), profile: () => mine ? editShelf(uid) : toast(p.name + "'s room"), reading: () => cur ? openBook(uid, cur.id) : (ui.tab = "reading", go("/p/" + encodeURIComponent(uid))), lent: () => lentSheet(uid, S.lent) };
-  renderer.domElement.addEventListener("pointerdown", e => down = [e.clientX, e.clientY]);
-  renderer.domElement.addEventListener("pointerup", e => {
-    if (busy || !down || Math.hypot(e.clientX - down[0], e.clientY - down[1]) > 8) return;
-    const r = renderer.domElement.getBoundingClientRect(); ptr.set((e.clientX - r.left) / r.width * 2 - 1, -(e.clientY - r.top) / r.height * 2 + 1);
+  el.addEventListener("pointerup", e => {
+    if (busy || !tapStart || moved > 10 || Math.hypot(e.clientX - tapStart[0], e.clientY - tapStart[1]) > 10) return;
+    tapStart = null;
+    const r = el.getBoundingClientRect(); ptr.set((e.clientX - r.left) / r.width * 2 - 1, -(e.clientY - r.top) / r.height * 2 + 1);
     ray.setFromCamera(ptr, cam);
-    const hits = ray.intersectObjects(clickables, true);
-    let o = null; for (const hh of hits) { let x = hh.object; while (x && !x.userData.go) x = x.parent; if (x) { o = x; break; } }
+    let o = null; for (const hh of ray.intersectObjects(clickables, true)) { let x = hh.object; while (x && !x.userData.go) x = x.parent; if (x) { o = x; break; } }
     const key = o?.userData.go; if (!key) return;
     if ((key === "letters" || key === "news") && !mine) return;
     const wp = new THREE.Vector3(); o.getWorldPosition(wp); if (key === "shelf") wp.set(0, 1.2, -RS + .4);
     ringM.position.set(wp.x, .03, wp.z); ringM.scale.setScalar(key === "shelf" ? 2.6 : key === "news" ? 1.9 : 1); ringM.visible = true; navigator.vibrate?.(20);
     if (["profile", "lent", "reading"].includes(key)) { setTimeout(() => { ringM.visible = false; actions[key](); }, 250); return; }
-    busy = true; ctl.enabled = false; const t0 = performance.now();
-    if (R3.mode === "iso") { const z0 = iso.zoom, tgt0 = ctl.target.clone(), pos0 = iso.position.clone(), off = pos0.clone().sub(tgt0), tgt1 = new THREE.Vector3(wp.x, Math.max(.6, wp.y), wp.z);
-      const fly = () => { const k = Math.min(1, (performance.now() - t0) / 600), e2 = k * k * (3 - 2 * k); iso.zoom = z0 + (2.8 - z0) * e2; iso.updateProjectionMatrix(); const t = tgt0.clone().lerp(tgt1, e2); iso.position.copy(t).add(off); iso.lookAt(t); if (k < 1) requestAnimationFrame(fly); else actions[key](); }; fly(); }
-    else { const from = per.position.clone(), to = wp.clone().add(new THREE.Vector3(0, .3, 1.2));
-      const fly = () => { const k = Math.min(1, (performance.now() - t0) / 600), e2 = k * k * (3 - 2 * k); per.position.lerpVectors(from, to, e2); per.lookAt(wp); if (k < 1) requestAnimationFrame(fly); else actions[key](); }; fly(); }
+    busy = true; animate({ tx: wp.x, tz: wp.z, zoom: 2.8 }, 600); setTimeout(() => actions[key](), 620);
   });
-  const onResize = () => { if (!box.isConnected || !box.clientHeight) return; W = box.clientWidth; H = box.clientHeight; renderer.setSize(W, H); sizeIso(); };
+  const onResize = () => { if (!box.isConnected || !box.clientHeight) return; W = box.clientWidth; H = box.clientHeight; renderer.setSize(W, H); sizeCam(); place(); };
   new ResizeObserver(onResize).observe(box);
-  addEventListener("resize", onResize);
-  // gentle opening glide
-  if (R3.keepView) { iso.zoom = R3.zoom; iso.updateProjectionMatrix(); R3.keepView = false; } else if (R3.mode === "iso" && !reduce) { const z1 = 1.45; iso.zoom = .7; iso.updateProjectionMatrix(); const t0 = performance.now(); const intro = () => { const k = Math.min(1, (performance.now() - t0) / 900); iso.zoom = .7 + (z1 - .7) * (1 - Math.pow(1 - k, 3)); iso.updateProjectionMatrix(); if (k < 1) requestAnimationFrame(intro); }; intro(); }
   const clock = new THREE.Clock();
   const loop = () => {
-    if (!renderer.domElement.isConnected) { renderer.dispose(); ctl?.dispose(); removeEventListener("resize", onResize); return; }
+    if (!el.isConnected) { renderer.dispose(); return; }
     const t = clock.getElapsedTime();
     flames.forEach(f => { const u = f.userData, n = Math.sin(t * 7.3 + u.ph) * .5 + Math.sin(t * 13.1 + u.ph * 2) * .3 + Math.sin(t * 23.7 + u.ph) * .2, hgt = u.base * (1 + n * .28); f.scale.set(hgt * .42, hgt, 1); f.position.set(u.x, .2 + hgt / 2, u.z + Math.sin(t * 5 + u.ph) * .015); f.material.opacity = .7 + n * .2; });
     embers.material.opacity = .85 + Math.sin(t * 3) * .1;
     sparks.forEach(sp => { const u = sp.userData; u.life += .006 * (1 + u.v); if (u.life > 1) { u.life = 0; u.z = (Math.random() - .5) * .5; } sp.position.set(FX - .26 + Math.sin(u.life * 9 + u.z * 9) * .04, .25 + u.life * .75, u.z + Math.sin(u.life * 7) * .03); sp.material.opacity = (1 - u.life) * .9; });
     fire.intensity = (night ? 3.2 : 1.8) * (1 + Math.sin(t * 11) * .08 + Math.sin(t * 27) * .05);
     if (ringM.visible) ringM.rotation.z = t * 2;
-    const ls = R3.mode === "iso" ? 2 / iso.zoom : .85; labels.forEach(sp => sp.scale.set(sp.userData.base[0] * ls, sp.userData.base[1] * ls, 1));
-    if (spin) { const k = Math.min(1, (performance.now() - spin.t0) / 500), e2 = k * k * (3 - 2 * k); const az = spin.from + (spin.to - spin.from) * e2; const d = Math.hypot(iso.position.x - ctl.target.x, iso.position.z - ctl.target.z), y = iso.position.y; iso.position.set(ctl.target.x + Math.cos(az) * d, y, ctl.target.z + Math.sin(az) * d); iso.lookAt(ctl.target); if (k >= 1) { spin = null; R3.az = az; ctl.enabled = !busy; } }
-    if (zoomAnim) { const k = Math.min(1, (performance.now() - zoomAnim.t0) / 260); zoomAnim.f(k * (2 - k)); if (k >= 1) zoomAnim = null; }
-    if (ctl.enabled) ctl.update();
-    if (R3.mode === "iso") { const t2 = ctl.target, cx = Math.max(-2.4, Math.min(2.4, t2.x)), cz = Math.max(-2.4, Math.min(2.4, t2.z)), dx = cx - t2.x, dz = cz - t2.z; if (dx || dz) { t2.x += dx; t2.z += dz; iso.position.x += dx; iso.position.z += dz; } }
-    if (R3.mode === "iso" && !spin) { R3.az = Math.atan2(iso.position.z - ctl.target.z, iso.position.x - ctl.target.x); R3.zoom = iso.zoom; }
+    if (anim) { const k = Math.min(1, (performance.now() - anim.t0) / anim.ms), e2 = k * k * (3 - 2 * k); for (const [key, v] of Object.entries(anim.to)) V[key] = anim.from[key] + (v - anim.from[key]) * e2; if (k >= 1) anim = null; place(); }
+    else if (!pts.size && Math.abs(vAz) > .0004) { V.az += vAz; vAz *= .92; place(); }
+    const ls = 2 / V.zoom; labels.forEach(sp => sp.scale.set(sp.userData.base[0] * ls, sp.userData.base[1] * ls, 1));
     updateWalls();
     renderer.render(scene, cam); requestAnimationFrame(loop);
   };
@@ -1273,6 +1283,62 @@ async function renderRoom3D(uid) {
 function lentSheet(uid, lent) {
   const { close } = sheet(h("h2", {}, "Lent books"),
     lent.length ? h("div", { class: "results" }, lent.map(b => h("button", { class: "result", type: "button", onclick: () => { close(true); openBook(uid, b.id); } }, coverEl(b), h("div", {}, h("b", {}, b.title), h("small", {}, "With " + b.lentTo + (b.lentOn ? " since " + fmtDate(b.lentOn) : "")))))) : h("p", { class: "muted" }, "The basket is empty. Open a book and use Lend this book to keep track of who has it."));
+}
+
+
+/* ---------- classic layout: tab bar and Me page ---------- */
+function drawTabs(r) {
+  let bar = document.getElementById("tabbar");
+  if (!bar) { bar = h("nav", { id: "tabbar", "aria-label": "Sections" }); document.body.append(bar); }
+  const u = myUid(), mail = u ? sugs.filter(x => x.to === u).length : 0, news = newsCount();
+  const tabs = [["/", "🏛", "Club"], ["/p/" + encodeURIComponent(u || ""), "📖", "My shelf"], ["/news", "✨", "News", news], ["/letters", "✉", "Letters", mail], ["/me", "👤", "Me"]];
+  const cur = r === "/" ? "/" : r.startsWith("/p/") && decodeURIComponent(r.slice(3)) === u ? tabs[1][0] : r;
+  bar.replaceChildren(...tabs.map(([path, ic, label, n]) => h("button", { type: "button", "aria-current": cur === path ? "page" : null, onclick: () => { if (path === "/") go("/"); else { ui.tab = "all"; go(path); } } }, h("span", { class: "ti" }, ic, n ? h("b", {}, n > 9 ? "9+" : n) : null), h("span", {}, label))));
+}
+function readingCard(uid, b) {
+  const pct = b.pages && b.page ? Math.min(100, Math.round(b.page / b.pages * 100)) : 0, edit = canEdit(uid);
+  return h("div", { class: "rcard" }, h("button", { class: "book", type: "button", onclick: () => openBook(uid, b.id) }, coverEl(b)),
+    h("div", { class: "rbody" }, h("div", { class: "t" }, b.title), h("div", { class: "a" }, arr(b.authors).join(", ")),
+      h("div", { class: "bigprog" }, h("i", { style: { width: pct + "%" } })),
+      h("div", { class: "faint", style: { "font-size": "13px" } }, b.pages ? "Page " + (b.page || 0) + " of " + b.pages + (pct ? " · " + pct + "%" : "") : "Add the page count in the book page"),
+      edit && b.pages ? h("div", { class: "actions" }, h("button", { class: "btn", type: "button", onclick: async () => { const page = Math.min(b.pages, (b.page || 0) + 10); await DB.updateBook(uid, b.id, page >= b.pages ? { page, status: "read", finished: today() } : { page }); toast(page >= b.pages ? "Finished! Give it some stars" : "Page " + page); } }, "+10 pages")) : null));
+}
+function renderMe() {
+  const uid = myUid(); if (!uid || !profiles[uid]) { go("/"); return; }
+  watch(uid); ui.route = "me"; $app.dataset.view = "me";
+  const p = profiles[uid], all = books(uid), color = p.color || LEATHER[0];
+  const reading = all.filter(b => stOf(b) === "reading"), lent = all.filter(b => b.lentTo);
+  const quotes = all.flatMap(b => arr(b.quotes).map(q => [q, b]));
+  const favs = arr(p.favAuthors), muted = arr(p.mutedAuthors);
+  const score = {}; all.filter(b => stOf(b) !== "wishlist").forEach(b => arr(b.authors).forEach(a => score[a] = (score[a] || 0) + (b.rating >= 4 ? 2 : 1)));
+  const suggested = Object.entries(score).filter(([a, n]) => n >= 2 && !favs.includes(a)).sort((a, b) => b[1] - a[1]).map(([a]) => a).slice(0, 12);
+  const saveP = async d => { await DB.saveProfile(uid, d); lsSet("cc-news-" + uid, null); };
+  const addIn = h("input", { placeholder: "Any author, even one you haven't read", list: "authList", autocomplete: "off" });
+  const dl = h("datalist", { id: "authList" }, [...new Set(Object.keys(shelf).flatMap(u => books(u).flatMap(b => arr(b.authors))))].sort().map(a => h("option", { value: a })));
+  const Y = new Date().getFullYear(), fin = finishedIn(uid, Y).length, goal = p.goals?.[Y];
+  const seg = h("div", { class: "seg", role: "group", "aria-label": "Layout" }, [["room", "3D room"], ["classic", "Classic"]].map(([v, l]) => h("button", { type: "button", "aria-pressed": lsGet("cc-view", "room") === v ? "true" : "false", onclick: () => setView(v) }, l)));
+  mount(
+    h("header", { class: "mehead" }, h("div", { class: "meport", style: { "--c": color } }, (p.name || "?")[0].toUpperCase()),
+      h("div", {}, h("h1", {}, p.name), h("div", { class: "muted" }, all.filter(b => stOf(b) === "read").length + " read · " + reading.length + " reading · " + all.filter(b => stOf(b) === "wishlist").length + " wished"),
+        h("div", { class: "actions", style: { "margin-top": "8px" } }, h("button", { class: "rename", type: "button", onclick: () => editShelf(uid) }, "✎ Edit shelf"), h("button", { class: "rename", type: "button", onclick: () => go("/year/" + encodeURIComponent(uid)) }, "◔ Year in books")))),
+    h("section", { class: "section card" }, h("h2", { style: { "font-size": "22px" } }, Y + " so far"), h("div", { class: "muted" }, fin + (goal ? " of " + goal : "") + " books finished"), goal ? h("div", { class: "bigprog" }, h("i", { style: { width: Math.min(100, fin / goal * 100) + "%" } })) : null),
+    h("section", { class: "section" }, h("h2", {}, "Reading now", h("small", {}, reading.length)), reading.length ? h("div", { class: "rcards" }, reading.map(b => readingCard(uid, b))) : h("div", { class: "empty" }, "Nothing on the go. Pick something from your wishlist.")),
+    h("section", { class: "section" }, h("h2", {}, "Authors"),
+      h("div", { class: "sc faint" }, "following"),
+      favs.length ? h("div", { class: "follows" }, favs.map(a => h("span", { class: "chip on" }, "♥ " + a, h("button", { type: "button", class: "chipx", "aria-label": "Unfollow " + a, onclick: () => saveP({ favAuthors: favs.filter(x => x !== a) }) }, "✕")))) : h("p", { class: "faint" }, "You don't follow anyone yet."),
+      h("form", { class: "addauthor", onsubmit: e => { e.preventDefault(); const a = addIn.value.trim(); if (!a || favs.includes(a)) return; saveP({ favAuthors: [...favs, a], mutedAuthors: muted.filter(x => x !== a) }); toast("Following " + a); } }, addIn, dl, h("button", { class: "btn", type: "submit" }, "Follow")),
+      suggested.length ? [h("div", { class: "sc faint", style: { "margin-top": "14px" } }, "suggested from your shelf"),
+        h("div", { class: "follows" }, suggested.map(a => h("span", { class: "chip" + (muted.includes(a) ? " muted" : "") }, a,
+          h("button", { type: "button", class: "chipx", onclick: () => saveP({ favAuthors: [...favs, a], mutedAuthors: muted.filter(x => x !== a) }) }, "♡"),
+          h("button", { type: "button", class: "chipx", "aria-label": (muted.includes(a) ? "Unmute " : "Mute ") + a, onclick: () => saveP({ mutedAuthors: muted.includes(a) ? muted.filter(x => x !== a) : [...muted, a] }) }, muted.includes(a) ? "🔈" : "🔇"))))] : null,
+      h("p", { class: "faint", style: { "font-size": "13px" } }, "News watches who you follow, plus suggested authors that aren't muted.")),
+    h("section", { class: "section" }, h("h2", {}, "Lent books", h("small", {}, lent.length)), lent.length ? h("div", { class: "results" }, lent.map(b => h("button", { class: "result", type: "button", onclick: () => openBook(uid, b.id) }, coverEl(b), h("div", {}, h("b", {}, b.title), h("small", {}, "With " + b.lentTo + (b.lentOn ? " since " + fmtDate(b.lentOn) : "")))))) : h("p", { class: "faint" }, "Nothing lent right now.")),
+    h("section", { class: "section" }, h("h2", {}, "Favourite quotes", h("small", {}, quotes.length)), quotes.length ? h("div", { class: "quotes" }, quotes.map(([q, b]) => h("blockquote", { onclick: () => openBook(uid, b.id) }, "“" + q + "”", h("cite", {}, b.title)))) : h("p", { class: "faint" }, "Save lines you love from any book page.")),
+    h("section", { class: "section card" }, h("h2", { style: { "font-size": "22px" } }, "Settings"),
+      h("div", { class: "field" }, "Layout", seg),
+      h("div", { class: "faint", style: { "font-size": "13px" } }, PREVIEW ? "Test version" : "Version 7 Nov k"),
+      DB.mode === "firebase" ? h("button", { class: "btn ghost", type: "button", onclick: () => DB.signOut() }, "Sign out") : null)
+  );
 }
 
 /* ---------- year in books ---------- */
@@ -1296,7 +1362,7 @@ function renderYear(uid) {
   const goalIn = h("input", { type: "number", min: "1", inputmode: "numeric", value: goal || "", placeholder: "24", style: { width: "90px" } });
   const board = Object.entries(profiles).map(([u, q]) => [q.name, finishedIn(u, Y).length]).sort((a, b) => b[1] - a[1]);
   mount(
-    h("div", { class: "topbar" }, h("button", { class: "back", onclick: () => go(roomPath(uid)) }, "‹ Room"), h("div", { class: "ribbon", style: { "--c": color } })),
+    h("div", { class: "topbar" }, h("button", { class: "back", onclick: () => classic() ? go("/") : go(roomPath(uid)) }, backLabel()), h("div", { class: "ribbon", style: { "--c": color } })),
     h("header", { class: "phead" }, h("div", { class: "sc faint" }, p.name + "'s year in books"),
       h("div", { class: "yearnav" }, h("button", { class: "back", "aria-label": "Previous year", onclick: () => { ui.year = Y - 1; render(); } }, "‹"), h("h1", {}, String(Y)), h("button", { class: "back", "aria-label": "Next year", disabled: Y >= new Date().getFullYear(), onclick: () => { ui.year = Y + 1; render(); } }, "›"))),
     h("div", { class: "fleuron" }, "❦"),
@@ -1331,7 +1397,7 @@ async function fetchNews(uid, force) {
     const read = mine.filter(b => stOf(b) !== "wishlist"), score = {};
     read.forEach(b => arr(b.authors).forEach(a => score[a] = (score[a] || 0) + (b.rating >= 4 ? 2 : 1) - (b.rating && b.rating <= 2 ? 2 : 0)));
     const favs = arr(profiles[uid]?.favAuthors);
-    const authors = [...new Set([...favs, ...Object.entries(score).filter(([, n]) => n >= 2).sort((a, b) => b[1] - a[1]).map(([a]) => a)])].slice(0, 14);
+    const muted = arr(profiles[uid]?.mutedAuthors); const authors = [...new Set([...favs, ...Object.entries(score).filter(([a, n]) => n >= 2 && !muted.includes(a)).sort((a, b) => b[1] - a[1]).map(([a]) => a)])].slice(0, 14);
     const series = {}; read.filter(b => b.series).forEach(b => series[b.series] = arr(b.authors)[0] || "");
     const owned = mine.map(b => norm(b.title)).filter(Boolean);
     const isOwned = k => owned.some(o => o === k || (k.length > 5 && o.length > 5 && (o.startsWith(k) || k.startsWith(o))));
@@ -1371,7 +1437,7 @@ function renderNews() {
       h("button", { class: "btn ghost", type: "button", onclick: () => { lsSet("cc-news-hide-" + uid, [...lsGet("cc-news-hide-" + uid, []), i.key]); render(); } }, "Not interested")));
   const favs = arr(profiles[uid]?.favAuthors);
   mount(
-    h("div", { class: "topbar" }, h("button", { class: "back", onclick: () => go(roomPath(uid)) }, "‹ Room")),
+    h("div", { class: "topbar" }, h("button", { class: "back", onclick: () => classic() ? go("/") : go(roomPath(uid)) }, backLabel())),
     h("header", { class: "phead" }, h("div", { class: "sc faint" }, "fresh from the press"), h("h1", {}, "News for you")),
     h("div", { class: "fleuron" }, "❦"),
     h("p", { class: "muted", style: { "text-align": "center" } }, c ? "Watching " + (c.series?.length || 0) + " series and " + (c.authors?.length || 0) + " authors. Checked " + new Date(c.at).toLocaleString("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) + "." : "Looking for new books for the first time."),
@@ -1593,7 +1659,7 @@ function renderLetters() {
     if (sent.length) sections.push(h("section", { class: "section" }, h("h2", {}, "Sent", h("small", {}, sent.length)), h("div", { class: "cards", style: { "margin-top": "0" } }, sent.map(s => letter(s, false)))));
   }
   mount(
-    h("div", { class: "topbar" }, h("button", { class: "back", onclick: () => myUid() ? go(roomPath(myUid())) : closeTo("/") }, myUid() ? "‹ Room" : "‹ Club")),
+    h("div", { class: "topbar" }, h("button", { class: "back", onclick: () => myUid() && !classic() ? go(roomPath(myUid())) : go("/") }, myUid() && !classic() ? "‹ Room" : "‹ Club")),
     h("header", { class: "phead" }, h("div", { class: "sc faint" }, "correspondence"), h("h1", {}, "Letters")),
     h("div", { class: "fleuron" }, "❦"),
     others.length ? h("form", { class: "card", onsubmit: send },
@@ -1695,7 +1761,7 @@ async function importBackup(e) {
 function go(path) { if (location.hash.slice(1) === path) render(); else location.hash = path; }
 window.addEventListener("hashchange", render);
 (async () => {
-  try { DB = FIREBASE_CONFIG ? await firebaseAdapter(FIREBASE_CONFIG) : localAdapter(); }
+  try { DB = PREVIEW ? localAdapter("exlibris-preview-sandbox", true) : FIREBASE_CONFIG ? await firebaseAdapter(FIREBASE_CONFIG) : localAdapter(); }
   catch (e) { DB = localAdapter(); setTimeout(() => toast("Sync is unreachable, working on this phone only"), 500); }
   await DB.init();
   user = DB.user();
