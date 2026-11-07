@@ -230,12 +230,12 @@ body{overscroll-behavior-y:contain}
 .book.fav{flex-direction:row;gap:16px;align-items:center}.book.fav .cover{width:110px;flex:0 0 110px}
 .newsrow{display:grid;grid-template-columns:76px 1fr;gap:12px;align-items:start}
 .soon{color:var(--accent);font-weight:600;font-size:14px}
-.room{max-width:460px;margin:0 auto;overflow:hidden;border-radius:14px;box-shadow:var(--shadow);background:#3A2718}
+.room{max-width:460px;margin:0 auto;overflow:hidden;border-radius:14px;box-shadow:var(--shadow);background:#1E120A}
 .roomsvg{display:block;width:100%;height:auto;--rw:#E9DCC1;--rw2:#E3D4B6;--rp:#D6C29E;--rf:#A27850;--rf2:#7F5A38}
 @media (prefers-color-scheme:dark){.roomsvg{--rw:#3A3027;--rw2:#352B23;--rp:#2E251D;--rf:#5A4030;--rf2:#3F2C1F}}
 .roomsvg .obj[role=button]{cursor:pointer;outline:none}
 .roomsvg .obj[role=button]:hover,.roomsvg .obj[role=button]:focus-visible{filter:brightness(1.08) drop-shadow(0 0 6px rgba(255,220,140,.7))}
-.roomsvg .lbl rect{fill:rgba(42,34,28,.78)}.roomsvg .lbl text{fill:#F4EBD6;font:600 11px Literata,Georgia,serif;letter-spacing:.02em}
+.roomsvg .lbl rect{fill:rgba(26,16,9,.82);stroke:rgba(230,198,122,.55);stroke-width:.8}.roomsvg .lbl text{fill:#F4EBD6;font:600 11px Literata,Georgia,serif;letter-spacing:.02em}
 .roomhint{text-align:center;font-style:italic;margin-top:12px}
 .result .cover{width:38px;flex:0 0 38px}
 .toast{position:fixed;left:50%;bottom:calc(90px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:10px 16px;border-radius:8px;font-size:14px;z-index:60;box-shadow:var(--shadow);max-width:90vw}
@@ -628,105 +628,150 @@ function roomState(uid) {
 }
 function roomSVG(uid, S) {
   const p = profiles[uid], c = p.color || LEATHER[0], night = matchMedia("(prefers-color-scheme: dark)").matches;
-  const pal = ["#7A2E2A", "#2F4F3A", "#2B3A55", "#A8742B", "#5A3550", "#3F5E63", "#8C6239", "#4A4A4A", "#9B4F3A", "#556B2F"];
-  // spines on the bookcase grow with the books read
-  let spines = "", n = Math.min(52, Math.max(S.read, S.all.length ? 3 : 0)), k = 0;
-  const rows = [58, 158, 258, 358];
-  for (const ry of rows) { let x = 240; while (x < 366 && k < n) { const hh = 58 + (hash("s" + k) % 26), w = 7 + (hash("w" + k) % 5), col = pal[hash("c" + k) % pal.length]; spines += `<rect x="${x}" y="${ry + 84 - hh}" width="${w}" height="${hh}" rx="1" fill="${col}"/><rect x="${x}" y="${ry + 84 - hh + 8}" width="${w}" height="2" fill="#D9B56A" opacity=".7"/>`; x += w + 1; k++; } }
+  const R = (seed, n) => hash(seed) % n;
+  const spinePal = ["#6E2B24", "#2F4535", "#27344D", "#8E6A2E", "#4C2E45", "#38525A", "#7A5434", "#3B3B3B", "#EDE4D2", "#D9CDB4", "#F3EEE3", "#B9472F", "#1F2A38", "#C9B48A"];
+  // bookcase compartments: [x0, x1, bottom y, height]
+  const comps = [];
+  [[24, 112], [288, 376]].forEach(([x0, x1]) => [140, 214, 288, 362, 436].forEach(y => comps.push([x0, x1, y, 66])));
+  [140, 200].forEach(y => comps.push([132, 268, y, 52]));
+  const total = S.all.length, filled = Math.min(comps.length, Math.max(total ? 2 : 0, Math.ceil(Math.sqrt(total) * 1.6)));
+  const order = comps.map((_, i) => i).sort((x, y) => R("o" + x, 97) - R("o" + y, 97));
+  let books = "", decor = "";
+  order.forEach((ci, rank) => {
+    const [x0, x1, yb, hmax] = comps[ci];
+    if (rank >= filled) { // empty slot gets an ornament
+      const cx = (x0 + x1) / 2, t = R("d" + ci, 4);
+      decor += t === 0 ? `<path d="M${cx - 8} ${yb} q-6 -14 2 -22 q-4 -8 6 -12 q10 4 6 12 q8 8 2 22z" fill="#E9E1D0"/><path d="M${cx - 8} ${yb} h16" stroke="#C8BCA4"/>`
+        : t === 1 ? `<circle cx="${cx}" cy="${yb - 20}" r="13" fill="#3E5A6B"/><path d="M${cx - 13} ${yb - 20} h26 M${cx} ${yb - 33} v26" stroke="#C9A65A" stroke-width="1"/><ellipse cx="${cx}" cy="${yb - 20}" rx="6" ry="13" fill="none" stroke="#C9A65A" stroke-width="1"/><path d="M${cx - 9} ${yb} h18 l-3 -6 h-12z" fill="#7A5434"/>`
+        : t === 2 ? `<rect x="${cx - 9}" y="${yb - 14}" width="18" height="14" rx="2" fill="#B9AE98"/><path d="M${cx} ${yb - 14} q-10 -12 -4 -24 M${cx} ${yb - 14} q8 -14 2 -26 M${cx} ${yb - 14} q2 -10 10 -18" stroke="#4E6B3A" stroke-width="3" fill="none" stroke-linecap="round"/>`
+        : `<rect x="${cx - 18}" y="${yb - 8}" width="36" height="8" fill="#6E2B24"/><rect x="${cx - 16}" y="${yb - 15}" width="32" height="7" fill="#27344D"/><rect x="${cx - 17}" y="${yb - 21}" width="34" height="6" fill="#EDE4D2"/>`;
+      return;
+    }
+    let x = x0 + 2, k = 0;
+    while (x < x1 - 6) {
+      const key = ci + "-" + k++, w = 5 + R("w" + key, 6), hh = Math.min(hmax - 6, hmax * .62 + R("h" + key, hmax * .35)), col = spinePal[R("c" + key, spinePal.length)];
+      const light = /^#(E|D|F|C9)/.test(col);
+      if (R("lean" + key, 9) === 0 && x < x1 - 20) { books += `<rect x="${x + 4}" y="${yb - hh + 2}" width="${w}" height="${hh}" fill="${col}" transform="rotate(14 ${x + 4} ${yb})"/>`; x += w + 12; continue; }
+      books += `<rect x="${x}" y="${yb - hh}" width="${w}" height="${hh}" fill="${col}"/>`;
+      if (!light && w > 6) books += `<rect x="${x}" y="${yb - hh + 6}" width="${w}" height="1.4" fill="#D9B56A" opacity=".8"/><rect x="${x}" y="${yb - 9}" width="${w}" height="1.4" fill="#D9B56A" opacity=".6"/>`;
+      else books += `<rect x="${x + w / 2 - .6}" y="${yb - hh + 8}" width="1.2" height="${hh * .45}" fill="#2A221C" opacity=".35"/>`;
+      books += `<rect x="${x + w - 1}" y="${yb - hh}" width="1" height="${hh}" fill="#000" opacity=".25"/>`;
+      x += w + .6;
+      if (R("gap" + key, 13) === 0) x += 10;
+    }
+  });
+  const shelves = comps.map(([x0, x1, yb, hm]) => `<rect x="${x0 - 4}" y="${yb}" width="${x1 - x0 + 8}" height="6" fill="url(#shelfwood)"/><rect x="${x0}" y="${yb - hm - 2}" width="${x1 - x0}" height="3" fill="#FFE2A0" opacity="${night ? .95 : .7}"/><rect x="${x0}" y="${yb - hm + 1}" width="${x1 - x0}" height="${hm - 1}" fill="url(#led)"/>`).join("");
+
   const letter = S.mine ? (S.mail
-    ? `<g transform="translate(62 338)"><polygon points="0,0 70,0 70,40 0,40" fill="#F4EBD6" stroke="#8A7B6B"/><polyline points="0,0 35,24 70,0" fill="none" stroke="#8A7B6B"/><circle cx="35" cy="24" r="8" fill="#9E2B25"/><circle cx="35" cy="24" r="4.5" fill="#B8463E"/></g>`
-    : `<g transform="translate(62 330)"><polygon points="0,14 70,14 70,48 0,48" fill="#EFE3C8" stroke="#8A7B6B"/><rect x="8" y="0" width="54" height="40" fill="#FFFDF6" stroke="#B9AE98"/><line x1="15" y1="10" x2="55" y2="10" stroke="#B9AE98"/><line x1="15" y1="17" x2="55" y2="17" stroke="#B9AE98"/><line x1="15" y1="24" x2="45" y2="24" stroke="#B9AE98"/><polyline points="0,14 35,36 70,14" fill="none" stroke="#8A7B6B"/></g>`) : "";
+    ? `<g transform="translate(140 346) rotate(-4)"><rect width="52" height="30" fill="#F1E6CC"/><path d="M0 0 L26 18 L52 0" fill="#E6D7B6" stroke="#9C8B6E" stroke-width=".8"/><rect width="52" height="30" fill="none" stroke="#9C8B6E" stroke-width=".8"/><circle cx="26" cy="18" r="6.5" fill="#8E1F1A"/><circle cx="26" cy="18" r="3.8" fill="#B23A31"/></g>`
+    : `<g transform="translate(138 344) rotate(-3)"><rect y="10" width="54" height="24" fill="#E9DDC2" stroke="#9C8B6E" stroke-width=".8"/><rect x="6" y="-4" width="42" height="30" fill="#FFFDF6" stroke="#C9BEA6" stroke-width=".8"/><path d="M11 4 h32 M11 9 h32 M11 14 h24" stroke="#B9AE98" stroke-width="1"/><path d="M0 10 L27 26 L54 10" fill="none" stroke="#9C8B6E" stroke-width=".8"/></g>`) : "";
   const paper = S.mine ? (S.news
-    ? `<g transform="translate(118 548) rotate(-8)"><rect width="62" height="34" fill="#F2EEE4" stroke="#8A8274"/><rect x="5" y="5" width="52" height="7" fill="#2A221C"/><rect x="5" y="15" width="24" height="14" fill="#B9B2A2"/><line x1="33" y1="17" x2="57" y2="17" stroke="#8A8274"/><line x1="33" y1="22" x2="57" y2="22" stroke="#8A8274"/><line x1="33" y1="27" x2="57" y2="27" stroke="#8A8274"/></g><g transform="translate(176 538)"><circle r="12" fill="#B8463E"/><text y="4" text-anchor="middle" font-size="11" font-weight="700" fill="#fff" font-family="Literata,serif">${S.news > 9 ? "9+" : S.news}</text></g>`
-    : `<g transform="translate(112 560) rotate(-4)"><rect width="78" height="26" fill="#EDE8DC" stroke="#8A8274"/><line x1="39" y1="0" x2="39" y2="26" stroke="#8A8274"/><line x1="6" y1="7" x2="34" y2="7" stroke="#A39B8C"/><line x1="6" y1="13" x2="34" y2="13" stroke="#A39B8C"/><line x1="44" y1="7" x2="72" y2="7" stroke="#A39B8C"/><line x1="44" y1="13" x2="72" y2="13" stroke="#A39B8C"/></g>`) : "";
-  const cur = S.reading[0], glow = !!cur || night;
-  const openBook = cur ? `<g transform="translate(300 556)"><path d="M0 8 Q16 0 32 8 L32 26 Q16 18 0 26Z" fill="#FFFBF0" stroke="#8A7B6B"/><path d="M32 8 Q48 0 64 8 L64 26 Q48 18 32 26Z" fill="#FFFBF0" stroke="#8A7B6B"/></g>` : "";
-  const lentBooks = S.lent.length ? `<rect x="205" y="452" width="9" height="22" fill="#2B3A55"/><rect x="215" y="448" width="8" height="26" fill="#7A2E2A"/><rect x="224" y="454" width="9" height="20" fill="#A8742B"/>` : "";
-  const sky = night ? `<rect x="46" y="56" width="98" height="128" fill="#1C2740"/><circle cx="118" cy="82" r="11" fill="#F3E6B8"/><circle cx="112" cy="79" r="10" fill="#1C2740"/><circle cx="66" cy="72" r="1.4" fill="#fff"/><circle cx="84" cy="98" r="1" fill="#fff"/><circle cx="130" cy="130" r="1.2" fill="#fff"/><circle cx="60" cy="140" r="1" fill="#fff"/>`
-    : `<rect x="46" y="56" width="98" height="128" fill="url(#sky)"/><circle cx="120" cy="84" r="12" fill="#FFF3C4"/><path d="M52 160 Q70 140 92 158 T140 150 L140 184 L52 184Z" fill="#9DB89A"/>`;
+    ? `<g transform="translate(108 566) rotate(-9)"><rect width="56" height="30" fill="#F2EEE4" stroke="#8A8274" stroke-width=".8"/><rect x="4" y="4" width="48" height="6" fill="#2A221C"/><rect x="4" y="13" width="20" height="12" fill="#B9B2A2"/><path d="M28 15 h24 M28 19 h24 M28 23 h24" stroke="#8A8274" stroke-width=".9"/></g><g transform="translate(166 556)"><circle r="11" fill="#B23A31" stroke="#F4EBD6" stroke-width="1.5"/><text y="4" text-anchor="middle" font-size="10.5" font-weight="700" fill="#fff" font-family="Literata,serif">${S.news > 9 ? "9+" : S.news}</text></g>`
+    : `<g transform="translate(100 576) rotate(-4)"><rect width="74" height="24" fill="#EDE8DC" stroke="#8A8274" stroke-width=".8"/><path d="M37 0 v24 M5 6 h27 M5 11 h27 M5 16 h20 M42 6 h27 M42 11 h27 M42 16 h22" stroke="#A39B8C" stroke-width=".9"/></g>`) : "";
+  const cur = S.reading[0];
+  const openBk = cur ? `<g transform="translate(292 566)"><path d="M0 8 Q14 1 28 8 L28 24 Q14 17 0 24Z" fill="#FFFBF0" stroke="#8A7B6B" stroke-width=".8"/><path d="M28 8 Q42 1 56 8 L56 24 Q42 17 28 24Z" fill="#F7F1E2" stroke="#8A7B6B" stroke-width=".8"/><path d="M5 12 q9 -4 19 0 M5 16 q9 -4 19 0 M32 12 q9 -4 19 0 M32 16 q9 -4 19 0" stroke="#C9BEA6" stroke-width=".7" fill="none"/></g>` : "";
+  const lit = !!cur;
   const pct = S.goal ? Math.min(1, S.fin / S.goal) : 0;
-  const label = (x, y, t) => `<g class="lbl" transform="translate(${x} ${y})"><rect x="${-t.length * 3.3 - 8}" y="-11" width="${t.length * 6.6 + 16}" height="18" rx="9"/><text y="2" text-anchor="middle">${t}</text></g>`;
+  const label = (x, y, t) => `<g class="lbl" transform="translate(${x} ${y})"><rect x="${-t.length * 3.2 - 8}" y="-11" width="${t.length * 6.4 + 16}" height="18" rx="9"/><text y="2" text-anchor="middle">${t.replace(/&/g, "&amp;").replace(/</g, "&lt;")}</text></g>`;
   const ini = (p.name || "?").trim()[0].toUpperCase();
-  return `<svg class="roomsvg" viewBox="0 0 400 700" role="group" aria-label="${p.name}'s room">
+  const tufts = []; for (let r = 0; r < 2; r++) for (let i = 0; i < 9; i++) tufts.push(`<circle cx="${34 + i * 19 + (r ? 9 : 0)}" cy="${538 + r * 14}" r="1.6" fill="#000" opacity=".35"/>`);
+  const lentBk = S.lent.length ? `<rect x="226" y="462" width="7" height="20" fill="#27344D"/><rect x="234" y="458" width="7" height="24" fill="#6E2B24"/><rect x="242" y="463" width="7" height="19" fill="#EDE4D2"/>` : "";
+  return `<svg class="roomsvg" viewBox="0 0 400 700" role="group" aria-label="${p.name.replace(/"/g, "")}'s study">
 <defs>
- <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#A9CBE0"/><stop offset="1" stop-color="#E9F1EE"/></linearGradient>
- <pattern id="paper" width="22" height="22" patternUnits="userSpaceOnUse"><rect width="22" height="22" fill="var(--rw)"/><rect width="11" height="22" fill="var(--rw2)"/></pattern>
- <pattern id="planks" width="80" height="24" patternUnits="userSpaceOnUse"><rect width="80" height="24" fill="var(--rf)"/><line x1="0" y1="23.5" x2="80" y2="23.5" stroke="var(--rf2)"/><line x1="52" y1="0" x2="52" y2="24" stroke="var(--rf2)"/></pattern>
- <radialGradient id="glow"><stop offset="0" stop-color="#FFE7A3" stop-opacity=".75"/><stop offset="1" stop-color="#FFE7A3" stop-opacity="0"/></radialGradient>
+ <linearGradient id="wal" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#3B2416"/><stop offset=".5" stop-color="#4A2E1C"/><stop offset="1" stop-color="#3B2416"/></linearGradient>
+ <linearGradient id="shelfwood" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6A4429"/><stop offset="1" stop-color="#3A2214"/></linearGradient>
+ <linearGradient id="led" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFD98A" stop-opacity="${night ? .42 : .3}"/><stop offset=".55" stop-color="#FFD98A" stop-opacity=".06"/><stop offset="1" stop-color="#FFD98A" stop-opacity="0"/></linearGradient>
+ <linearGradient id="inner" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#24150C"/><stop offset="1" stop-color="#1A0F08"/></linearGradient>
+ <linearGradient id="desk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5A3820"/><stop offset="1" stop-color="#3A2214"/></linearGradient>
+ <linearGradient id="leather" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".18"/><stop offset=".45" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".35"/></linearGradient>
+ <linearGradient id="brass" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#8A6A2C"/><stop offset=".5" stop-color="#E6C67A"/><stop offset="1" stop-color="#8A6A2C"/></linearGradient>
+ <pattern id="parquet" width="40" height="20" patternUnits="userSpaceOnUse"><rect width="40" height="20" fill="#5B3920"/><path d="M0 20 L20 0 M20 20 L40 0" stroke="#4A2E19" stroke-width="7"/><path d="M0 0 L20 20 M20 0 L40 20" stroke="#6B4528" stroke-width="1" opacity=".5"/></pattern>
+ <pattern id="carpet" width="26" height="16" patternUnits="userSpaceOnUse"><rect width="26" height="16" fill="${c}"/><path d="M13 1 L24 8 L13 15 L2 8Z" fill="none" stroke="#E6C67A" stroke-opacity=".35" stroke-width="1"/><circle cx="13" cy="8" r="1.4" fill="#E6C67A" opacity=".45"/></pattern>
+ <pattern id="coffer" width="50" height="50" patternUnits="userSpaceOnUse"><rect width="50" height="50" fill="#2A170C"/><rect x="5" y="5" width="40" height="40" fill="#3A2214"/><rect x="9" y="9" width="32" height="32" fill="#2E1A0E"/><circle cx="25" cy="25" r="2.2" fill="#FFE2A0" opacity="${night ? .95 : .7}"/></pattern>
+ <radialGradient id="pool"><stop offset="0" stop-color="#FFD27A" stop-opacity="${night ? .55 : .35}"/><stop offset="1" stop-color="#FFD27A" stop-opacity="0"/></radialGradient>
+ <radialGradient id="vig" cx=".5" cy=".45" r=".75"><stop offset=".55" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity="${night ? .6 : .38}"/></radialGradient>
 </defs>
-<rect width="400" height="470" fill="url(#paper)"/>
-<rect y="380" width="400" height="90" fill="var(--rp)"/><line x1="0" y1="380" x2="400" y2="380" stroke="var(--rf2)" stroke-width="3"/>
-<rect y="470" width="400" height="230" fill="url(#planks)"/>
-<rect y="466" width="400" height="8" fill="var(--rf2)"/>
-<ellipse cx="200" cy="640" rx="185" ry="42" fill="${c}" opacity=".45"/><ellipse cx="200" cy="640" rx="170" ry="34" fill="none" stroke="#D9B56A" stroke-opacity=".6" stroke-dasharray="4 4"/>
-${glow ? `<circle cx="368" cy="470" r="${cur ? 120 : 80}" fill="url(#glow)"/>` : ""}
-
-<g class="obj" data-go="window" aria-hidden="true">
- <rect x="38" y="48" width="114" height="144" rx="3" fill="#6B4A2B"/>${sky}
- <line x1="95" y1="56" x2="95" y2="184" stroke="#6B4A2B" stroke-width="4"/><line x1="46" y1="120" x2="144" y2="120" stroke="#6B4A2B" stroke-width="4"/>
- <path d="M30 40 L62 40 Q50 120 58 200 L30 200Z" fill="${c}" opacity=".85"/><path d="M160 40 L128 40 Q140 120 132 200 L160 200Z" fill="${c}" opacity=".85"/><rect x="24" y="36" width="142" height="6" rx="3" fill="#5E412A"/>
+<rect width="400" height="62" fill="url(#coffer)"/>
+<rect y="50" width="400" height="420" fill="url(#wal)"/>
+<rect y="50" width="400" height="12" fill="#5A3820"/><rect y="60" width="400" height="3" fill="#2A170C"/>
+<!-- floor -->
+<rect y="470" width="400" height="230" fill="url(#parquet)"/><rect y="468" width="400" height="6" fill="#2A170C"/>
+<path d="M30 600 L370 600 L400 700 L0 700Z" fill="url(#carpet)"/><path d="M30 600 L370 600 L400 700 L0 700Z" fill="#000" opacity=".18"/><path d="M36 606 L364 606 L392 700 M8 700 L36 606" stroke="#E6C67A" stroke-opacity=".5" stroke-width="2" fill="none"/>
+<!-- built-in bookcases -->
+<rect x="14" y="62" width="108" height="410" fill="#4A2E1C"/><rect x="278" y="62" width="108" height="410" fill="#4A2E1C"/>
+<rect x="24" y="68" width="88" height="374" fill="url(#inner)"/><rect x="288" y="68" width="88" height="374" fill="url(#inner)"/>
+<rect x="128" y="62" width="144" height="146" fill="#4A2E1C"/><rect x="132" y="80" width="136" height="126" fill="url(#inner)"/>
+<g class="obj" data-go="shelf" role="button" tabindex="0" aria-label="Bookcase, ${total} books">
+ <rect x="14" y="62" width="108" height="410" fill="transparent"/><rect x="278" y="62" width="108" height="410" fill="transparent"/><rect x="128" y="62" width="144" height="146" fill="transparent"/>
+ ${shelves}${decor}${books}
+ <rect x="12" y="436" width="112" height="36" fill="#3F2617"/><rect x="276" y="436" width="112" height="36" fill="#3F2617"/>
+ <rect x="22" y="444" width="44" height="22" rx="1" fill="#4E301D"/><rect x="70" y="444" width="44" height="22" rx="1" fill="#4E301D"/><rect x="286" y="444" width="44" height="22" rx="1" fill="#4E301D"/><rect x="334" y="444" width="44" height="22" rx="1" fill="#4E301D"/>
+ ${label(332, 78, "Bookcase · " + total)}
 </g>
-
+<!-- ladder -->
+<g aria-hidden="true" opacity=".95"><path d="M40 92 L18 470 M78 92 L60 470" stroke="#8C6239" stroke-width="5" stroke-linecap="round"/>${[130, 180, 230, 280, 330, 380, 430].map(y => { const t = (y - 92) / 378; return `<path d="M${40 - 22 * t} ${y} L${78 - 18 * t} ${y}" stroke="#A97B4C" stroke-width="4"/>`; }).join("")}<rect x="30" y="86" width="56" height="4" rx="2" fill="url(#brass)"/></g>
+<!-- centre niche: portrait and sconces -->
+<rect x="128" y="208" width="144" height="160" fill="#3F2617"/><rect x="138" y="216" width="124" height="146" fill="none" stroke="#5A3820" stroke-width="3"/>
+<rect x="132" y="206" width="136" height="3" fill="#FFE2A0" opacity="${night ? .9 : .6}"/><rect x="132" y="209" width="136" height="60" fill="url(#led)"/>
+<g aria-hidden="true">${[148, 252].map(x => `<rect x="${x - 2}" y="246" width="4" height="16" fill="url(#brass)"/><path d="M${x - 7} 246 h14 l-3 -12 h-8z" fill="#F3E3B5"/><circle cx="${x}" cy="238" r="22" fill="url(#pool)"/>`).join("")}</g>
 <g class="obj" data-go="profile" role="button" tabindex="0" aria-label="Profile and settings">
- <line x1="192" y1="40" x2="180" y2="58" stroke="#5E412A"/><line x1="192" y1="40" x2="204" y2="58" stroke="#5E412A"/>
- <ellipse cx="192" cy="92" rx="24" ry="31" fill="#B08A3E"/><ellipse cx="192" cy="92" rx="19" ry="26" fill="${c}"/>
- <text x="192" y="101" text-anchor="middle" font-family="Cormorant Garamond,serif" font-weight="700" font-size="26" fill="#F1D99A">${ini}</text>
- ${label(192, 140, S.mine ? "You" : p.name)}
+ <rect x="174" y="226" width="52" height="64" fill="url(#brass)"/><rect x="179" y="231" width="42" height="54" fill="${c}"/><rect x="179" y="231" width="42" height="54" fill="url(#leather)"/>
+ <text x="200" y="267" text-anchor="middle" font-family="Cormorant Garamond,serif" font-weight="700" font-size="28" fill="#F1D99A">${ini}</text>
+ ${label(200, 306, S.mine ? "You" : p.name)}
 </g>
-
-<g class="obj" data-go="year" role="button" tabindex="0" aria-label="Year in books">
- <circle cx="86" cy="214" r="3" fill="#5E412A"/>
- <rect x="54" y="220" width="64" height="78" rx="3" fill="#FFFDF6" stroke="#B9AE98"/><rect x="54" y="220" width="64" height="18" rx="3" fill="#9E2B25"/>
- <text x="86" y="233" text-anchor="middle" font-size="11" font-weight="700" fill="#fff" font-family="Literata,serif">${S.Y}</text>
- <text x="86" y="268" text-anchor="middle" font-size="22" font-family="Cormorant Garamond,serif" font-weight="700" fill="#2A221C">${S.fin}${S.goal ? "/" + S.goal : ""}</text>
- <rect x="62" y="280" width="48" height="5" rx="2.5" fill="#E2D6BC"/><rect x="62" y="280" width="${48 * pct}" height="5" rx="2.5" fill="#9E2B25"/>
- ${label(86, 314, "Year")}
-</g>
-
-<g class="obj" data-go="shelf" role="button" tabindex="0" aria-label="Bookcase, ${S.all.length} books">
- <rect x="226" y="28" width="158" height="444" rx="4" fill="#5E412A"/><rect x="234" y="40" width="142" height="424" fill="#3A2718"/>
- ${rows.map(y => `<rect x="230" y="${y + 84}" width="150" height="8" fill="#6B4A2B"/>`).join("")}
- ${spines}
- <rect x="222" y="22" width="166" height="10" rx="2" fill="#6B4A2B"/>
- ${label(305, 486, "Bookcase · " + S.all.length)}
-</g>
-
+<!-- desk -->
 <g class="obj" data-go="letters" role="button" tabindex="0" aria-label="${S.mine ? (S.mail ? S.mail + " new letters" : "Letters") : "Desk"}">
- <rect x="20" y="378" width="190" height="12" rx="2" fill="#6B4A2B"/><rect x="30" y="390" width="170" height="44" fill="#5E412A"/>
- <rect x="40" y="398" width="70" height="28" rx="2" fill="#6B4A2B"/><rect x="120" y="398" width="70" height="28" rx="2" fill="#6B4A2B"/><circle cx="75" cy="412" r="2.5" fill="#D9B56A"/><circle cx="155" cy="412" r="2.5" fill="#D9B56A"/>
- <rect x="32" y="434" width="10" height="56" fill="#5E412A"/><rect x="188" y="434" width="10" height="56" fill="#5E412A"/>
- <rect x="160" y="358" width="18" height="20" rx="4" fill="#2A221C"/><path d="M170 360 Q186 320 200 300" stroke="#F4EBD6" stroke-width="3" fill="none"/>
+ <rect x="112" y="372" width="176" height="10" fill="url(#desk)"/><rect x="112" y="370" width="176" height="3" fill="#7A5434"/>
+ <rect x="120" y="382" width="52" height="88" fill="#4A2E1C"/><rect x="228" y="382" width="52" height="88" fill="#4A2E1C"/>
+ ${[392, 420, 448].map(y => `<rect x="124" y="${y}" width="44" height="24" rx="1" fill="#55361F"/><rect x="141" y="${y + 11}" width="10" height="2.5" rx="1" fill="url(#brass)"/><rect x="232" y="${y}" width="44" height="24" rx="1" fill="#55361F"/><rect x="249" y="${y + 11}" width="10" height="2.5" rx="1" fill="url(#brass)"/>`).join("")}
+ <rect x="172" y="382" width="56" height="88" fill="#1E120A"/>
+ <rect x="128" y="366" width="34" height="5" fill="#2F4535"/><rect x="129" y="361" width="31" height="5" fill="#EDE4D2"/>
  ${letter}
- ${S.mine && S.mail ? `<g transform="translate(140 336)"><circle r="11" fill="#B8463E"/><text y="4" text-anchor="middle" font-size="11" font-weight="700" fill="#fff" font-family="Literata,serif">${S.mail}</text></g>` : ""}
- ${S.mine ? label(115, 458, S.mail ? "New letter" : "Letters") : ""}
+ <g aria-hidden="true"><rect x="270" y="364" width="12" height="6" rx="2" fill="url(#brass)"/><path d="M276 364 L268 336" stroke="url(#brass)" stroke-width="2.5"/><path d="M256 338 Q268 322 284 334 L280 340 Q268 332 260 344Z" fill="#2F5A3A"/><circle cx="270" cy="352" r="34" fill="url(#pool)"/></g>
+ ${S.mine && S.mail ? `<g transform="translate(196 340)"><circle r="10" fill="#B23A31" stroke="#F4EBD6" stroke-width="1.5"/><text y="4" text-anchor="middle" font-size="10" font-weight="700" fill="#fff" font-family="Literata,serif">${S.mail}</text></g>` : ""}
+ ${S.mine ? label(200, 458, S.mail ? "New letter" : "Letters") : ""}
 </g>
-
+<g class="obj" data-go="year" role="button" tabindex="0" aria-label="Year in books">
+ <path d="M214 370 L218 340 L250 340 L246 370Z" fill="#FFFDF6" stroke="#B9AE98" stroke-width=".8"/><path d="M218 340 L250 340 L249 348 L217 348Z" fill="#8E1F1A"/>
+ <text x="233" y="347" text-anchor="middle" font-size="7" font-weight="700" fill="#fff" font-family="Literata,serif">${S.Y}</text>
+ <text x="232" y="362" text-anchor="middle" font-size="11" font-weight="700" fill="#2A221C" font-family="Cormorant Garamond,serif">${S.fin}${S.goal ? "/" + S.goal : ""}</text>
+ <rect x="221" y="365" width="22" height="2.5" fill="#E2D6BC"/><rect x="221" y="365" width="${22 * pct}" height="2.5" fill="#8E1F1A"/>
+ ${label(252, 398, "Year")}
+</g>
+<circle cx="200" cy="80" r="70" fill="url(#pool)"/>
+<!-- chandelier -->
+<g aria-hidden="true"><line x1="200" y1="62" x2="200" y2="92" stroke="#8A6A2C" stroke-width="1.5"/><ellipse cx="200" cy="104" rx="30" ry="6" fill="none" stroke="url(#brass)" stroke-width="2.5"/><path d="M200 92 q-4 10 0 22 q4 -12 0 -22" fill="#E6C67A"/>${[-30, -15, 0, 15, 30].map(dx => `<rect x="${199 + dx}" y="${92 - Math.abs(dx) / 6}" width="2.5" height="10" fill="#F6EBD0"/><ellipse cx="${200 + dx}" cy="${89 - Math.abs(dx) / 6}" rx="2" ry="3.5" fill="#FFE7A3"/><circle cx="${200 + dx}" cy="${88 - Math.abs(dx) / 6}" r="9" fill="url(#pool)"/>`).join("")}</g>
+<!-- lent basket -->
 <g class="obj" data-go="lent" role="button" tabindex="0" aria-label="Lent books, ${S.lent.length}">
- ${lentBooks}
- <path d="M200 470 L240 470 L234 504 L206 504Z" fill="#B88A55"/><path d="M200 470 L240 470" stroke="#8C6239" stroke-width="3"/>
- <path d="M204 480 L237 480 M205 490 L236 490" stroke="#8C6239" stroke-width="1.5"/>
+ ${lentBk}<path d="M222 478 L256 478 L251 508 L227 508Z" fill="#A27850"/><path d="M222 478 h34" stroke="#7A5434" stroke-width="3"/><path d="M225 488 h29 M226 498 h27" stroke="#7A5434" stroke-width="1.3"/>
 </g>
-
+<!-- chesterfield -->
 <g class="obj" data-go="news" role="button" tabindex="0" aria-label="${S.mine ? (S.news ? S.news + " new books in the news" : "News") : "Sofa"}">
- <rect x="16" y="512" width="214" height="62" rx="16" fill="${c}"/><rect x="16" y="512" width="214" height="62" rx="16" fill="#000" opacity=".12"/>
- <rect x="30" y="566" width="186" height="38" rx="8" fill="${c}"/>
- <rect x="8" y="548" width="34" height="62" rx="12" fill="${c}"/><rect x="204" y="548" width="34" height="62" rx="12" fill="${c}"/>
- <rect x="8" y="548" width="34" height="62" rx="12" fill="#000" opacity=".08"/><rect x="204" y="548" width="34" height="62" rx="12" fill="#000" opacity=".08"/>
- <rect x="22" y="610" width="8" height="14" fill="#3A2718"/><rect x="216" y="610" width="8" height="14" fill="#3A2718"/>
+ <ellipse cx="116" cy="652" rx="112" ry="10" fill="#000" opacity=".35"/>
+ <rect x="20" y="526" width="192" height="52" rx="10" fill="${c}"/><rect x="20" y="526" width="192" height="52" rx="10" fill="url(#leather)"/>${tufts.join("")}
+ <rect x="24" y="578" width="184" height="40" rx="6" fill="${c}"/><rect x="24" y="578" width="184" height="40" rx="6" fill="url(#leather)"/><path d="M85 580 v36 M147 580 v36" stroke="#000" stroke-opacity=".25"/>
+ <path d="M4 552 q0 -16 18 -16 q14 0 14 16 v84 h-32z" fill="${c}"/><path d="M4 552 q0 -16 18 -16 q14 0 14 16 v84 h-32z" fill="url(#leather)"/>
+ <path d="M196 552 q0 -16 18 -16 q14 0 14 16 v84 h-32z" fill="${c}"/><path d="M196 552 q0 -16 18 -16 q14 0 14 16 v84 h-32z" fill="url(#leather)"/>
+ <rect x="10" y="636" width="7" height="12" fill="#2A170C"/><rect x="215" y="636" width="7" height="12" fill="#2A170C"/>
  ${paper}
- ${S.mine ? label(123, 646, S.news ? "News · " + S.news : "News") : ""}
+ ${S.mine ? label(116, 674, S.news ? "News · " + S.news : "News") : ""}
 </g>
-
+<!-- wingback armchair and floor lamp -->
 <g class="obj" data-go="reading" role="button" tabindex="0" aria-label="${cur ? "Reading " + cur.title.replace(/"/g, "") : "Armchair, nothing on the go"}">
- <rect x="262" y="500" width="112" height="78" rx="22" fill="#8C6239"/><rect x="262" y="500" width="112" height="78" rx="22" fill="#000" opacity=".1"/>
- <rect x="272" y="570" width="94" height="36" rx="8" fill="#8C6239"/>
- <rect x="252" y="540" width="28" height="70" rx="11" fill="#7A5434"/><rect x="358" y="540" width="28" height="70" rx="11" fill="#7A5434"/>
- <rect x="266" y="610" width="7" height="16" fill="#3A2718"/><rect x="364" y="610" width="7" height="16" fill="#3A2718"/>
- ${openBook}
- <line x1="378" y1="458" x2="378" y2="628" stroke="#2A221C" stroke-width="4"/><ellipse cx="378" cy="630" rx="14" ry="4" fill="#2A221C"/>
- <path d="M356 456 L400 456 L392 424 L364 424Z" fill="${glow ? "#F3D58A" : "#C9B48A"}" stroke="#8C6239"/>
- ${label(318, 646, cur ? (cur.title.length > 16 ? cur.title.slice(0, 15) + "…" : cur.title) : "Armchair")}
+ ${lit ? `<circle cx="372" cy="470" r="130" fill="url(#pool)"/>` : ""}
+ <ellipse cx="318" cy="652" rx="70" ry="9" fill="#000" opacity=".35"/>
+ <path d="M266 520 q0 -34 52 -34 q52 0 52 34 v80 h-104z" fill="#6E3420"/><path d="M266 520 q0 -34 52 -34 q52 0 52 34 v80 h-104z" fill="url(#leather)"/>
+ <path d="M258 548 q0 -18 18 -18 v30 h-18z M378 548 q0 -18 -18 -18 v30 h18z" fill="#5E2A19"/>
+ <rect x="270" y="584" width="96" height="36" rx="6" fill="#6E3420"/><rect x="270" y="584" width="96" height="36" rx="6" fill="url(#leather)"/>
+ <path d="M254 556 q0 -12 14 -12 q10 0 10 12 v76 h-24z" fill="#5E2A19"/><path d="M358 556 q0 -12 10 -12 q14 0 14 12 v76 h-24z" fill="#5E2A19"/>
+ <path d="M254 556 q0 -12 14 -12 q10 0 10 12 v76 h-24z M358 556 q0 -12 10 -12 q14 0 14 12 v76 h-24z" fill="url(#leather)"/>
+ <rect x="262" y="632" width="6" height="14" fill="#2A170C"/><rect x="368" y="632" width="6" height="14" fill="#2A170C"/>
+ ${openBk}
+ <line x1="386" y1="440" x2="386" y2="646" stroke="url(#brass)" stroke-width="3.5"/><ellipse cx="386" cy="648" rx="11" ry="3.5" fill="#8A6A2C"/>
+ <path d="M368 440 L398 440 L392 414 L374 414Z" fill="${lit ? "#F7DE9A" : "#CDBA8E"}" stroke="#8A6A2C"/>
+ ${label(318, 674, cur ? (cur.title.length > 18 ? cur.title.slice(0, 17) + "…" : cur.title) : "Armchair")}
 </g>
+<rect width="400" height="700" fill="url(#vig)" pointer-events="none"/>
 </svg>`;
 }
 function renderRoom(uid) {
