@@ -234,7 +234,10 @@ body{overscroll-behavior-y:contain}
 .room{position:relative;max-width:460px;margin:0 auto;overflow:hidden;border-radius:14px;box-shadow:var(--shadow);background:#1E120A;aspect-ratio:400/700;touch-action:pan-y}
 .roomsvg.layer{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;will-change:transform}
 .roomsvg.layer .obj[role=button]{pointer-events:auto}
-.room3d{position:relative;max-width:520px;margin:0 auto;border-radius:14px;overflow:hidden;box-shadow:var(--shadow);background:#140B06;aspect-ratio:3/4;touch-action:none}
+.room3d{position:relative;max-width:560px;margin:0 auto;border-radius:14px;overflow:hidden;box-shadow:var(--shadow);background:#2A1C12;height:min(72vh,640px);touch-action:none}
+.r3bar{display:flex;justify-content:center;gap:10px;margin-top:12px}
+.r3btn{border:1px solid var(--edge);background:var(--paper-2);border-radius:22px;min-width:46px;height:44px;font-size:20px;color:var(--ink)}
+.r3btn.wide{font-size:15px;padding:0 18px}
 .room3d canvas{display:block;width:100%;height:100%}
 .room3d .r3msg{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#E6C67A;font-style:italic;text-align:center;padding:20px}
 .roomsvg{display:block;width:100%;height:auto;--rw:#E9DCC1;--rw2:#E3D4B6;--rp:#D6C29E;--rf:#A27850;--rf2:#7F5A38}
@@ -457,7 +460,7 @@ async function openShelf(uid) {
   ui.tab = "all"; ui.q = ""; ui.genre = null;
   const t = turn({ color: p.color, kicker: "Ex Libris", name: p.name, opening: true });
   await new Promise(r => setTimeout(r, reduce ? 0 : 160));
-  go("/room/" + encodeURIComponent(uid)); window.scrollTo(0, 0);
+  go(roomPath(uid)); window.scrollTo(0, 0);
   await t; mergeSeed(uid);
 }
 async function closeTo(path) { const t = turn({ paper: true, kicker: "Ex Libris", name: "", opening: false }); await new Promise(r => setTimeout(r, reduce ? 0 : 700)); go(path); window.scrollTo(0, 0); await t; }
@@ -494,7 +497,7 @@ function renderShelf(uid) {
   }
   const authors = new Set(all.filter(b => st(b) !== "wishlist").flatMap(b => arr(b.authors))).size;
   mount(
-    h("div", { class: "topbar" }, h("button", { class: "back", onclick: () => go("/room/" + encodeURIComponent(uid)) }, "‹ Room"), h("button", { class: "back", onclick: () => closeTo("/") }, "Club ›")),
+    h("div", { class: "topbar" }, h("button", { class: "back", onclick: () => go(roomPath(uid)) }, "‹ Room"), h("button", { class: "back", onclick: () => closeTo("/") }, "Club ›")),
     h("header", { class: "phead" }, h("div", { class: "sc faint" }, "the shelf of"), h("h1", {}, p.name), h("div", { class: "actions", style: { "justify-content": "center", "margin-top": "8px" } }, edit ? h("button", { class: "rename", type: "button", onclick: () => editShelf(uid) }, "✎ Edit shelf") : null, h("button", { class: "rename", type: "button", onclick: () => go("/year/" + encodeURIComponent(uid)) }, "◔ Year in books")),
       h("div", { class: "stats sc" }, counts.read + " read · " + counts.reading + " reading · " + counts.wishlist + " wished · " + authors + " authors")),
     h("div", { class: "fleuron" }, "❦"),
@@ -841,187 +844,303 @@ function renderRoom(uid) {
     wrap,
     h("div", { class: "actions", style: { "justify-content": "center", "margin-top": "12px" } },
       needPerm ? h("button", { class: "btn", type: "button", onclick: async e => { try { PAR.perm = (await DeviceOrientationEvent.requestPermission()) === "granted"; } catch (err) {} e.target.remove(); } }, "✦ Tilt the phone to look around") : null,
-      h("button", { class: "btn", type: "button", onclick: () => go("/room3d/" + encodeURIComponent(uid)) }, "◈ Try the 3D room (beta)")),
+      h("button", { class: "btn", type: "button", onclick: () => { lsSet("cc-room2d", false); go("/room3d/" + encodeURIComponent(uid)); } }, "◈ Switch to the 3D room")),
     h("p", { class: "faint roomhint" }, mine ? (S.mail ? "A sealed letter is waiting on your desk. " : "") + "Tap anything in the room." : "You are visiting " + p.name + ". Tap the bookcase, the armchair or the calendar.")
   );
 }
 
 /* ---------- 3D room (beta) ---------- */
+const roomPath = uid => (lsGet("cc-room2d", false) ? "/room/" : "/room3d/") + encodeURIComponent(uid);
+const R3 = { mode: "iso", az: Math.PI / 4 };
+function webglOK() { try { const c = document.createElement("canvas"); return !!(c.getContext("webgl2") || c.getContext("webgl")); } catch (e) { return false; } }
 async function renderRoom3D(uid) {
   const p = profiles[uid]; if (!p) { if (Object.keys(profiles).length) go("/"); return; }
   watch(uid);
   if ($app.dataset.view === "room3d:" + uid && $app.querySelector(".room3d canvas")) return;
+  if (!webglOK()) { location.replace("#/room/" + encodeURIComponent(uid)); return; }
   ui.route = "room3d:" + uid; $app.dataset.view = ui.route;
   const S = roomState(uid), mine = S.mine;
-  const box = h("div", { class: "room3d" }, h("div", { class: "r3msg" }, "Building the room in 3D…"));
+  const box = h("div", { class: "room3d" }, h("div", { class: "r3msg" }, "Furnishing the room…"));
+  const modeBtn = h("button", { class: "r3btn wide", type: "button" }), rotL = h("button", { class: "r3btn", type: "button", "aria-label": "Rotate left" }, "↺"), rotR = h("button", { class: "r3btn", type: "button", "aria-label": "Rotate right" }, "↻");
+  const bar = h("div", { class: "r3bar" }, rotL, modeBtn, rotR);
   mount(
-    h("div", { class: "topbar" }, h("button", { class: "back", onclick: () => go("/room/" + encodeURIComponent(uid)) }, "‹ Back to the room"), h("div", { class: "sc faint" }, "3D beta")),
-    box,
-    h("p", { class: "faint roomhint" }, "Drag to look around, pinch to move closer, tap an object to open it.")
+    h("div", { class: "topbar" }, h("button", { class: "back", onclick: () => closeTo("/") }, "‹ Club"), h("div", { class: "sc faint" }, mine ? "your room" : p.name + "'s room")),
+    box, bar,
+    h("p", { class: "faint roomhint" }, (mine && S.mail ? "A sealed letter is waiting on your desk. " : "") + "Drag to turn the room, pinch to zoom, tap an object to open it."),
+    h("p", { class: "roomhint" }, h("button", { class: "rename", type: "button", onclick: () => { lsSet("cc-room2d", true); go("/room/" + encodeURIComponent(uid)); } }, "Use the illustrated room instead"))
   );
   let THREE, OrbitControls, RoundedBoxGeometry;
   try {
     THREE = await import("three");
     ({ OrbitControls } = await import("three/addons/controls/OrbitControls.js"));
     ({ RoundedBoxGeometry } = await import("three/addons/geometries/RoundedBoxGeometry.js"));
-  } catch (e) { box.firstChild.textContent = "The 3D room needs internet the first time it opens."; return; }
+  } catch (e) { location.replace("#/room/" + encodeURIComponent(uid)); setTimeout(() => toast("The 3D room needs internet the first time"), 400); return; }
   if (!box.isConnected) return;
   const night = matchMedia("(prefers-color-scheme: dark)").matches, c = p.color || LEATHER[0];
-  const W = box.clientWidth, H = box.clientHeight;
+  let W = box.clientWidth, H = box.clientHeight;
   const renderer = new THREE.WebGLRenderer({ antialias: true });
   renderer.setPixelRatio(Math.min(devicePixelRatio, 2)); renderer.setSize(W, H);
   renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-  renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = night ? .95 : 1.15; renderer.outputColorSpace = THREE.SRGBColorSpace;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = night ? 1 : 1.2; renderer.outputColorSpace = THREE.SRGBColorSpace;
   box.replaceChildren(renderer.domElement);
-  const scene = new THREE.Scene(); scene.background = new THREE.Color("#140B06"); scene.fog = new THREE.Fog("#140B06", 9, 16);
-  const cam = new THREE.PerspectiveCamera(60, W / H, .05, 40); cam.position.set(0, 1.75, 5.6);
-  const ctl = new OrbitControls(cam, renderer.domElement);
-  ctl.target.set(0, 1.25, -1); ctl.enableDamping = true; ctl.enablePan = false; ctl.minDistance = 1.6; ctl.maxDistance = 7;
-  ctl.minPolarAngle = 1.05; ctl.maxPolarAngle = 1.72; ctl.minAzimuthAngle = -.75; ctl.maxAzimuthAngle = .75; ctl.rotateSpeed = .55;
+  const scene = new THREE.Scene(); const bg = night ? "#120A06" : "#2A1C12"; scene.background = new THREE.Color(bg);
 
   const tex = (w, hh, draw) => { const cv = document.createElement("canvas"); cv.width = w; cv.height = hh; draw(cv.getContext("2d"), w, hh); const t = new THREE.CanvasTexture(cv); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4; return t; };
   const mat = (color, o = {}) => new THREE.MeshStandardMaterial({ color, roughness: .6, metalness: 0, ...o });
   const walnut = mat("#4A2C1A", { roughness: .45 }), walnutDark = mat("#2E1A0E", { roughness: .5 }), brass = mat("#C9A65A", { metalness: .9, roughness: .3 });
+  const plaster = mat(night ? "#5A4A3A" : "#C9B08A", { roughness: .9 }), wainscot = mat("#3E2616", { roughness: .5 });
   const leather = col => mat(col, { roughness: .42, metalness: .05 });
   const add = (geo, m, x, y, z, parent = scene, cast = true) => { const o = new THREE.Mesh(geo, m); o.position.set(x, y, z); o.castShadow = cast; o.receiveShadow = true; parent.add(o); return o; };
   const B = (w, h2, d) => new THREE.BoxGeometry(w, h2, d);
-  const clickables = [];
-  const group = (go, x, y, z, ry = 0) => { const g = new THREE.Group(); g.position.set(x, y, z); g.rotation.y = ry; g.userData.go = go; scene.add(g); clickables.push(g); return g; };
+  const RB = (w, h2, d, r) => new RoundedBoxGeometry(w, h2, d, 4, r);
+  const clickables = [], labels = [];
+  const group = (go, x, y, z, ry = 0, parent = scene) => { const g = new THREE.Group(); g.position.set(x, y, z); g.rotation.y = ry; g.userData.go = go; parent.add(g); clickables.push(g); return g; };
   const sprite = (text, x, y, z, parent = scene, badge) => {
-    const t = tex(badge ? 64 : 512, badge ? 64 : 96, (g, w, hh) => {
+    const t = tex(badge ? 64 : 512, badge ? 64 : 96, (g, w) => {
       if (badge) { g.fillStyle = "#B23A31"; g.beginPath(); g.arc(32, 32, 28, 0, 7); g.fill(); g.strokeStyle = "#F4EBD6"; g.lineWidth = 4; g.stroke(); g.fillStyle = "#fff"; g.font = "bold 30px Georgia"; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText(text, 32, 34); return; }
-      g.font = "600 40px Literata, Georgia, serif"; const tw = g.measureText(text).width + 50; g.fillStyle = "rgba(26,16,9,.85)"; g.strokeStyle = "rgba(230,198,122,.7)"; g.lineWidth = 3;
-      const x0 = (w - tw) / 2; g.beginPath(); g.roundRect(x0, 14, tw, 68, 34); g.fill(); g.stroke(); g.fillStyle = "#F4EBD6"; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText(text, w / 2, 50);
+      g.font = "600 40px Literata, Georgia, serif"; const tw = g.measureText(text).width + 50; g.fillStyle = "rgba(26,16,9,.86)"; g.strokeStyle = "rgba(230,198,122,.75)"; g.lineWidth = 3;
+      g.beginPath(); g.roundRect((w - tw) / 2, 14, tw, 68, 34); g.fill(); g.stroke(); g.fillStyle = "#F4EBD6"; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText(text, w / 2, 50);
     });
-    const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex === null ? null : t, depthTest: false, transparent: true }));
-    sp.scale.set(badge ? .3 : 1.7, badge ? .3 : .32, 1); sp.position.set(x, y, z); sp.renderOrder = 10; parent.add(sp); return sp;
+    const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: t, depthTest: false, transparent: true }));
+    sp.userData.base = badge ? [.28, .28] : [1.45, .27]; sp.scale.set(...sp.userData.base, 1); sp.position.set(x, y, z); sp.renderOrder = 10; parent.add(sp); labels.push(sp); return sp;
   };
+  const RS = 3.2, WH = 3;   // half room size, wall height
+  const walls = { N: new THREE.Group(), S: new THREE.Group(), E: new THREE.Group(), W: new THREE.Group() };
+  Object.values(walls).forEach(g => scene.add(g));
+  const normals = { N: [0, -1], S: [0, 1], E: [1, 0], W: [-1, 0] };
 
-  // room shell
+  // floor, skirting, carpet
   const parquet = tex(512, 512, (g, w) => { g.fillStyle = "#4E3019"; g.fillRect(0, 0, w, w); for (let y = 0; y < 16; y++) for (let x = 0; x < 8; x++) { g.fillStyle = ["#5B3920", "#553419", "#62401F", "#4A2D16"][(x * 7 + y * 3) % 4]; g.save(); g.translate(x * 64 + (y % 2) * 32, y * 32); g.rotate((y % 2 ? 1 : -1) * Math.PI / 4); g.fillRect(-4, -20, 60, 18); g.restore(); } });
-  parquet.wrapS = parquet.wrapT = THREE.RepeatWrapping; parquet.repeat.set(4, 3);
-  const floor = add(new THREE.PlaneGeometry(9, 7), mat("#fff", { map: parquet, roughness: .5 }), 0, 0, 0, scene, false); floor.rotation.x = -Math.PI / 2;
+  parquet.wrapS = parquet.wrapT = THREE.RepeatWrapping; parquet.repeat.set(3, 3);
+  const floor = add(B(RS * 2 + .24, .12, RS * 2 + .24), mat("#fff", { map: parquet, roughness: .5 }), 0, -.06, 0, scene, false);
   const carpetT = tex(512, 512, (g, w) => { g.fillStyle = c; g.fillRect(0, 0, w, w); g.strokeStyle = "rgba(230,198,122,.45)"; g.lineWidth = 3; for (let y = 0; y < w; y += 48) for (let x = 0; x < w; x += 64) { g.beginPath(); g.moveTo(x + 32, y + 4); g.lineTo(x + 60, y + 24); g.lineTo(x + 32, y + 44); g.lineTo(x + 4, y + 24); g.closePath(); g.stroke(); } g.lineWidth = 14; g.strokeRect(10, 10, w - 20, w - 20); });
-  const carpet = add(B(4.6, .02, 3), mat("#fff", { map: carpetT, roughness: .95 }), 0, .011, .6, scene, false);
-  add(B(9, 3.4, .1), walnut, 0, 1.7, -3.05, scene, false);
-  [-4.5, 4.5].forEach(x => add(B(.1, 3.4, 7), walnut, x, 1.7, 0, scene, false));
-  const ceil = add(B(9, .1, 7), walnutDark, 0, 3.4, 0, scene, false);
-  for (let x = -4; x <= 4; x += 1) for (let z = -2.5; z <= 2.5; z += 1) { add(B(.8, .06, .8), walnut, x, 3.33, z, scene, false); const l = add(new THREE.CircleGeometry(.035, 12), mat("#FFE2A0", { emissive: "#FFD27A", emissiveIntensity: 2 }), x, 3.29, z, scene, false); l.rotation.x = Math.PI / 2; }
+  add(B(3.4, .02, 2.8), mat("#fff", { map: carpetT, roughness: .95 }), .5, .011, .2, scene, false);
 
-  // bookcases along the back wall with lit shelves
+  // wall builder with openings: holes = [[from, to, bottom, top]] along the wall
+  const wallPanel = (side, holes = []) => {
+    const g = walls[side], horiz = side === "N" || side === "S", sign = side === "N" || side === "W" ? -1 : 1;
+    const piece = (a0, a1, y0, y1) => { if (a1 - a0 < .01 || y1 - y0 < .01) return; const len = a1 - a0, mid = (a0 + a1) / 2;
+      const plast = add(horiz ? B(len, y1 - y0, .12) : B(.12, y1 - y0, len), plaster, horiz ? mid : sign * (RS + .06), (y0 + y1) / 2, horiz ? sign * (RS + .06) : mid, g, false);
+      if (y0 < 1.05) { const top = Math.min(1.05, y1); add(horiz ? B(len, top - y0, .03) : B(.03, top - y0, len), wainscot, horiz ? mid : sign * (RS - .015), (y0 + top) / 2, horiz ? sign * (RS - .015) : mid, g, false); } };
+    let a = -RS - .12; const sorted = holes.slice().sort((x, y) => x[0] - y[0]);
+    for (const [h0, h1, b0, t0] of sorted) { piece(a, h0, 0, WH); piece(h0, h1, 0, b0); piece(h0, h1, t0, WH); a = h1; }
+    piece(a, RS + .12, 0, WH);
+    add(horiz ? B(RS * 2 + .24, .08, .16) : B(.16, .08, RS * 2 + .24), walnut, horiz ? 0 : sign * (RS + .02), WH - .04, horiz ? sign * (RS + .02) : 0, g, false);
+    add(horiz ? B(RS * 2, .03, .05) : B(.05, .03, RS * 2), walnut, horiz ? 0 : sign * (RS - .02), 1.06, horiz ? sign * (RS - .02) : 0, g, false);
+  };
+  wallPanel("N"); wallPanel("E"); wallPanel("W", [[-.8, .8, .9, 2.4]]); wallPanel("S", [[1.1, 2.1, 0, 2.15]]);
+
+  // NORTH: built-in bookcases, niche with portrait and sconces
   const pal = ["#6E2B24", "#2F4535", "#27344D", "#8E6A2E", "#4C2E45", "#38525A", "#7A5434", "#3B3B3B", "#EDE4D2", "#D9CDB4", "#F3EEE3", "#B9472F", "#1F2A38", "#C9B48A"];
-  const comps = []; const shelfYs = [.62, 1.12, 1.62, 2.12, 2.62];
-  const sections = [[-4.3, -1.5], [1.5, 4.3]];
-  sections.forEach(([x0, x1]) => {
-    add(B(x1 - x0 + .1, 3.1, .5), walnutDark, (x0 + x1) / 2, 1.55, -2.78);
-    shelfYs.forEach(y => { add(B(x1 - x0, .04, .42), walnut, (x0 + x1) / 2, y - .02, -2.74); add(B(x1 - x0 - .04, .012, .02), mat("#FFE2A0", { emissive: "#FFD27A", emissiveIntensity: night ? 3 : 2 }), (x0 + x1) / 2, y + .44, -2.56, scene, false); comps.push([x0 + .04, x1 - .04, y]); });
-    add(B(x1 - x0 + .1, .4, .55), walnut, (x0 + x1) / 2, .2, -2.72);
+  const N = walls.N, comps = [], shelfYs = [.62, 1.1, 1.58, 2.06, 2.54];
+  [[-3.12, -.95], [.95, 3.12]].forEach(([x0, x1]) => {
+    add(B(x1 - x0 + .08, WH - .1, .46), walnutDark, (x0 + x1) / 2, (WH - .1) / 2, -RS + .23, N);
+    shelfYs.forEach(y => { add(B(x1 - x0, .035, .4), walnut, (x0 + x1) / 2, y - .018, -RS + .22, N); add(B(x1 - x0 - .04, .01, .02), mat("#FFE2A0", { emissive: "#FFD27A", emissiveIntensity: night ? 3 : 2 }), (x0 + x1) / 2, y + .43, -RS + .4, N, false); comps.push([x0 + .03, x1 - .03, y]); });
+    add(B(x1 - x0 + .08, .4, .5), walnut, (x0 + x1) / 2, .2, -RS + .25, N);
   });
-  add(B(3.1, 1.2, .5), walnutDark, 0, 2.75, -2.78); [2.3, 2.85].forEach(y => { add(B(3, .04, .42), walnut, 0, y - .02, -2.74); comps.push([-1.46, 1.46, y]); });
-  const total = S.all.length, filled = Math.min(comps.length, Math.max(total ? 2 : 0, Math.ceil(Math.sqrt(total) * 1.7)));
+  add(B(1.9, .95, .46), walnutDark, 0, 2.47, -RS + .23, N); [2.08, 2.52].forEach(y => { add(B(1.86, .035, .4), walnut, 0, y - .018, -RS + .22, N); comps.push([-.9, .9, y]); });
+  const total = S.all.length, filled = Math.min(comps.length, Math.max(total ? 2 : 0, Math.ceil(Math.sqrt(total) * 1.8)));
   const pos = [];
-  comps.forEach(([x0, x1, y], ci) => { if (ci % comps.length >= filled && (hash("f" + ci) % comps.length) >= filled) return; let x = x0; let k = 0; while (x < x1 - .05) { const key = ci + "-" + k++, w = .03 + (hash("w" + key) % 5) * .008, hh = .26 + (hash("h" + key) % 12) * .012, d = .2 + (hash("d" + key) % 5) * .015; pos.push([x + w / 2, y + hh / 2, -2.62 - (.24 - d) / 2, w, hh, d, pal[hash("c" + key) % pal.length], hash("l" + key) % 11 === 0]); x += w + .003; if (hash("g" + key) % 15 === 0) x += .08; } });
-  const im = new THREE.InstancedMesh(B(1, 1, 1), mat("#fff", { roughness: .7 }), pos.length); im.castShadow = true; im.receiveShadow = true;
+  comps.forEach(([x0, x1, y], ci) => { if ((hash("f" + ci) % comps.length) >= filled) return; let x = x0, k = 0; while (x < x1 - .05) { const key = ci + "-" + k++, w = .03 + (hash("w" + key) % 5) * .008, hh = .26 + (hash("h" + key) % 12) * .012, d = .2 + (hash("d" + key) % 5) * .015; pos.push([x + w / 2, y + hh / 2, -RS + .3 + d / 2, w, hh, d, pal[hash("c" + key) % pal.length], hash("l" + key) % 11 === 0]); x += w + .003; if (hash("g" + key) % 15 === 0) x += .08; } });
+  const im = new THREE.InstancedMesh(B(1, 1, 1), mat("#fff", { roughness: .7 }), Math.max(1, pos.length)); im.castShadow = true; im.receiveShadow = true;
   const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), col = new THREE.Color();
-  pos.forEach(([x, y, z, w, hh, d, cl, lean], i) => { q.setFromEuler(new THREE.Euler(0, 0, lean ? .22 : 0)); m4.compose(new THREE.Vector3(x, y - (lean ? .01 : 0), z), q, new THREE.Vector3(w, hh, d)); im.setMatrixAt(i, m4); im.setColorAt(i, col.set(cl)); });
-  const shelfG = group("shelf", 0, 0, 0); shelfG.add(im);
-  const hit = new THREE.Mesh(B(8.8, 3.1, .3), new THREE.MeshBasicMaterial({ visible: false })); hit.position.set(0, 1.55, -2.6); shelfG.add(hit);
-  sprite("Bookcase · " + total, 2.6, 2.95, -2.3, shelfG);
-  // shelf glow
-  [[-2.9, 2.2], [2.9, 2.2], [-2.9, 1.1], [2.9, 1.1]].forEach(([x, y]) => { const l = new THREE.PointLight("#FFD27A", night ? 1.3 : .8, 2.6, 2); l.position.set(x, y, -2.2); scene.add(l); });
+  pos.forEach(([x, y, z, w, hh, d, cl, lean], i) => { q.setFromEuler(new THREE.Euler(0, 0, lean ? .22 : 0)); m4.compose(new THREE.Vector3(x, y, z), q, new THREE.Vector3(w, hh, d)); im.setMatrixAt(i, m4); im.setColorAt(i, col.set(cl)); });
+  if (!pos.length) im.count = 0;
+  const shelfG = group("shelf", 0, 0, 0, 0, N); shelfG.add(im);
+  [-2.03, 2.03].forEach(x => { const hb = new THREE.Mesh(B(2.2, WH - .1, .5), new THREE.MeshBasicMaterial({ visible: false })); hb.position.set(x, (WH - .1) / 2, -RS + .25); shelfG.add(hb); });
+  sprite("Bookcase · " + total, 2.03, WH + .2, -RS + .4, shelfG);
+  const portG = group("profile", 0, 1.55, -RS + .03, 0, N);
+  add(B(.56, .7, .04), brass, 0, 0, 0, portG);
+  const porT = tex(256, 320, (g, w, hh) => { g.fillStyle = c; g.fillRect(0, 0, w, hh); const gr = g.createLinearGradient(0, 0, 0, hh); gr.addColorStop(0, "rgba(255,255,255,.15)"); gr.addColorStop(1, "rgba(0,0,0,.35)"); g.fillStyle = gr; g.fillRect(0, 0, w, hh); g.fillStyle = "#F1D99A"; g.font = "bold 170px Georgia"; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText((p.name || "?")[0].toUpperCase(), w / 2, hh / 2 + 10); });
+  add(B(.46, .6, .01), mat("#fff", { map: porT }), 0, 0, .025, portG);
+  sprite(mine ? "You" : p.name, 0, .55, .15, portG);
+  [-.62, .62].forEach(x => { add(B(.04, .14, .04), brass, x, 1.62, -RS + .03, N); add(new THREE.CylinderGeometry(.05, .07, .1, 16), mat("#F3E3B5", { emissive: "#FFD9A0", emissiveIntensity: 1.3 }), x, 1.75, -RS + .1, N, false); const sl = new THREE.PointLight("#FFD9A0", night ? 1 : .6, 1.8, 2); sl.position.set(x, 1.75, -RS + .3); N.add(sl); });
+  [[-2.03, 2.2], [2.03, 2.2], [-2.03, 1], [2.03, 1]].forEach(([x, y]) => { const l = new THREE.PointLight("#FFD27A", night ? 1.4 : .8, 2.4, 2); l.position.set(x, y, -RS + .75); N.add(l); });
+  // ladder against the bookcase
+  const lad = new THREE.Group(); lad.position.set(-2.55, 0, -RS + .62); lad.rotation.x = -.17; N.add(lad);
+  [-.22, .22].forEach(x => add(B(.05, 2.9, .05), mat("#8C6239"), x, 1.45, 0, lad));
+  for (let y = .35; y < 2.9; y += .38) add(B(.44, .035, .04), mat("#A97B4C"), 0, y, 0, lad);
 
-  // ladder
-  const lad = new THREE.Group(); lad.position.set(-3.4, 0, -2.25); lad.rotation.x = -.16; scene.add(lad);
-  [-.22, .22].forEach(x => add(B(.05, 3, .05), mat("#8C6239"), x, 1.5, 0, lad));
-  for (let y = .35; y < 3; y += .38) add(B(.44, .035, .04), mat("#A97B4C"), 0, y, 0, lad);
-
-  // desk with letter, lamp, calendar, portrait
-  const desk = group("letters", 0, 0, -2.3);
-  add(B(2.6, .07, .9), walnut, 0, .78, 0, desk); [-1.05, 1.05].forEach(x => { add(B(.5, .74, .8), walnutDark, x, .37, 0, desk); [.18, .42, .62].forEach(y => add(B(.05, .02, .02), brass, x, y, .41, desk)); });
-  const env = new THREE.Group(); env.position.set(-.35, .82, .1); env.rotation.y = .12; desk.add(env);
+  // desk in the niche with letter, lamp and calendar
+  const desk = group("letters", 0, 0, -RS + .55);
+  add(B(1.8, .06, .8), walnut, 0, .77, 0, desk); [-.68, .68].forEach(x => { add(B(.42, .74, .72), walnutDark, x, .37, 0, desk); [.18, .42, .62].forEach(y => add(B(.05, .02, .02), brass, x, y, .37, desk)); });
+  const chair = new THREE.Group(); chair.position.set(0, 0, .75); desk.add(chair);
+  add(RB(.5, .08, .48, .03), leather(c), 0, .48, 0, chair); add(RB(.5, .5, .06, .03), leather(c), 0, .76, .22, chair); [-.2, .2].forEach(x => [-.2, .2].forEach(z => add(B(.035, .46, .035), walnutDark, x, .23, z, chair)));
+  const env = new THREE.Group(); env.position.set(-.3, .81, .08); env.rotation.y = .15; desk.add(env);
   add(B(.36, .008, .24), mat(S.mail ? "#F1E6CC" : "#FFFDF6"), 0, 0, 0, env);
-  if (mine && S.mail) { const seal = add(new THREE.CylinderGeometry(.035, .035, .012, 20), mat("#8E1F1A", { roughness: .35 }), 0, .01, .02, env); sprite(String(S.mail), .2, .2, 0, env, true); }
+  if (mine && S.mail) { add(new THREE.CylinderGeometry(.035, .035, .012, 20), mat("#8E1F1A", { roughness: .35 }), 0, .01, .02, env); sprite(String(S.mail), .22, .22, 0, env, true); }
   else if (mine) { const pg = add(B(.28, .004, .3), mat("#FFFDF6"), .02, .012, -.08, env); pg.rotation.x = -.5; }
-  if (mine) sprite(S.mail ? "New letter" : "Letters", -.5, 1.12, .45, desk);
-  const lampG = new THREE.Group(); lampG.position.set(.85, .82, -.1); desk.add(lampG);
+  if (mine) sprite(S.mail ? "New letter" : "Letters", -.3, .75, .5, desk);
+  const lampG = new THREE.Group(); lampG.position.set(.62, .8, -.15); desk.add(lampG);
   add(new THREE.CylinderGeometry(.07, .08, .03, 20), brass, 0, .015, 0, lampG); add(new THREE.CylinderGeometry(.01, .01, .35, 8), brass, 0, .19, 0, lampG);
   const shade = add(new THREE.CylinderGeometry(.06, .16, .1, 20, 1, true, 0, Math.PI), mat("#2F5A3A", { side: THREE.DoubleSide, roughness: .3, emissive: "#1A3A22", emissiveIntensity: .4 }), 0, .38, 0, lampG); shade.rotation.set(0, Math.PI / 2, Math.PI / 2);
   const dl = new THREE.PointLight("#FFD9A0", night ? 2.2 : 1.3, 2.5, 2); dl.position.set(0, .3, .1); lampG.add(dl);
-  const yearG = group("year", .35, .82, -2.15);
+  const yearG = group("year", .22, .8, -RS + .5);
   const calT = tex(256, 256, (g, w) => { g.fillStyle = "#FFFDF6"; g.fillRect(0, 0, w, w); g.fillStyle = "#8E1F1A"; g.fillRect(0, 0, w, 64); g.fillStyle = "#fff"; g.font = "bold 44px Georgia"; g.textAlign = "center"; g.fillText(String(S.Y), w / 2, 48); g.fillStyle = "#2A221C"; g.font = "bold 96px Georgia"; g.fillText(S.fin + (S.goal ? "/" + S.goal : ""), w / 2, 170); if (S.goal) { g.fillStyle = "#E2D6BC"; g.fillRect(40, 200, 176, 16); g.fillStyle = "#8E1F1A"; g.fillRect(40, 200, 176 * Math.min(1, S.fin / S.goal), 16); } });
-  const cal = add(B(.26, .26, .02), mat("#fff", { map: calT }), 0, .13, 0, yearG); cal.rotation.x = -.25;
-  sprite("Year", .35, .5, .1, yearG);
-  const portG = group("profile", 0, 1.55, -2.97);
-  add(B(.62, .78, .04), brass, 0, 0, 0, portG);
-  const porT = tex(256, 320, (g, w, hh) => { g.fillStyle = c; g.fillRect(0, 0, w, hh); const gr = g.createLinearGradient(0, 0, 0, hh); gr.addColorStop(0, "rgba(255,255,255,.15)"); gr.addColorStop(1, "rgba(0,0,0,.35)"); g.fillStyle = gr; g.fillRect(0, 0, w, hh); g.fillStyle = "#F1D99A"; g.font = "bold 170px Georgia"; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText((p.name || "?")[0].toUpperCase(), w / 2, hh / 2 + 10); });
-  add(B(.52, .68, .01), mat("#fff", { map: porT }), 0, 0, .025, portG);
-  sprite(mine ? "You" : p.name, 0, .58, .1, portG);
-  [-.75, .75].forEach(x => { add(B(.04, .14, .04), brass, x, 1.62, -2.95); const sl = new THREE.PointLight("#FFD9A0", night ? .9 : .5, 1.6, 2); sl.position.set(x, 1.75, -2.8); scene.add(sl); add(new THREE.CylinderGeometry(.05, .07, .1, 16), mat("#F3E3B5", { emissive: "#FFD9A0", emissiveIntensity: 1.2 }), x, 1.75, -2.9); });
+  const cal = add(B(.24, .24, .02), mat("#fff", { map: calT }), 0, .12, 0, yearG); cal.rotation.x = -.25;
+  sprite("Year", .25, .55, .25, yearG);
 
-  // chesterfield sofa with the newspaper
-  const sofa = group("news", -1.2, 0, .6, .5);
+  // WEST: window with curtains, plant, lent basket
+  const Wg = walls.W, sky = night ? "#1C2740" : "#BFD9EA";
+  add(B(.06, 1.5, 1.6), mat(sky, { emissive: sky, emissiveIntensity: night ? .5 : 1.1, roughness: .1 }), -RS - .02, 1.65, 0, Wg, false);
+  add(B(.1, 1.6, .06), walnut, -RS + .02, 1.65, 0, Wg); add(B(.1, .06, 1.7), walnut, -RS + .02, 1.65, 0, Wg); add(B(.1, .06, 1.7), walnut, -RS + .02, .88, 0, Wg); add(B(.1, .06, 1.7), walnut, -RS + .02, 2.42, 0, Wg);
+  add(B(.3, .06, 1.8), walnut, -RS + .12, .86, 0, Wg);
+  [-1, 1].forEach(sd => add(B(.06, 1.9, .42), mat(c, { roughness: .85 }), -RS + .14, 1.55, sd * 1.0, Wg));
+  add(new THREE.CylinderGeometry(.015, .015, 2.2, 8), brass, -RS + .18, 2.55, 0, Wg).rotation.x = Math.PI / 2;
+  if (night) { add(new THREE.SphereGeometry(.09, 16, 16), mat("#F3E6B8", { emissive: "#F3E6B8", emissiveIntensity: 1 }), -RS - .1, 2.05, .4, Wg, false); }
+  else { const sun = new THREE.DirectionalLight("#FFE8C2", 1.6); sun.position.set(-8, 5, 1); sun.target.position.set(0, 0, 0); sun.castShadow = true; sun.shadow.mapSize.set(1024, 1024); Object.assign(sun.shadow.camera, { left: -5, right: 5, top: 5, bottom: -5 }); scene.add(sun, sun.target); }
+  const plant = new THREE.Group(); plant.position.set(-2.75, 0, -1.55); scene.add(plant);
+  add(new THREE.CylinderGeometry(.2, .15, .38, 20), mat("#B9AE98"), 0, .19, 0, plant);
+  for (let i = 0; i < 9; i++) { const lf = add(new THREE.SphereGeometry(.16, 10, 8), mat(["#3F5E3A", "#4E6B3A", "#35502F"][i % 3]), Math.cos(i) * .14, .55 + (i % 4) * .15, Math.sin(i * 2) * .14, plant); lf.scale.set(1, .5, 1.6); lf.rotation.y = i; }
+  const bas = group("lent", -2.7, 0, 1.6);
+  add(new THREE.CylinderGeometry(.22, .17, .28, 20), mat("#A27850", { roughness: .9 }), 0, .14, 0, bas);
+  S.lent.slice(0, 3).forEach((b, i) => add(B(.05, .26, .17), mat(pal[i * 3]), -.07 + i * .07, .32, 0, bas));
+  if (S.lent.length) sprite("Lent · " + S.lent.length, 0, .75, 0, bas);
+
+  // EAST: fireplace with fire and a painting
+  const E = walls.E;
+  add(B(.4, 1.25, 1.9), mat("#D8CFC0", { roughness: .8 }), RS - .2, .625, 0, E);
+  add(B(.42, .9, 1.1), mat("#1A100A"), RS - .2, .45, 0, E);
+  add(B(.55, .07, 2.1), walnut, RS - .25, 1.28, 0, E);
+  add(B(.6, .05, 2.2), mat("#B9AE98"), RS - .3, .025, 0, E, false);
+  const flames = [];
+  [[-.18, .32], [0, .42], [.18, .3]].forEach(([z, hh]) => { const f = add(new THREE.ConeGeometry(.11, hh, 12), mat("#FF9A3C", { emissive: "#FF7A1A", emissiveIntensity: 2.5, transparent: true, opacity: .9 }), RS - .25, .12 + hh / 2, z, E, false); flames.push(f); });
+  add(B(.12, .08, .6), mat("#4A2E19"), RS - .25, .08, 0, E);
+  const fire = new THREE.PointLight("#FF9A4A", night ? 3.2 : 1.8, 5, 1.8); fire.position.set(RS - .6, .5, 0); fire.castShadow = true; fire.shadow.mapSize.set(512, 512); E.add(fire);
+  const paintT = tex(320, 220, (g, w, hh) => { const gr = g.createLinearGradient(0, 0, 0, hh); gr.addColorStop(0, "#C9A86A"); gr.addColorStop(.6, "#8FA08A"); gr.addColorStop(1, "#4E5E3E"); g.fillStyle = gr; g.fillRect(0, 0, w, hh); g.fillStyle = "#3E4E32"; g.beginPath(); g.moveTo(0, 150); g.quadraticCurveTo(90, 100, 170, 140); g.quadraticCurveTo(250, 170, 320, 120); g.lineTo(320, 220); g.lineTo(0, 220); g.fill(); g.fillStyle = "#F3E6B8"; g.beginPath(); g.arc(240, 60, 22, 0, 7); g.fill(); });
+  add(B(.05, .8, 1.15), brass, RS - .03, 2.05, 0, E); add(B(.02, .68, 1.02), mat("#fff", { map: paintT }), RS - .065, 2.05, 0, E, false);
+  // candlesticks on the mantel
+  [-.8, .8].forEach(z => { add(new THREE.CylinderGeometry(.03, .05, .2, 12), brass, RS - .25, 1.41, z, E); add(new THREE.CylinderGeometry(.018, .018, .12, 8), mat("#F6EBD0"), RS - .25, 1.57, z, E); add(new THREE.SphereGeometry(.018, 8, 8), mat("#FFE7A3", { emissive: "#FFD27A", emissiveIntensity: 3 }), RS - .25, 1.65, z, E, false); });
+
+  // SOUTH: door
+  const Sg = walls.S;
+  add(B(1, 2.15, .06), mat("#5A3820", { roughness: .45 }), 1.6, 1.075, RS + .02, Sg);
+  [[1.6, .55], [1.6, 1.55]].forEach(([x, y]) => add(B(.7, .7, .02), mat("#4A2C1A"), x, y, RS - .02, Sg, false));
+  add(new THREE.SphereGeometry(.04, 12, 12), brass, 1.98, 1.05, RS - .05, Sg);
+  add(B(1.16, .1, .1), walnut, 1.6, 2.2, RS - .02, Sg); [1.06, 2.14].forEach(x => add(B(.08, 2.2, .1), walnut, x, 1.1, RS - .02, Sg));
+  // a little side table with a globe by the door
+  const glb = new THREE.Group(); glb.position.set(-1.6, 0, RS - .55); scene.add(glb);
+  add(new THREE.CylinderGeometry(.22, .22, .04, 24), walnut, 0, .62, 0, glb); add(new THREE.CylinderGeometry(.04, .06, .6, 12), walnutDark, 0, .3, 0, glb);
+  const gT = tex(256, 128, (g, w, hh) => { g.fillStyle = "#3E5A6B"; g.fillRect(0, 0, w, hh); g.fillStyle = "#C9B48A"; [[30, 40, 50, 30], [110, 30, 40, 50], [170, 60, 60, 30], [60, 90, 30, 20]].forEach(([x, y, a, b]) => { g.beginPath(); g.ellipse(x, y, a / 2, b / 2, .3, 0, 7); g.fill(); }); });
+  const gl = add(new THREE.SphereGeometry(.17, 24, 16), mat("#fff", { map: gT, roughness: .5 }), 0, .86, 0, glb); gl.rotation.z = .4;
+  add(new THREE.TorusGeometry(.2, .008, 6, 30, Math.PI), brass, 0, .86, 0, glb).rotation.y = Math.PI / 2;
+
+  // chesterfield + coffee table (news)
+  const sofa = group("news", -.9, 0, .2, Math.PI / 2);
   const sm = leather(c);
-  add(new RoundedBoxGeometry(2.1, .42, .9, 4, .08), sm, 0, .38, 0, sofa);
-  add(new RoundedBoxGeometry(2.3, .55, .22, 4, .08), sm, 0, .78, -.38, sofa);
-  [-1.08, 1.08].forEach(x => add(new RoundedBoxGeometry(.24, .62, .95, 4, .1), sm, x, .48, 0, sofa));
-  for (let i = 0; i < 9; i++) for (let r = 0; r < 2; r++) add(new THREE.SphereGeometry(.014, 8, 8), mat("#1A0F08"), -.92 + i * .23 + r * .11, .72 + r * .17, -.26, sofa, false);
+  add(RB(2, .42, .88, .08), sm, 0, .37, 0, sofa);
+  add(RB(2.2, .55, .22, .08), sm, 0, .78, -.36, sofa);
+  [-1.04, 1.04].forEach(x => add(RB(.24, .62, .92, .1), sm, x, .48, 0, sofa));
+  for (let i = 0; i < 9; i++) for (let r = 0; r < 2; r++) add(new THREE.SphereGeometry(.014, 8, 8), mat("#1A0F08"), -.92 + i * .23 + r * .11, .72 + r * .17, -.245, sofa, false);
   [-1, 1].forEach(x => [-.38, .38].forEach(z => add(new THREE.CylinderGeometry(.03, .025, .16, 10), walnutDark, x, .08, z, sofa)));
-  if (mine) { const np = new THREE.Group(); np.position.set(.25, .6, .05); np.rotation.y = -.25; sofa.add(np); add(B(.42, .01, .28), mat("#EEE9DD"), 0, 0, 0, np); add(B(.36, .002, .05), mat("#2A221C"), 0, .006, -.09, np); if (S.news) sprite(String(S.news > 9 ? "9+" : S.news), .25, .25, 0, np, true); sprite(S.news ? "News · " + S.news : "News", 0, .55, .1, np); }
+  const table = new THREE.Group(); table.position.set(0, 0, 1.25); sofa.add(table);
+  add(RB(1.1, .06, .6, .02), walnut, 0, .42, 0, table); [-.48, .48].forEach(x => [-.24, .24].forEach(z => add(B(.05, .4, .05), walnutDark, x, .2, z, table)));
+  add(B(.26, .05, .18), mat("#27344D"), .32, .47, -.08, table); add(B(.24, .04, .17), mat("#EDE4D2"), .32, .515, -.08, table);
+  if (mine) { const np = new THREE.Group(); np.position.set(-.15, .46, .02); np.rotation.y = .3; table.add(np); add(B(.42, .01, .28), mat("#EEE9DD"), 0, 0, 0, np); add(B(.36, .003, .05), mat("#2A221C"), 0, .006, -.09, np); if (S.news) sprite(String(S.news > 9 ? "9+" : S.news), .25, .25, 0, np, true); sprite(S.news ? "News · " + S.news : "News", 0, .65, 0, np); }
 
-  // wingback armchair with floor lamp
+  // wingback armchair by the fire and a floor lamp
   const cur = S.reading[0];
-  const arm = group("reading", 1.25, 0, .65, -.6);
+  const arm = group("reading", 1.75, 0, -1.45, .65);
   const am = leather("#6E3420");
-  add(new RoundedBoxGeometry(.95, .4, .85, 4, .08), am, 0, .36, 0, arm);
-  add(new RoundedBoxGeometry(.95, 1.05, .2, 4, .09), am, 0, .9, -.38, arm);
-  [-.5, .5].forEach(x => { add(new RoundedBoxGeometry(.18, .6, .85, 4, .07), am, x, .48, 0, arm); add(new RoundedBoxGeometry(.16, .5, .3, 4, .06), am, x * .95, 1.18, -.3, arm); });
+  add(RB(.95, .4, .85, .08), am, 0, .36, 0, arm); add(RB(.95, 1.05, .2, .09), am, 0, .9, -.38, arm);
+  [-.5, .5].forEach(x => { add(RB(.18, .6, .85, .07), am, x, .48, 0, arm); add(RB(.16, .5, .3, .06), am, x * .95, 1.18, -.3, arm); });
   [-.4, .4].forEach(x => [-.35, .35].forEach(z => add(new THREE.CylinderGeometry(.03, .025, .16, 10), walnutDark, x, .08, z, arm)));
   if (cur) { const bk = new THREE.Group(); bk.position.set(0, .58, .1); bk.rotation.x = -.15; arm.add(bk); [-1, 1].forEach(sd => { const pg = add(B(.17, .012, .24), mat("#FFFBF0"), sd * .088, 0, 0, bk); pg.rotation.z = -sd * .12; }); }
-  sprite(cur ? (cur.title.length > 18 ? cur.title.slice(0, 17) + "…" : cur.title) : "Armchair", 0, 1.65, 0, arm);
-  const fl = new THREE.Group(); fl.position.set(2.05, 0, .05); scene.add(fl);
+  sprite(cur ? (cur.title.length > 18 ? cur.title.slice(0, 17) + "…" : cur.title) : "Armchair", 0, 1.75, 0, arm);
+  const fl = new THREE.Group(); fl.position.set(2.55, 0, -2.3); scene.add(fl);
   add(new THREE.CylinderGeometry(.14, .16, .03, 20), brass, 0, .015, 0, fl); add(new THREE.CylinderGeometry(.015, .015, 1.55, 8), brass, 0, .8, 0, fl);
   add(new THREE.CylinderGeometry(.15, .24, .26, 20, 1, true), mat(cur ? "#F7DE9A" : "#CDBA8E", { side: THREE.DoubleSide, emissive: cur ? "#FFD27A" : "#000", emissiveIntensity: cur ? .9 : 0 }), 0, 1.62, 0, fl);
-  if (cur) { const ll = new THREE.PointLight("#FFD08A", night ? 3 : 2, 4, 2); ll.position.set(0, 1.5, 0); ll.castShadow = true; ll.shadow.mapSize.set(512, 512); fl.add(ll); }
+  if (cur) { const ll = new THREE.PointLight("#FFD08A", night ? 2.6 : 1.6, 4, 2); ll.position.set(0, 1.5, 0); fl.add(ll); }
 
-  // lent basket
-  const bas = group("lent", .2, 0, -1.4);
-  add(new THREE.CylinderGeometry(.2, .16, .26, 20), mat("#A27850", { roughness: .9 }), 0, .13, 0, bas);
-  S.lent.slice(0, 3).forEach((b, i) => add(B(.05, .26, .17), mat(pal[i * 3]), -.07 + i * .07, .3, 0, bas));
-
-  // chandelier
-  const ch = new THREE.Group(); ch.position.set(0, 2.75, .3); scene.add(ch);
-  add(new THREE.CylinderGeometry(.006, .006, .62, 6), brass, 0, .32, 0, ch, false);
+  // chandelier and ceiling (ceiling only in first-person view)
+  const ch = new THREE.Group(); ch.position.set(.5, 2.5, .2); scene.add(ch);
+  add(new THREE.CylinderGeometry(.006, .006, .5, 6), brass, 0, .26, 0, ch, false);
   const ring = add(new THREE.TorusGeometry(.38, .018, 8, 40), brass, 0, 0, 0, ch, false); ring.rotation.x = Math.PI / 2;
-  for (let i = 0; i < 8; i++) { const a = i / 8 * Math.PI * 2; add(new THREE.CylinderGeometry(.014, .014, .1, 8), mat("#F6EBD0"), Math.cos(a) * .38, .06, Math.sin(a) * .38, ch, false); add(new THREE.SphereGeometry(.018, 8, 8), mat("#FFE7A3", { emissive: "#FFD27A", emissiveIntensity: 3 }), Math.cos(a) * .38, .13, Math.sin(a) * .38, ch, false); }
-  const cl = new THREE.PointLight("#FFD9A0", night ? 9 : 6, 9, 1.6); cl.position.set(0, -.05, 0); cl.castShadow = true; cl.shadow.mapSize.set(1024, 1024); cl.shadow.bias = -.002; ch.add(cl);
-  scene.add(new THREE.HemisphereLight("#FFE9C9", "#3A2214", night ? .25 : .55));
-  scene.add(new THREE.AmbientLight("#FFDDB0", night ? .08 : .18));
+  for (let i = 0; i < 8; i++) { const a2 = i / 8 * Math.PI * 2; add(new THREE.CylinderGeometry(.014, .014, .1, 8), mat("#F6EBD0"), Math.cos(a2) * .38, .06, Math.sin(a2) * .38, ch, false); add(new THREE.SphereGeometry(.018, 8, 8), mat("#FFE7A3", { emissive: "#FFD27A", emissiveIntensity: 3 }), Math.cos(a2) * .38, .13, Math.sin(a2) * .38, ch, false); }
+  const cl = new THREE.PointLight("#FFD9A0", night ? 7 : 4.5, 8, 1.6); cl.position.set(0, -.05, 0); cl.castShadow = true; cl.shadow.mapSize.set(1024, 1024); cl.shadow.bias = -.002; ch.add(cl);
+  const ceil = add(B(RS * 2 + .24, .1, RS * 2 + .24), walnutDark, 0, WH + .05, 0, scene, false);
+  scene.add(new THREE.HemisphereLight("#FFE9C9", "#3A2214", night ? .3 : .6));
+  scene.add(new THREE.AmbientLight("#FFDDB0", night ? .1 : .2));
 
-  // taps
-  const ray = new THREE.Raycaster(), ptr = new THREE.Vector2(); let down = null;
+  // cameras
+  const iso = new THREE.OrthographicCamera(-1, 1, 1, -1, .1, 100), per = new THREE.PerspectiveCamera(62, W / H, .05, 40);
+  const isoTarget = new THREE.Vector3(.2, .9, 0);
+  const sizeIso = () => { const a = W / H, v = a < .8 ? 8.6 : 7.2; iso.left = -v * a / 2; iso.right = v * a / 2; iso.top = v / 2; iso.bottom = -v / 2; iso.updateProjectionMatrix(); per.aspect = a; per.updateProjectionMatrix(); };
+  sizeIso();
+  const placeIso = az => { const d = 20, el = .62; iso.position.set(isoTarget.x + Math.cos(az) * d * Math.cos(el), isoTarget.y + d * Math.sin(el), isoTarget.z + Math.sin(az) * d * Math.cos(el)); iso.lookAt(isoTarget); };
+  let cam, ctl;
+  const setMode = mode => {
+    R3.mode = mode; ctl?.dispose();
+    if (mode === "iso") {
+      cam = iso; placeIso(R3.az);
+      ctl = new OrbitControls(iso, renderer.domElement); ctl.target.copy(isoTarget); ctl.enableDamping = true; ctl.enablePan = false; ctl.minZoom = .8; ctl.maxZoom = 3.2; ctl.minPolarAngle = ctl.maxPolarAngle = Math.PI / 2 - .62; ctl.rotateSpeed = .6;
+      ceil.visible = false; modeBtn.textContent = "👁 Look around"; rotL.hidden = rotR.hidden = false;
+    } else {
+      cam = per; per.position.set(.6, 1.6, 2.4);
+      ctl = new OrbitControls(per, renderer.domElement); ctl.target.set(0, 1.35, -1.2); ctl.enableDamping = true; ctl.enablePan = false; ctl.minDistance = .8; ctl.maxDistance = 3.2; ctl.minPolarAngle = 1.05; ctl.maxPolarAngle = 1.75; ctl.rotateSpeed = .55;
+      ceil.visible = true; modeBtn.textContent = "⌂ Room view"; rotL.hidden = rotR.hidden = true;
+    }
+    ctl.update();
+  };
+  setMode(R3.mode);
+  modeBtn.onclick = () => setMode(R3.mode === "iso" ? "fp" : "iso");
+  let spin = null;
+  const rotate = dir => { if (R3.mode !== "iso") return; const from = Math.atan2(iso.position.z - isoTarget.z, iso.position.x - isoTarget.x), to = Math.round((from - Math.PI / 4) / (Math.PI / 2)) * (Math.PI / 2) + Math.PI / 4 + dir * Math.PI / 2; spin = { from, to, t0: performance.now() }; };
+  rotL.onclick = () => rotate(-1); rotR.onclick = () => rotate(1);
+
+  // walls near the camera drop down, like a dollhouse
+  const wallLevel = { N: 1, S: 1, E: 1, W: 1 };
+  const updateWalls = () => {
+    let vx = 0, vz = 0;
+    if (R3.mode === "iso") { vx = cam.position.x - isoTarget.x; vz = cam.position.z - isoTarget.z; const l = Math.hypot(vx, vz); vx /= l; vz /= l; }
+    for (const [k, g] of Object.entries(walls)) {
+      const [nx, nz] = normals[k], near = R3.mode === "iso" && nx * vx + nz * vz > .25;
+      const want = near ? .12 : 1; wallLevel[k] += (want - wallLevel[k]) * .15; g.scale.y = wallLevel[k];
+      g.traverse(o => { if (o.isSprite) o.visible = wallLevel[k] > .8; if (o.isLight) o.visible = wallLevel[k] > .5; });
+    }
+  };
+
+  // taps: highlight ring, glide, then open
+  const ray = new THREE.Raycaster(), ptr = new THREE.Vector2(); let down = null, busy = false;
+  const ringM = new THREE.Mesh(new THREE.TorusGeometry(.6, .025, 8, 48), new THREE.MeshBasicMaterial({ color: "#7CFF6B", transparent: true, opacity: .9 })); ringM.rotation.x = Math.PI / 2; ringM.visible = false; scene.add(ringM);
+  const actions = { shelf: () => { ui.tab = "all"; ui.q = ""; ui.genre = null; go("/p/" + encodeURIComponent(uid)); }, letters: () => go("/letters"), news: () => go("/news"), year: () => go("/year/" + encodeURIComponent(uid)), profile: () => mine ? editShelf(uid) : toast(p.name + "'s room"), reading: () => cur ? openBook(uid, cur.id) : (ui.tab = "reading", go("/p/" + encodeURIComponent(uid))), lent: () => lentSheet(uid, S.lent) };
   renderer.domElement.addEventListener("pointerdown", e => down = [e.clientX, e.clientY]);
   renderer.domElement.addEventListener("pointerup", e => {
-    if (!down || Math.hypot(e.clientX - down[0], e.clientY - down[1]) > 8) return;
+    if (busy || !down || Math.hypot(e.clientX - down[0], e.clientY - down[1]) > 8) return;
     const r = renderer.domElement.getBoundingClientRect(); ptr.set((e.clientX - r.left) / r.width * 2 - 1, -(e.clientY - r.top) / r.height * 2 + 1);
     ray.setFromCamera(ptr, cam);
-    const hitObj = ray.intersectObjects(clickables, true)[0]; if (!hitObj) return;
-    let o = hitObj.object; while (o && !o.userData.go) o = o.parent; const key = o?.userData.go; if (!key) return;
+    const hits = ray.intersectObjects(clickables, true);
+    let o = null; for (const hh of hits) { let x = hh.object; while (x && !x.userData.go) x = x.parent; if (x) { o = x; break; } }
+    const key = o?.userData.go; if (!key) return;
     if ((key === "letters" || key === "news") && !mine) return;
-    const actions = { shelf: () => { ui.tab = "all"; go("/p/" + encodeURIComponent(uid)); }, letters: () => go("/letters"), news: () => go("/news"), year: () => go("/year/" + encodeURIComponent(uid)), profile: () => mine ? editShelf(uid) : toast(p.name + "'s room"), reading: () => cur ? openBook(uid, cur.id) : (ui.tab = "reading", go("/p/" + encodeURIComponent(uid))), lent: () => lentSheet(uid, S.lent) };
-    if (["profile", "lent", "reading"].includes(key)) { actions[key](); return; }
-    // fly the camera towards the object, then open it
-    const target = new THREE.Vector3(); o.getWorldPosition(target); if (key === "shelf") target.set(0, 1.6, -2.6);
-    const from = cam.position.clone(), to = target.clone().add(new THREE.Vector3(0, .25, 1.3)), t0 = performance.now();
-    ctl.enabled = false;
-    const fly = () => { const k = Math.min(1, (performance.now() - t0) / 650), e2 = k * k * (3 - 2 * k); cam.position.lerpVectors(from, to, e2); cam.lookAt(target); if (k < 1) requestAnimationFrame(fly); else actions[key](); };
-    fly();
+    const wp = new THREE.Vector3(); o.getWorldPosition(wp); if (key === "shelf") wp.set(0, 1.2, -RS + .4);
+    ringM.position.set(wp.x, .03, wp.z); ringM.scale.setScalar(key === "shelf" ? 2.6 : key === "news" ? 1.9 : 1); ringM.visible = true; navigator.vibrate?.(20);
+    if (["profile", "lent", "reading"].includes(key)) { setTimeout(() => { ringM.visible = false; actions[key](); }, 250); return; }
+    busy = true; ctl.enabled = false; const t0 = performance.now();
+    if (R3.mode === "iso") { const z0 = iso.zoom, tgt0 = ctl.target.clone(), pos0 = iso.position.clone(), off = pos0.clone().sub(tgt0), tgt1 = new THREE.Vector3(wp.x, Math.max(.6, wp.y), wp.z);
+      const fly = () => { const k = Math.min(1, (performance.now() - t0) / 600), e2 = k * k * (3 - 2 * k); iso.zoom = z0 + (2.8 - z0) * e2; iso.updateProjectionMatrix(); const t = tgt0.clone().lerp(tgt1, e2); iso.position.copy(t).add(off); iso.lookAt(t); if (k < 1) requestAnimationFrame(fly); else actions[key](); }; fly(); }
+    else { const from = per.position.clone(), to = wp.clone().add(new THREE.Vector3(0, .3, 1.2));
+      const fly = () => { const k = Math.min(1, (performance.now() - t0) / 600), e2 = k * k * (3 - 2 * k); per.position.lerpVectors(from, to, e2); per.lookAt(wp); if (k < 1) requestAnimationFrame(fly); else actions[key](); }; fly(); }
   });
-  const onResize = () => { if (!box.isConnected) return; const w = box.clientWidth, hh = box.clientHeight; renderer.setSize(w, hh); cam.aspect = w / hh; cam.updateProjectionMatrix(); };
+  const onResize = () => { if (!box.isConnected) return; W = box.clientWidth; H = box.clientHeight; renderer.setSize(W, H); sizeIso(); };
   addEventListener("resize", onResize);
-  const loop = () => { if (!renderer.domElement.isConnected) { renderer.dispose(); removeEventListener("resize", onResize); return; } if (ctl.enabled) ctl.update(); renderer.render(scene, cam); requestAnimationFrame(loop); };
+  // gentle opening glide
+  if (R3.mode === "iso" && !reduce) { const z1 = iso.zoom; iso.zoom = .7; iso.updateProjectionMatrix(); const t0 = performance.now(); const intro = () => { const k = Math.min(1, (performance.now() - t0) / 900); iso.zoom = .7 + (z1 - .7) * (1 - Math.pow(1 - k, 3)); iso.updateProjectionMatrix(); if (k < 1) requestAnimationFrame(intro); }; intro(); }
+  const clock = new THREE.Clock();
+  const loop = () => {
+    if (!renderer.domElement.isConnected) { renderer.dispose(); ctl?.dispose(); removeEventListener("resize", onResize); return; }
+    const t = clock.getElapsedTime();
+    flames.forEach((f, i) => { f.scale.y = 1 + Math.sin(t * 9 + i * 2) * .12 + Math.sin(t * 23 + i) * .06; f.scale.x = f.scale.z = 1 - Math.sin(t * 7 + i) * .06; });
+    fire.intensity = (night ? 3.2 : 1.8) * (1 + Math.sin(t * 11) * .08 + Math.sin(t * 27) * .05);
+    if (ringM.visible) ringM.rotation.z = t * 2;
+    if (spin) { const k = Math.min(1, (performance.now() - spin.t0) / 500), e2 = k * k * (3 - 2 * k); const az = spin.from + (spin.to - spin.from) * e2; const d = Math.hypot(iso.position.x - ctl.target.x, iso.position.z - ctl.target.z), y = iso.position.y; iso.position.set(ctl.target.x + Math.cos(az) * d, y, ctl.target.z + Math.sin(az) * d); iso.lookAt(ctl.target); if (k >= 1) { spin = null; R3.az = az; } }
+    if (ctl.enabled) ctl.update();
+    if (R3.mode === "iso" && !spin) R3.az = Math.atan2(iso.position.z - isoTarget.z, iso.position.x - isoTarget.x);
+    updateWalls();
+    renderer.render(scene, cam); requestAnimationFrame(loop);
+  };
   loop();
 }
-
 function lentSheet(uid, lent) {
   const { close } = sheet(h("h2", {}, "Lent books"),
     lent.length ? h("div", { class: "results" }, lent.map(b => h("button", { class: "result", type: "button", onclick: () => { close(true); openBook(uid, b.id); } }, coverEl(b), h("div", {}, h("b", {}, b.title), h("small", {}, "With " + b.lentTo + (b.lentOn ? " since " + fmtDate(b.lentOn) : "")))))) : h("p", { class: "muted" }, "The basket is empty. Open a book and use Lend this book to keep track of who has it."));
@@ -1048,7 +1167,7 @@ function renderYear(uid) {
   const goalIn = h("input", { type: "number", min: "1", inputmode: "numeric", value: goal || "", placeholder: "24", style: { width: "90px" } });
   const board = Object.entries(profiles).map(([u, q]) => [q.name, finishedIn(u, Y).length]).sort((a, b) => b[1] - a[1]);
   mount(
-    h("div", { class: "topbar" }, h("button", { class: "back", onclick: () => go("/room/" + encodeURIComponent(uid)) }, "‹ Room"), h("div", { class: "ribbon", style: { "--c": color } })),
+    h("div", { class: "topbar" }, h("button", { class: "back", onclick: () => go(roomPath(uid)) }, "‹ Room"), h("div", { class: "ribbon", style: { "--c": color } })),
     h("header", { class: "phead" }, h("div", { class: "sc faint" }, p.name + "'s year in books"),
       h("div", { class: "yearnav" }, h("button", { class: "back", "aria-label": "Previous year", onclick: () => { ui.year = Y - 1; render(); } }, "‹"), h("h1", {}, String(Y)), h("button", { class: "back", "aria-label": "Next year", disabled: Y >= new Date().getFullYear(), onclick: () => { ui.year = Y + 1; render(); } }, "›"))),
     h("div", { class: "fleuron" }, "❦"),
@@ -1123,7 +1242,7 @@ function renderNews() {
       h("button", { class: "btn ghost", type: "button", onclick: () => { lsSet("cc-news-hide-" + uid, [...lsGet("cc-news-hide-" + uid, []), i.key]); render(); } }, "Not interested")));
   const favs = arr(profiles[uid]?.favAuthors);
   mount(
-    h("div", { class: "topbar" }, h("button", { class: "back", onclick: () => go("/room/" + encodeURIComponent(uid)) }, "‹ Room")),
+    h("div", { class: "topbar" }, h("button", { class: "back", onclick: () => go(roomPath(uid)) }, "‹ Room")),
     h("header", { class: "phead" }, h("div", { class: "sc faint" }, "fresh from the press"), h("h1", {}, "News for you")),
     h("div", { class: "fleuron" }, "❦"),
     h("p", { class: "muted", style: { "text-align": "center" } }, c ? "Watching " + (c.series?.length || 0) + " series and " + (c.authors?.length || 0) + " authors. Checked " + new Date(c.at).toLocaleString("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) + "." : "Looking for new books for the first time."),
@@ -1345,7 +1464,7 @@ function renderLetters() {
     if (sent.length) sections.push(h("section", { class: "section" }, h("h2", {}, "Sent", h("small", {}, sent.length)), h("div", { class: "cards", style: { "margin-top": "0" } }, sent.map(s => letter(s, false)))));
   }
   mount(
-    h("div", { class: "topbar" }, h("button", { class: "back", onclick: () => myUid() ? go("/room/" + encodeURIComponent(myUid())) : closeTo("/") }, myUid() ? "‹ Room" : "‹ Club")),
+    h("div", { class: "topbar" }, h("button", { class: "back", onclick: () => myUid() ? go(roomPath(myUid())) : closeTo("/") }, myUid() ? "‹ Room" : "‹ Club")),
     h("header", { class: "phead" }, h("div", { class: "sc faint" }, "correspondence"), h("h1", {}, "Letters")),
     h("div", { class: "fleuron" }, "❦"),
     others.length ? h("form", { class: "card", onsubmit: send },
