@@ -184,6 +184,10 @@ button.card:hover{border-color:var(--ink-3)}
 @keyframes fade{from{opacity:0}}
 @keyframes rise{from{transform:translateY(30px);opacity:0}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+.ptr{position:fixed;left:50%;top:calc(env(safe-area-inset-top) + 8px);z-index:70;transform:translate(-50%,-70px);width:44px;height:44px;border-radius:50%;background:var(--paper);box-shadow:var(--shadow);border:1px solid var(--edge);display:flex;align-items:center;justify-content:center;color:var(--accent);font-size:22px;pointer-events:none}
+.ptr.spin span{animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+body{overscroll-behavior-y:contain}
 .toast{position:fixed;left:50%;bottom:calc(90px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:10px 16px;border-radius:8px;font-size:14px;z-index:60;box-shadow:var(--shadow);max-width:90vw}
 .auth{max-width:420px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
 </style>
@@ -742,6 +746,21 @@ window.addEventListener("hashchange", render);
   DB.watchSugs(s => { sugs = s; render(); });
   DB.onAuth(u => { const was = user?.uid; user = u; if (was !== u?.uid) { render(); } });
   render();
+})();
+/* ---------- pull down to update ---------- */
+(() => {
+  const ind = h("div", { class: "ptr", "aria-hidden": "true" }, h("span", {}, "↻")); document.body.append(ind);
+  let y0 = null, dy = 0, busy = false;
+  const ready = () => !busy && window.scrollY <= 0 && !document.querySelector(".scrim,.turn");
+  addEventListener("touchstart", e => { y0 = ready() && e.touches.length === 1 ? e.touches[0].clientY : null; dy = 0; ind.style.transition = "none"; }, { passive: true });
+  addEventListener("touchmove", e => { if (y0 == null) return; dy = e.touches[0].clientY - y0; if (dy <= 0 || window.scrollY > 0) { ind.style.transform = "translate(-50%,-70px)"; return; } const d = Math.min(dy * 0.5, 90); ind.style.transform = "translate(-50%," + (d - 60) + "px)"; ind.firstChild.style.transform = "rotate(" + dy * 2 + "deg)"; ind.style.opacity = Math.min(1, dy / 120); }, { passive: true });
+  addEventListener("touchend", async () => {
+    if (y0 == null) return; y0 = null; ind.style.transition = "transform .2s ease";
+    if (dy < 140 || window.scrollY > 0) { ind.style.transform = "translate(-50%,-70px)"; return; }
+    busy = true; ind.style.transform = "translate(-50%,24px)"; ind.firstChild.style.transform = ""; ind.classList.add("spin");
+    try { const reg = await navigator.serviceWorker?.getRegistration(); await reg?.update(); } catch (e) {}
+    setTimeout(() => location.reload(), 300);
+  });
 })();
 if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost")) navigator.serviceWorker.register("sw.js");
 </script>
