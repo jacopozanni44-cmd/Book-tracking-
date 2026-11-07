@@ -882,7 +882,7 @@ async function renderRoom3D(uid) {
   const renderer = new THREE.WebGLRenderer({ antialias: true });
   renderer.setPixelRatio(Math.min(devicePixelRatio, 2)); renderer.setSize(W, H);
   renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-  renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = night ? 1 : 1.2; renderer.outputColorSpace = THREE.SRGBColorSpace;
+  renderer.clippingPlanes = [new THREE.Plane(new THREE.Vector3(0, 1, 0), .22)]; renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = night ? 1 : 1.2; renderer.outputColorSpace = THREE.SRGBColorSpace;
   box.replaceChildren(renderer.domElement);
   const scene = new THREE.Scene(); const bg = night ? "#120A06" : "#2A1C12"; scene.background = new THREE.Color(bg);
 
@@ -914,7 +914,7 @@ async function renderRoom3D(uid) {
   const parquet = tex(512, 512, (g, w) => { g.fillStyle = "#4E3019"; g.fillRect(0, 0, w, w); for (let y = 0; y < 16; y++) for (let x = 0; x < 8; x++) { g.fillStyle = ["#5B3920", "#553419", "#62401F", "#4A2D16"][(x * 7 + y * 3) % 4]; g.save(); g.translate(x * 64 + (y % 2) * 32, y * 32); g.rotate((y % 2 ? 1 : -1) * Math.PI / 4); g.fillRect(-4, -20, 60, 18); g.restore(); } });
   parquet.wrapS = parquet.wrapT = THREE.RepeatWrapping; parquet.repeat.set(3, 3);
   const floor = add(B(RS * 2 + .24, .12, RS * 2 + .24), mat("#fff", { map: parquet, roughness: .5 }), 0, -.06, 0, scene, false);
-  add(B(RS * 2 + .26, 3.2, RS * 2 + .26), mat("#3A2416", { roughness: .8 }), 0, -1.72, 0, scene, false);
+  add(B(RS * 2 + .3, .1, RS * 2 + .3), walnutDark, 0, -.17, 0, scene, false);
   const carpetT = tex(512, 512, (g, w) => { g.fillStyle = c; g.fillRect(0, 0, w, w); g.strokeStyle = "rgba(230,198,122,.45)"; g.lineWidth = 3; for (let y = 0; y < w; y += 48) for (let x = 0; x < w; x += 64) { g.beginPath(); g.moveTo(x + 32, y + 4); g.lineTo(x + 60, y + 24); g.lineTo(x + 32, y + 44); g.lineTo(x + 4, y + 24); g.closePath(); g.stroke(); } g.lineWidth = 14; g.strokeRect(10, 10, w - 20, w - 20); });
   add(B(3.4, .02, 2.8), mat("#fff", { map: carpetT, roughness: .95 }), .5, .011, .2, scene, false);
 
