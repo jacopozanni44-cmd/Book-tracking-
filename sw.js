@@ -6,7 +6,7 @@ self.addEventListener("fetch", e => {
   if (e.request.method !== "GET") return;
   const u = new URL(e.request.url);
   const same = u.origin === location.origin;
-  const statics = /^(fonts\.googleapis\.com|fonts\.gstatic\.com|www\.gstatic\.com|covers\.openlibrary\.org)$/.test(u.hostname);
+  const statics = /^(fonts\.googleapis\.com|fonts\.gstatic\.com|www\.gstatic\.com|cdn\.jsdelivr\.net|covers\.openlibrary\.org)$/.test(u.hostname);
   if (!same && !statics) return;
   const keep = res => { if (res.ok || res.type === "opaque") { const cp = res.clone(); caches.open(CACHE).then(c => c.put(e.request, cp)); } return res; };
   if (same && !u.pathname.includes("/covers/")) {
