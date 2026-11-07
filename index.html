@@ -103,6 +103,7 @@ button.card:hover{border-color:var(--ink-3)}
 .phead{text-align:center;padding:4px 0 0}
 .phead h1{font-size:42px}
 .phead .stats{margin-top:6px;color:var(--ink-2)}
+.rename{margin-top:8px;border:1px solid var(--edge);background:transparent;border-radius:16px;padding:4px 12px;font-size:13px;color:var(--ink-2)}
 .tabs{display:flex;gap:4px;justify-content:center;margin:18px 0 14px;flex-wrap:wrap}
 .tab{border:0;background:none;padding:8px 12px;font-family:var(--display);font-size:18px;color:var(--ink-3);border-bottom:2px solid transparent}
 .tab[aria-selected="true"]{color:var(--ink);border-color:var(--c,var(--accent))}
@@ -424,7 +425,7 @@ function renderShelf(uid) {
   const authors = new Set(all.filter(b => st(b) !== "wishlist").flatMap(b => arr(b.authors))).size;
   mount(
     h("div", { class: "topbar" }, h("button", { class: "back", onclick: () => closeTo("/") }, "‹ Library"), h("div", { class: "ribbon", style: { "--c": color } })),
-    h("header", { class: "phead" }, h("div", { class: "sc faint" }, "the shelf of"), h("h1", {}, p.name),
+    h("header", { class: "phead" }, h("div", { class: "sc faint" }, "the shelf of"), h("h1", {}, p.name), edit ? h("button", { class: "rename", type: "button", onclick: () => editShelf(uid) }, "✎ Edit shelf") : null,
       h("div", { class: "stats sc" }, counts.read + " read · " + counts.reading + " reading · " + counts.wishlist + " wished · " + authors + " authors")),
     h("div", { class: "fleuron" }, "❦"),
     h("div", { class: "tabs", role: "tablist", style: { "--c": color } }, tab("all", "Shelf", counts.read + counts.reading), tab("reading", "Reading", counts.reading), tab("wishlist", "Wishlist", counts.wishlist)),
@@ -457,6 +458,22 @@ function sheet(...kids) {
   history.pushState({ sheet: true }, "");
   document.body.style.overflow = "hidden";
   document.body.append(scrim); return { close, sh };
+}
+
+function editShelf(uid) {
+  const p = profiles[uid]; let color = p.color || LEATHER[0];
+  const name = h("input", { required: true, maxlength: 24, autocomplete: "off" }); name.value = p.name || "";
+  const msg = h("div", { class: "status", role: "status" });
+  const sw = h("div", { class: "swatches", role: "group", "aria-label": "Binding colour" }, LEATHER.map(c => h("button", { type: "button", class: "swatch", style: { "--c": c }, "aria-label": "Binding " + c, "aria-pressed": c === color ? "true" : "false", onclick: e => { color = c; sw.querySelectorAll(".swatch").forEach(x => x.setAttribute("aria-pressed", x === e.currentTarget ? "true" : "false")); } })));
+  const save = async e => {
+    e.preventDefault(); const n = name.value.trim(); if (!n) { msg.textContent = "Add a name."; return; }
+    msg.textContent = "Saving";
+    try { await DB.saveProfile(uid, { name: n, color }); close(); toast("Shelf updated"); }
+    catch (err) { msg.textContent = err.code === "permission-denied" ? "Firebase refused the save. Check that the Firestore rules are published." : "Could not save: " + (err.code || err.message); }
+  };
+  const { close } = sheet(h("form", { onsubmit: save, style: { display: "flex", "flex-direction": "column", gap: "14px" } },
+    h("h2", {}, "Edit shelf"), h("label", { class: "field" }, "Name on the spine", name), h("div", { class: "field" }, "Binding", sw),
+    h("div", { class: "actions" }, h("button", { class: "btn primary", type: "submit" }, "Save"), h("button", { class: "btn ghost", type: "button", onclick: () => close() }, "Cancel")), msg));
 }
 
 function openBook(uid, id) {
