@@ -1,0 +1,1062 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#F3ECDD" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#1B1713" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Codex Club">
+<title>The Codex Club</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,600;1,7..72,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F3ECDD; --paper-2:#EBE2CE; --paper-3:#E2D6BC; --edge:#D8CBAE;
+  --ink:#2A221C; --ink-2:#5E5145; --ink-3:#8A7B6B;
+  --accent:#8E3B2E; --accent-ink:#FBF6EC; --gilt:#B08A3E; --wood:#7A5638; --wood-2:#5E412A;
+  --shadow:0 1px 2px rgba(60,40,20,.12),0 6px 18px rgba(60,40,20,.12);
+  --display:"Cormorant Garamond",Georgia,"Times New Roman",serif;
+  --text:"Literata",Georgia,"Times New Roman",serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --paper:#1B1713; --paper-2:#241F19; --paper-3:#2E2720; --edge:#3A3128;
+    --ink:#EDE3D1; --ink-2:#C2B49E; --ink-3:#8F8270;
+    --accent:#D2876F; --accent-ink:#1B1713; --gilt:#D3AE62; --wood:#4A3424; --wood-2:#33241A;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 22px rgba(0,0,0,.35);
+    color-scheme:dark;
+  }
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{
+  background:var(--paper);
+  background-image:radial-gradient(ellipse at 20% 0%,rgba(255,255,255,.35),transparent 60%),radial-gradient(ellipse at 100% 100%,rgba(120,90,50,.08),transparent 55%);
+  color:var(--ink);font-family:var(--text);font-size:16px;line-height:1.55;
+  -webkit-font-smoothing:antialiased;min-height:100vh;
+  padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+a{color:var(--accent)}
+.page{max-width:920px;margin:0 auto;padding:20px 16px 120px}
+h1,h2,h3{font-family:var(--display);font-weight:600;line-height:1.1;margin:0}
+.sc{font-variant:small-caps;letter-spacing:.08em;text-transform:lowercase}
+.muted{color:var(--ink-2)}.faint{color:var(--ink-3)}
+.fleuron{display:flex;align-items:center;gap:12px;color:var(--gilt);margin:18px 0}
+.fleuron::before,.fleuron::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,transparent,var(--gilt),transparent)}
+.btn{border:1px solid var(--edge);background:var(--paper-2);border-radius:8px;padding:10px 16px;font-size:15px}
+.btn:hover{border-color:var(--ink-3)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:600}
+.btn.ghost{background:transparent}
+.btn:disabled{opacity:.5;cursor:default}
+.field{display:flex;flex-direction:column;gap:5px;font-size:14px;color:var(--ink-2)}
+.field input,.field select,.field textarea{font-size:16px;color:var(--ink);background:var(--paper);border:1px solid var(--edge);border-radius:8px;padding:10px 12px;width:100%;min-width:0}
+.field textarea{resize:vertical;min-height:90px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.status{font-size:14px;color:var(--ink-2);min-height:1.4em}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* title page */
+.titlepage{text-align:center;padding:22px 0 6px}
+.titlepage .kicker{font-family:var(--display);font-size:15px;color:var(--gilt);letter-spacing:.3em;text-transform:uppercase}
+.titlepage h1{font-size:46px;margin-top:6px}
+.titlepage p{margin:6px 0 0;color:var(--ink-2);font-style:italic}
+
+/* bookshelf of profiles */
+.case{margin-top:26px;padding:0 6px}
+.spines{display:flex;align-items:flex-end;gap:8px;padding:0 10px;min-height:250px;overflow-x:auto;scrollbar-width:none}
+.spines::-webkit-scrollbar{display:none}
+.spine{flex:0 0 auto;width:64px;border:0;border-radius:4px 4px 2px 2px;position:relative;color:#F4E9D2;
+  background:var(--c,#7A2E2A);
+  background-image:linear-gradient(90deg,rgba(0,0,0,.28),rgba(255,255,255,.10) 18%,rgba(255,255,255,0) 40%,rgba(0,0,0,.18) 85%,rgba(0,0,0,.35));
+  box-shadow:inset 0 0 0 1px rgba(0,0,0,.15),2px 0 4px rgba(0,0,0,.18);
+  display:flex;flex-direction:column;align-items:center;padding:14px 0;transition:transform .2s ease}
+.spine:hover{transform:translateY(-6px)}
+.spine .band{width:100%;height:5px;border-top:1px solid rgba(225,190,110,.75);border-bottom:1px solid rgba(225,190,110,.75);margin:4px 0}
+.spine .name{writing-mode:vertical-rl;transform:rotate(180deg);font-family:var(--display);font-weight:700;font-size:22px;letter-spacing:.06em;margin:12px 0;flex:1;display:flex;align-items:center;color:#F1D99A;text-shadow:0 1px 0 rgba(0,0,0,.35)}
+.spine .num{font-family:var(--display);font-size:13px;color:#EAD7A8}
+.spine.add{background:transparent;background-image:none;border:2px dashed var(--ink-3);color:var(--ink-2);box-shadow:none;justify-content:center}
+.spine.add .name{color:var(--ink-2);text-shadow:none;font-size:18px}
+.plank{height:16px;margin:0 0 0;border-radius:3px;background:linear-gradient(var(--wood),var(--wood-2));box-shadow:0 8px 14px -6px rgba(60,40,20,.5)}
+.casehint{text-align:center;font-size:14px;color:var(--ink-3);margin-top:12px;font-style:italic}
+
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;margin-top:28px}
+.card{border:1px solid var(--edge);background:var(--paper-2);border-radius:10px;padding:18px;display:flex;flex-direction:column;gap:8px;text-align:left}
+.card h2{font-size:26px}
+button.card:hover{border-color:var(--ink-3)}
+.badge{display:inline-block;min-width:22px;padding:0 7px;border-radius:11px;background:var(--accent);color:var(--accent-ink);font-size:13px;text-align:center;font-family:var(--text);font-weight:600;vertical-align:3px}
+.foot{margin-top:28px;font-size:14px;color:var(--ink-3);text-align:center}
+.foot button{background:none;border:0;color:var(--accent);text-decoration:underline;padding:4px}
+
+/* profile page */
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+.back{background:none;border:0;color:var(--ink-2);font-family:var(--display);font-size:19px;padding:6px 0}
+.ribbon{width:16px;height:40px;background:var(--c);clip-path:polygon(0 0,100% 0,100% 100%,50% 78%,0 100%);margin-right:4px}
+.phead{text-align:center;padding:4px 0 0}
+.phead h1{font-size:42px}
+.phead .stats{margin-top:6px;color:var(--ink-2)}
+.rename{margin-top:8px;border:1px solid var(--edge);background:transparent;border-radius:16px;padding:4px 12px;font-size:13px;color:var(--ink-2)}
+.tabs{display:flex;gap:4px;justify-content:center;margin:18px 0 14px;flex-wrap:wrap}
+.tab{border:0;background:none;padding:8px 12px;font-family:var(--display);font-size:18px;color:var(--ink-3);border-bottom:2px solid transparent}
+.tab[aria-selected="true"]{color:var(--ink);border-color:var(--c,var(--accent))}
+.tools{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.tools input[type=search]{flex:1 1 200px;font-size:16px;background:var(--paper);border:1px solid var(--edge);border-radius:20px;padding:9px 16px;min-width:0}
+.tools select{background:var(--paper);border:1px solid var(--edge);border-radius:20px;padding:8px 12px;font-size:15px}
+.chips{display:flex;gap:6px;overflow-x:auto;margin:12px -16px 0;padding:0 16px 4px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:0 0 auto;border:1px solid var(--edge);background:var(--paper);border-radius:16px;padding:5px 12px;font-size:14px;color:var(--ink-2)}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.section{margin-top:26px}
+.section h2{font-size:24px;display:flex;align-items:baseline;gap:10px;margin-bottom:12px}
+.section h2 small{font-family:var(--text);font-size:13px;color:var(--ink-3);font-weight:400}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:18px 14px}
+.book{border:0;background:none;padding:0;text-align:left;display:flex;flex-direction:column;gap:6px;min-width:0}
+.cover{position:relative;aspect-ratio:2/3;border-radius:2px 4px 4px 2px;overflow:hidden;background:var(--paper-3);box-shadow:var(--shadow)}
+.cover::after{content:"";position:absolute;inset:0 auto 0 0;width:7px;background:linear-gradient(90deg,rgba(0,0,0,.28),rgba(255,255,255,.12),transparent)}
+.cover img{width:100%;height:100%;object-fit:cover;display:block}
+.cloth{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:space-between;padding:12px 10px 10px 14px;color:#F1E3C4;background:var(--cc,#3D4A3A);
+  background-image:repeating-linear-gradient(45deg,rgba(255,255,255,.035) 0 2px,transparent 2px 4px)}
+.cloth b{font-family:var(--display);font-weight:700;font-size:16px;line-height:1.1;color:#F1D99A}
+.cloth i{font-size:11px;font-style:normal;opacity:.85}
+.cloth::before{content:"";position:absolute;inset:6px 6px 6px 10px;border:1px solid rgba(225,190,110,.5);pointer-events:none}
+.book .t{font-size:14px;line-height:1.25;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.book .a{font-size:12px;color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pill{position:absolute;top:6px;right:6px;z-index:1;font-size:10px;letter-spacing:.06em;text-transform:uppercase;background:var(--paper);color:var(--ink);border-radius:3px;padding:1px 5px;box-shadow:0 1px 2px rgba(0,0,0,.2)}
+.empty{border:1px dashed var(--edge);border-radius:10px;padding:28px 18px;text-align:center;color:var(--ink-2);font-style:italic}
+.fab{position:fixed;right:max(18px,env(safe-area-inset-right));bottom:calc(22px + env(safe-area-inset-bottom));z-index:20;border:0;background:var(--accent);color:var(--accent-ink);border-radius:28px;padding:14px 20px;font-weight:600;box-shadow:0 8px 20px rgba(90,40,20,.35);display:flex;align-items:center;gap:8px}
+.fab span{font-size:22px;line-height:1}
+
+/* sheets */
+.scrim{position:fixed;inset:0;background:rgba(30,20,12,.45);z-index:40;display:flex;align-items:flex-end;justify-content:center;animation:fade .2s ease}
+.sheet{background:var(--paper);width:100%;max-width:640px;max-height:92vh;overflow:auto;border-radius:16px 16px 0 0;padding:10px 18px calc(24px + env(safe-area-inset-bottom));box-shadow:0 -10px 30px rgba(0,0,0,.25);animation:rise .25s ease}
+@media (min-width:700px){.scrim{align-items:center}.sheet{border-radius:14px}}
+.grab{width:42px;height:5px;border-radius:3px;background:var(--edge);margin:4px auto 14px}
+.grabzone{padding:6px 0 2px;margin:-10px -18px 0;touch-action:none}
+.sheet{position:relative;overscroll-behavior:contain}
+.sheetx{position:sticky;top:0;float:right;z-index:2;width:38px;height:38px;margin:2px -6px 0 0;border-radius:50%;border:1px solid var(--edge);background:var(--paper-2);color:var(--ink);font-size:16px;line-height:1}
+.sheet h2{font-size:30px}
+.detail{display:grid;grid-template-columns:110px 1fr;gap:16px;align-items:start}
+.detail .meta{font-size:14px;color:var(--ink-2)}
+.seg{display:flex;border:1px solid var(--edge);border-radius:10px;overflow:hidden;margin:16px 0}
+.seg button{flex:1;border:0;background:var(--paper-2);padding:10px 4px;font-size:14px;color:var(--ink-2)}
+.seg button+button{border-left:1px solid var(--edge)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--paper);font-weight:600}
+.plot{margin:12px 0 0;max-width:62ch}
+.plot::first-letter{font-family:var(--display);font-size:2.6em;float:left;line-height:.8;padding:6px 6px 0 0;color:var(--accent)}
+.margin{margin-top:18px;padding:14px;border-left:3px solid var(--gilt);background:var(--paper-2);border-radius:0 8px 8px 0}
+.margin .field textarea{background:transparent;border-style:dashed;font-style:italic}
+.results{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+.result{display:flex;gap:10px;align-items:center;border:1px solid var(--edge);background:var(--paper-2);border-radius:8px;padding:6px;text-align:left}
+.result img,.result .noimg{width:38px;height:56px;object-fit:cover;border-radius:2px;background:var(--paper-3);flex:0 0 38px}
+.result div{min-width:0}.result b{display:block;font-weight:600;font-size:15px}.result small{color:var(--ink-3)}
+.cropwrap{display:flex;flex-direction:column;gap:10px;padding:12px;border:1px solid var(--edge);border-radius:10px;background:var(--paper-2)}
+.cropstage{position:relative;touch-action:none;user-select:none;line-height:0;align-self:center;max-width:100%}
+.cropimg{display:block;max-width:100%;max-height:52vh;width:auto;height:auto}
+.cropframe{position:absolute;border:2px solid #fff;box-shadow:0 0 0 9999px rgba(0,0,0,.5),inset 0 0 0 1px rgba(0,0,0,.4);cursor:move;touch-action:none}
+.cropstage{overflow:hidden;border-radius:6px}
+.camera{position:fixed;inset:0;z-index:90;background:#000;display:flex;align-items:center;justify-content:center}
+.camvideo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.camguide{position:relative;width:min(62vw,46vh);aspect-ratio:2/3;border:3px solid rgba(255,255,255,.9);border-radius:6px;box-shadow:0 0 0 9999px rgba(0,0,0,.45)}
+.camguide.bar{aspect-ratio:2/1;width:min(80vw,420px)}
+.camhint{position:absolute;top:calc(env(safe-area-inset-top) + 24px);left:16px;right:16px;text-align:center;color:#fff;font-size:16px;text-shadow:0 1px 3px #000}
+.cambar{position:absolute;left:0;right:0;bottom:calc(env(safe-area-inset-bottom) + 24px);display:flex;justify-content:space-around;align-items:center}
+.camshutter{width:72px;height:72px;border-radius:50%;border:5px solid #fff;background:rgba(255,255,255,.35)}
+.camshutter:active{background:#fff}
+.swatches{display:flex;gap:10px;flex-wrap:wrap}
+.swatch{width:40px;height:56px;border-radius:3px;border:0;background:var(--c);box-shadow:inset 0 0 0 1px rgba(0,0,0,.2)}
+.swatch[aria-pressed="true"]{outline:3px solid var(--ink);outline-offset:2px}
+.letter{border:1px solid var(--edge);background:var(--paper-2);border-radius:8px;padding:14px 16px;display:flex;flex-direction:column;gap:6px}
+.letter .t{font-family:var(--display);font-size:21px;font-weight:600}
+.letter p{margin:0;font-style:italic}
+.actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+
+/* page turn */
+.turn{position:fixed;inset:0;z-index:30;perspective:1800px;pointer-events:none}
+.turn .leaf{position:absolute;inset:0;transform-origin:left center;backface-visibility:hidden;background:var(--c);
+  background-image:linear-gradient(90deg,rgba(0,0,0,.35),rgba(0,0,0,0) 6%,rgba(255,255,255,.06) 50%,rgba(0,0,0,.25));
+  display:flex;flex-direction:column;align-items:center;justify-content:center;color:#F1D99A;font-family:var(--display)}
+.turn .leaf::before{content:"";position:absolute;inset:18px 18px 18px 26px;border:2px solid rgba(225,190,110,.6)}
+.turn .leaf::after{content:"";position:absolute;inset:26px 26px 26px 34px;border:1px solid rgba(225,190,110,.4)}
+.turn .leaf .k{letter-spacing:.35em;font-size:15px;text-transform:uppercase}
+.turn .leaf .n{font-size:54px;font-weight:700;margin-top:10px;text-align:center;padding:0 40px}
+.turn .leaf .o{font-size:22px;margin-top:14px}
+.turn.paper .leaf{background:var(--paper);color:var(--ink)}
+.turn.paper .leaf::before,.turn.paper .leaf::after{border-color:var(--edge)}
+@keyframes fade{from{opacity:0}}
+@keyframes rise{from{transform:translateY(30px);opacity:0}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+.ptr{position:fixed;left:50%;top:calc(env(safe-area-inset-top) + 8px);z-index:70;transform:translate(-50%,-70px);width:44px;height:44px;border-radius:50%;background:var(--paper);box-shadow:var(--shadow);border:1px solid var(--edge);display:flex;align-items:center;justify-content:center;color:var(--accent);font-size:22px;pointer-events:none}
+.ptr.spin span{animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+body{overscroll-behavior-y:contain}
+#pvbar{position:sticky;top:0;z-index:50;background:#A8742B;color:#fff;font-size:13px;text-align:center;padding:6px 12px}
+.stars{display:flex;gap:2px}.stars button{border:0;background:none;font-size:28px;line-height:1;padding:2px;color:var(--edge)}
+.stars button[aria-pressed="true"]{color:var(--gilt)}
+.stars-ro{color:var(--gilt);letter-spacing:1px}.stars-ro .off{color:var(--edge)}.stars-ro.sm{font-size:12px}
+.brow{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:10px 0}
+.pagebox{margin:6px 0 4px}.pagein{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:8px}
+.pagein input{width:84px;font-size:16px;background:var(--paper);border:1px solid var(--edge);border-radius:8px;padding:6px 8px}
+.bigprog{height:8px;border-radius:4px;background:var(--paper-3);overflow:hidden}.bigprog i{display:block;height:100%;background:var(--accent);border-radius:4px}
+.prog{position:absolute;left:0;right:0;bottom:0;height:5px;background:rgba(0,0,0,.35);z-index:1}.prog i{display:block;height:100%;background:var(--gilt)}
+.pill.lent{left:6px;right:auto;background:var(--accent);color:var(--accent-ink)}
+.dates{margin:6px 0 4px}
+.also{margin:12px 0 0;font-size:14px;color:var(--ink-2);background:var(--paper-2);border-radius:8px;padding:8px 12px}
+.fold{margin-top:14px;border-top:1px solid var(--edge);padding-top:10px}
+.fold summary{cursor:pointer;font-family:var(--display);font-size:19px;font-weight:600}
+.fold textarea,.fold input{width:100%;font-size:16px;background:var(--paper);border:1px solid var(--edge);border-radius:8px;padding:8px 10px;margin:8px 0}
+.quotes blockquote{margin:10px 0;padding:6px 30px 6px 12px;border-left:3px solid var(--gilt);font-style:italic;position:relative}
+.qx{position:absolute;right:0;top:4px;border:0;background:none;color:var(--ink-3)}
+.follows{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
+.statgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+@media (min-width:640px){.statgrid{grid-template-columns:repeat(4,1fr)}}
+.stat{border:1px solid var(--edge);background:var(--paper-2);border-radius:10px;padding:14px;text-align:center}
+.stat b{display:block;font-family:var(--display);font-size:34px;line-height:1}.stat span{font-size:13px;color:var(--ink-3)}
+.yearnav{display:flex;align-items:center;justify-content:center;gap:18px}.yearnav .back{font-size:30px}.yearnav .back:disabled{opacity:.25}
+.months{display:grid;grid-template-columns:repeat(12,1fr);gap:4px;height:140px;align-items:end}
+.mcol{display:flex;flex-direction:column;align-items:center;height:100%;justify-content:flex-end;gap:4px}
+.mbar{width:100%;min-height:2px;background:var(--c,var(--accent));border-radius:3px 3px 0 0;position:relative}
+.mbar span{position:absolute;top:-18px;left:0;right:0;text-align:center;font-size:11px;color:var(--ink-2)}
+.mcol small{font-size:11px;color:var(--ink-3)}
+.hbars{display:flex;flex-direction:column;gap:8px}.hbar{display:grid;grid-template-columns:minmax(90px,38%) 1fr;gap:10px;align-items:center;font-size:14px}
+.hbar span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.hbar b{background:var(--c,var(--accent));color:#fff;border-radius:4px;padding:2px 8px;font-size:12px;text-align:right;min-width:24px}
+.book.fav{flex-direction:row;gap:16px;align-items:center}.book.fav .cover{width:110px;flex:0 0 110px}
+.newsrow{display:grid;grid-template-columns:76px 1fr;gap:12px;align-items:start}
+.soon{color:var(--accent);font-weight:600;font-size:14px}
+.toast{position:fixed;left:50%;bottom:calc(90px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:10px 16px;border-radius:8px;font-size:14px;z-index:60;box-shadow:var(--shadow);max-width:90vw}
+.auth{max-width:420px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+</style>
+</head>
+<body>
+<div id="pvbar" hidden>Preview version. Changes to books are real, the new features are being tested.</div>
+<div id="app" class="page"><div class="titlepage"><div class="kicker">Ex Libris</div><h1>Opening the library</h1></div></div>
+<script type="module">
+/* ------------------------------------------------------------------
+   Sync setup. Paste the firebaseConfig from the Firebase console here.
+   While it stays null the app works on this phone only.
+------------------------------------------------------------------- */
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyBor-6tHmEoTxPDhU5WwK1LlcPMlCs4KGU",
+  authDomain: "book-traking.firebaseapp.com",
+  projectId: "book-traking",
+  storageBucket: "book-traking.firebasestorage.app",
+  messagingSenderId: "808487284957",
+  appId: "1:808487284957:web:de4a4a420a47932cd0eb34"
+};
+
+const LEATHER = ["#7A2E2A", "#2F4F3A", "#2B3A55", "#A8742B", "#5A3550", "#3F5E63", "#6B4A2B", "#4A4A4A"];
+const STATUS = { reading: "Reading", read: "Read", wishlist: "Wishlist" };
+const $app = document.getElementById("app");
+
+/* ---------- helpers ---------- */
+function h(tag, attrs, ...kids) {
+  const e = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs || {})) {
+    if (v == null || v === false) continue;
+    if (k === "class") e.className = v;
+    else if (k === "style" && typeof v === "object") Object.entries(v).forEach(([p, val]) => e.style.setProperty(p, val));
+    else if (k.startsWith("on")) e.addEventListener(k.slice(2), v);
+    else if (k === "text") e.textContent = v;
+    else e.setAttribute(k, v === true ? "" : v);
+  }
+  for (const k of kids.flat()) if (k != null && k !== false) e.append(k.nodeType ? k : document.createTextNode(String(k)));
+  return e;
+}
+const arr = v => Array.isArray(v) ? v : (v ? [v] : []);
+const slug = t => String(t || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 80) || "book";
+const hash = s => { let x = 0; for (const c of String(s)) x = (x * 31 + c.charCodeAt(0)) | 0; return Math.abs(x); };
+const today = () => new Date().toISOString().slice(0, 10);
+const PREVIEW = location.pathname.includes("/preview/");
+const ASSET = PREVIEW ? "../" : "";
+const stOf = b => b.status === "reading" ? "reading" : b.status === "wishlist" ? "wishlist" : "read";
+const norm = t => String(t || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/\(.*?\)|\[.*?\]/g, "").split(/[:.]\s/)[0].replace(/^(the|a|an|il|la|lo|i|gli|le|l')\s+/, "").replace(/[^a-z0-9]/g, "");
+const fmtDate = d => d ? new Date(d + "T12:00:00").toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "";
+const lsGet = (k, d) => { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch (e) { return d; } };
+const lsSet = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} };
+function myUid() { if (DB.mode === "firebase") return meUid(); const s = sessionStorage.getItem("exlibris-me"); if (s && profiles[s]) return s; return Object.entries(profiles).sort((a, b) => (a[1].created || 0) - (b[1].created || 0))[0]?.[0] || null; }
+function starsEl(r, small) { return h("span", { class: "stars-ro" + (small ? " sm" : ""), "aria-label": r ? r + " out of 5" : "Not rated" }, "★★★★★".slice(0, r || 0), h("span", { class: "off" }, "★★★★★".slice(0, 5 - (r || 0)))); }
+const yr = b => b.yearLabel || (b.year != null ? (b.year < 0 ? -b.year + " BC" : b.year) : "");
+let toastT;
+function toast(msg) { document.querySelector(".toast")?.remove(); const t = h("div", { class: "toast", role: "status" }, msg); document.body.append(t); clearTimeout(toastT); toastT = setTimeout(() => t.remove(), 3200); }
+const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/* ---------- local adapter (this phone only) ---------- */
+function localAdapter() {
+  const KEY = "exlibris-v2";
+  let db; const subs = { profiles: [], sugs: [], books: {} };
+  const save = () => { try { localStorage.setItem(KEY, JSON.stringify(db)); } catch (e) { toast("Storage is full, change not saved"); } };
+  const emit = () => { subs.profiles.forEach(f => f(structuredClone(db.profiles))); subs.sugs.forEach(f => f(Object.entries(db.sugs).map(([id, d]) => ({ id, ...d })))); for (const [u, fs] of Object.entries(subs.books)) fs.forEach(f => f(db.books[u] || {})); };
+  let me = null; const authSubs = [];
+  return {
+    mode: "local",
+    async init() {
+      try { db = JSON.parse(localStorage.getItem(KEY) || "null"); } catch (e) { db = null; }
+      if (!db) {
+        db = { profiles: {}, books: {}, sugs: {} };
+        let old = null; try { old = JSON.parse(localStorage.getItem("shelves-v1") || "null"); } catch (e) {}
+        const seed = old || await fetch("data.json").then(r => r.json()).catch(() => ({ books: {} }));
+        db.profiles.jacopo = { name: "Jacopo", color: LEATHER[0], created: 1, seedFrom: "data.json", seen: Object.keys(seed.books || {}) };
+        db.books.jacopo = seed.books || {};
+        if (old && Object.keys(old.gaia_books || {}).length) { db.profiles.gaia = { name: "Gaia", color: LEATHER[4], created: 2 }; db.books.gaia = old.gaia_books; }
+        save();
+      }
+      me = sessionStorage.getItem("exlibris-me") || null; if (me && !db.profiles[me]) me = null;
+    },
+    user: () => me ? { uid: me } : null,
+    onAuth(f) { authSubs.push(f); f(this.user()); },
+    use(uid) { me = uid; sessionStorage.setItem("exlibris-me", uid || ""); authSubs.forEach(f => f(this.user())); },
+    watchProfiles(f) { subs.profiles.push(f); f(structuredClone(db.profiles)); },
+    async saveProfile(uid, d) { db.profiles[uid] = { ...(db.profiles[uid] || {}), ...d }; save(); emit(); },
+    watchBooks(uid, f) { (subs.books[uid] = subs.books[uid] || []).push(f); f(db.books[uid] || {}); return () => { subs.books[uid] = subs.books[uid].filter(x => x !== f); }; },
+    async setBook(uid, id, d) { (db.books[uid] = db.books[uid] || {})[id] = d; save(); emit(); },
+    async updateBook(uid, id, p) { Object.assign(db.books[uid][id], p); save(); emit(); },
+    async deleteBook(uid, id) { delete db.books[uid][id]; save(); emit(); },
+    async setBooks(uid, map) { db.books[uid] = { ...(db.books[uid] || {}), ...map }; save(); emit(); },
+    watchSugs(f) { subs.sugs.push(f); f(Object.entries(db.sugs).map(([id, d]) => ({ id, ...d }))); },
+    async addSug(d) { db.sugs["s" + Date.now().toString(36)] = d; save(); emit(); },
+    async delSug(id) { delete db.sugs[id]; save(); emit(); },
+    exportAll: () => structuredClone(db),
+    async importAll(d) { db = d; save(); emit(); }
+  };
+}
+
+/* ---------- firebase adapter (shared, synced) ---------- */
+async function firebaseAdapter(cfg) {
+  const V = "10.12.2", base = "https://www.gstatic.com/firebasejs/" + V + "/";
+  const [{ initializeApp }, A, F] = await Promise.all([import(base + "firebase-app.js"), import(base + "firebase-auth.js"), import(base + "firebase-firestore.js")]);
+  const app = initializeApp(cfg);
+  let auth; try { auth = A.initializeAuth(app, { persistence: [A.indexedDBLocalPersistence, A.browserLocalPersistence] }); } catch (e) { auth = A.getAuth(app); }
+  let fs; try { fs = F.initializeFirestore(app, { localCache: F.persistentLocalCache({ tabManager: F.persistentMultipleTabManager() }) }); } catch (e) { fs = F.getFirestore(app); }
+  const books = uid => F.collection(fs, "profiles", uid, "books");
+  return {
+    mode: "firebase",
+    async init() { await new Promise(r => { const u = A.onAuthStateChanged(auth, () => { u(); r(); }); }); },
+    user: () => auth.currentUser ? { uid: auth.currentUser.uid, email: auth.currentUser.email } : null,
+    onAuth(f) { A.onAuthStateChanged(auth, u => f(u ? { uid: u.uid, email: u.email } : null)); },
+    signIn: (e, p) => A.signInWithEmailAndPassword(auth, e, p),
+    signUp: (e, p) => A.createUserWithEmailAndPassword(auth, e, p),
+    reset: e => A.sendPasswordResetEmail(auth, e),
+    signOut: () => A.signOut(auth),
+    watchProfiles(f) { return F.onSnapshot(F.collection(fs, "profiles"), s => { const o = {}; s.forEach(d => o[d.id] = d.data()); f(o); }, e => toast("Could not load profiles: " + e.code)); },
+    saveProfile: (uid, d) => F.setDoc(F.doc(fs, "profiles", uid), d, { merge: true }),
+    watchBooks(uid, f) { return F.onSnapshot(books(uid), s => { const o = {}; s.forEach(d => o[d.id] = d.data()); f(o); }, e => toast("Could not load books: " + e.code)); },
+    setBook: (uid, id, d) => F.setDoc(F.doc(books(uid), id), JSON.parse(JSON.stringify(d))),
+    updateBook: (uid, id, p) => F.updateDoc(F.doc(books(uid), id), p),
+    deleteBook: (uid, id) => F.deleteDoc(F.doc(books(uid), id)),
+    async setBooks(uid, map) { const ids = Object.keys(map); for (let i = 0; i < ids.length; i += 400) { const b = F.writeBatch(fs); ids.slice(i, i + 400).forEach(id => b.set(F.doc(books(uid), id), map[id])); await b.commit(); } },
+    watchSugs(f) { return F.onSnapshot(F.collection(fs, "suggestions"), s => f(s.docs.map(d => ({ id: d.id, ...d.data() }))), () => {}); },
+    addSug: d => F.addDoc(F.collection(fs, "suggestions"), d),
+    delSug: id => F.deleteDoc(F.doc(fs, "suggestions", id))
+  };
+}
+
+/* ---------- state ---------- */
+let DB, profiles = {}, sugs = [], user = null;
+const shelf = {}; const unsub = {};
+const ui = { route: "", tab: "all", q: "", genre: null, group: localStorage.getItem("exl-group") || "genre", sort: localStorage.getItem("exl-sort") || "title" };
+const meUid = () => user?.uid || null;
+const canEdit = uid => DB.mode === "local" || uid === meUid();
+const nameOf = uid => profiles[uid]?.name || "Someone";
+function books(uid) { return Object.entries(shelf[uid] || {}).map(([id, d]) => ({ id, ...d })); }
+function watch(uid) { if (unsub[uid] !== undefined) return; unsub[uid] = null; let sync = true; const u = DB.watchBooks(uid, o => { shelf[uid] = o; if (!sync) render(); }); sync = false; if (shelf[uid]) queueMicrotask(render); unsub[uid] = u || null; }
+
+/* ---------- seed merge: books Claude adds to data.json ---------- */
+async function mergeSeed(uid) {
+  const p = profiles[uid]; if (!p || p.seedFrom !== "data.json" || !canEdit(uid)) return;
+  const r = await fetch("data.json?t=" + Date.now(), { cache: "no-store" }).then(x => x.ok ? x.json() : null).catch(() => null); if (!r) return;
+  const seen = new Set(p.seen || []), mine = shelf[uid] || {}, add = {};
+  for (const [id, d] of Object.entries(r.books || {})) if (!seen.has(id) && !mine[id]) add[id] = d;
+  const all = [...new Set([...(p.seen || []), ...Object.keys(r.books || {})])];
+  if (Object.keys(add).length) { await DB.setBooks(uid, add); toast(Object.keys(add).length + " new book" + (Object.keys(add).length > 1 ? "s" : "") + " added from Claude"); }
+  if (all.length !== (p.seen || []).length) await DB.saveProfile(uid, { seen: all });
+}
+
+/* ---------- covers ---------- */
+function coverEl(b, pill) {
+  const c = h("div", { class: "cover" });
+  if (pill) c.append(h("span", { class: "pill" }, pill));
+  const cloth = () => h("div", { class: "cloth", style: { "--cc": LEATHER[hash(b.title) % LEATHER.length] } }, h("b", {}, b.title || "Untitled"), h("i", {}, arr(b.authors).join(", ")));
+  if (b.status === "reading" && b.pages && b.page) c.append(h("div", { class: "prog" }, h("i", { style: { width: Math.min(100, Math.round(b.page / b.pages * 100)) + "%" } })));
+  if (b.lentTo) c.append(h("span", { class: "pill lent" }, "Lent"));
+  if (b.cover) { const img = h("img", { src: /^(https?:|data:|blob:)/.test(b.cover) ? b.cover : ASSET + b.cover, alt: "Cover of " + b.title, loading: "lazy" }); img.onerror = () => img.replaceWith(cloth()); c.append(img); } else c.append(cloth());
+  return c;
+}
+
+/* ---------- page turn ---------- */
+function turn({ color, kicker, name, paper, opening }) {
+  if (reduce) return Promise.resolve();
+  const wrap = h("div", { class: "turn" + (paper ? " paper" : "") }), leaf = h("div", { class: "leaf", style: { "--c": color || "var(--paper-3)" } }, h("div", { class: "k" }, kicker || "Ex Libris"), h("div", { class: "n" }, name || ""), h("div", { class: "o" }, "❦"));
+  wrap.append(leaf); document.body.append(wrap);
+  const frames = opening ? [{ transform: "rotateY(0deg)" }, { transform: "rotateY(-178deg)" }] : [{ transform: "rotateY(-178deg)" }, { transform: "rotateY(0deg)" }];
+  const a = leaf.animate(frames, { duration: 760, easing: "cubic-bezier(.55,.05,.35,1)", fill: "forwards", delay: opening ? 140 : 0 });
+  return new Promise(r => a.onfinish = () => { if (opening) wrap.remove(); else setTimeout(() => wrap.remove(), 60); r(); });
+}
+
+/* ---------- views ---------- */
+function render() {
+  const r = location.hash.slice(1) || "/";
+  if (DB.mode === "firebase" && !user) return renderAuth();
+  if (user && DB.mode === "firebase" && !profiles[user.uid] && !r.startsWith("/new")) { if ($app.dataset.view === "new") return; return renderNewProfile(true); }
+  if (r.startsWith("/new") && $app.dataset.view === "new" && ui.creating) return;
+  if (r.startsWith("/p/")) return renderShelf(decodeURIComponent(r.slice(3)));
+  if (r === "/letters") return renderLetters();
+  if (r.startsWith("/year")) return renderYear(decodeURIComponent(r.slice(6)) || myUid());
+  if (r === "/news") return renderNews();
+  if (r.startsWith("/new")) return renderNewProfile(false);
+  return renderLibrary();
+}
+function mount(...kids) { const y = window.scrollY, same = $app.dataset.view === ui.route; $app.replaceChildren(...kids.flat().filter(k => k != null && k !== false)); if (same) window.scrollTo(0, y); }
+
+function renderLibrary() {
+  ui.route = "lib"; $app.dataset.view = "lib";
+  const list = Object.entries(profiles).sort((a, b) => (a[1].created || 0) - (b[1].created || 0));
+  const heights = [230, 210, 240, 200, 225, 215];
+  const spines = list.map(([uid, p], i) => {
+    watch(uid); const n = Object.values(shelf[uid] || {}).filter(b => b.status !== "wishlist").length;
+    return h("button", { class: "spine", style: { "--c": p.color || LEATHER[0], height: heights[i % heights.length] + "px" }, "aria-label": "Open " + p.name + "'s shelf", onclick: () => openShelf(uid) },
+      h("div", { class: "band" }), h("div", { class: "band" }), h("div", { class: "name" }, p.name), h("div", { class: "num" }, shelf[uid] ? n : "·"), h("div", { class: "band" }));
+  });
+  spines.push(h("button", { class: "spine add", style: { height: "180px" }, "aria-label": "Add a reader", onclick: () => go("/new") }, h("div", { class: "name" }, "+ Add a reader")));
+  const forMe = sugs.filter(s => DB.mode === "local" ? true : s.to === meUid()).length;
+  const mine = meUid() && profiles[meUid()];
+  mount(
+    h("header", { class: "titlepage" }, h("div", { class: "kicker" }, "Ex Libris"), h("h1", {}, "The Codex Club"), h("p", {}, list.length ? "Choose a volume to open it" : "Add the first reader to begin")),
+    h("div", { class: "case" }, h("div", { class: "spines" }, spines), h("div", { class: "plank" })),
+    h("div", { class: "cards" },
+      myUid() ? h("button", { class: "card", onclick: () => go("/news") }, h("h2", {}, "News for you ", newsCount() ? h("span", { class: "badge" }, newsCount()) : null), h("div", { class: "muted" }, "New and upcoming books from your series and the authors you love.")) : null,
+      myUid() ? h("button", { class: "card", onclick: () => go("/year/" + encodeURIComponent(myUid())) }, h("h2", {}, "Year in books"), yearTeaser(myUid())) : null,
+      h("button", { class: "card", onclick: () => go("/letters") }, h("h2", {}, "Letters ", forMe ? h("span", { class: "badge" }, forMe) : null), h("div", { class: "muted" }, "Suggest books to each other and send the good ones straight to a wishlist.")),
+      DB.mode === "local" ? h("div", { class: "card" }, h("h2", {}, "Backup"), h("div", { class: "muted" }, "This library lives only on this phone until sync is switched on. Save a backup now and then."),
+        h("div", { class: "actions" }, h("button", { class: "btn", onclick: exportBackup }, "Save backup"), h("label", { class: "btn ghost" }, "Load backup", h("input", { type: "file", accept: ".json,application/json", hidden: true, onchange: importBackup })))) : null),
+    h("div", { class: "foot" }, h("div", { class: "faint", style: { "font-size": "12px", "margin-bottom": "4px" } }, PREVIEW ? "Preview version" : "Version 7 Nov j"), DB.mode === "firebase" ? ["Signed in as ", mine ? mine.name : user.email, " · ", h("button", { onclick: () => DB.signOut() }, "Sign out")] : "Sync is not set up yet, so changes stay on this phone.")
+  );
+}
+
+async function openShelf(uid) {
+  const p = profiles[uid]; watch(uid);
+  ui.tab = "all"; ui.q = ""; ui.genre = null;
+  const t = turn({ color: p.color, kicker: "Ex Libris", name: p.name, opening: true });
+  await new Promise(r => setTimeout(r, reduce ? 0 : 160));
+  go("/p/" + encodeURIComponent(uid)); window.scrollTo(0, 0);
+  await t; mergeSeed(uid);
+}
+async function closeTo(path) { const t = turn({ paper: true, kicker: "Ex Libris", name: "", opening: false }); await new Promise(r => setTimeout(r, reduce ? 0 : 700)); go(path); window.scrollTo(0, 0); await t; }
+
+function renderShelf(uid) {
+  const p = profiles[uid]; if (!p) { if (Object.keys(profiles).length) go("/"); return; }
+  watch(uid); ui.route = "shelf:" + uid; $app.dataset.view = ui.route;
+  const all = books(uid), color = p.color || LEATHER[0], edit = canEdit(uid);
+  const counts = { reading: 0, read: 0, wishlist: 0 }; all.forEach(b => counts[b.status === "reading" ? "reading" : b.status === "wishlist" ? "wishlist" : "read"]++);
+  const st = b => b.status === "reading" ? "reading" : b.status === "wishlist" ? "wishlist" : "read";
+  let list = all.filter(b => ui.tab === "all" ? st(b) !== "wishlist" : st(b) === ui.tab);
+  const genres = [...new Set(list.flatMap(b => arr(b.genres)))].sort();
+  if (ui.genre && !genres.includes(ui.genre)) ui.genre = null;
+  if (ui.genre) list = list.filter(b => arr(b.genres).includes(ui.genre));
+  const q = ui.q.trim().toLowerCase();
+  if (q) list = list.filter(b => [b.title, b.altTitle, b.series, b.notes, ...arr(b.authors), ...arr(b.genres)].join(" ").toLowerCase().includes(q));
+  const sorters = { title: (a, b) => (a.title || "").localeCompare(b.title || ""), author: (a, b) => (arr(a.authors)[0] || "").localeCompare(arr(b.authors)[0] || "") || (a.year || 0) - (b.year || 0), added: (a, b) => (b.added || "").localeCompare(a.added || ""), year: (a, b) => (a.year || 9999) - (b.year || 9999) };
+  list.sort(sorters[ui.sort] || sorters.title);
+  const groups = new Map(), put = (k, b) => { if (!groups.has(k)) groups.set(k, []); groups.get(k).push(b); };
+  if (ui.group === "genre") list.forEach(b => put(arr(b.genres)[0] || "Other", b));
+  else if (ui.group === "author") list.forEach(b => put(arr(b.authors)[0] || "Unknown", b));
+  else if (ui.group === "series") { list.forEach(b => put(b.series || "Standalone", b)); groups.forEach(v => v.sort((a, b) => (a.seriesNo ?? 99) - (b.seriesNo ?? 99))); }
+  else groups.set("", list);
+  const keys = [...groups.keys()].sort((a, b) => (a === "Other" || a === "Standalone") - (b === "Other" || b === "Standalone") || a.localeCompare(b));
+  const reading = ui.tab === "all" ? all.filter(b => st(b) === "reading") : [];
+  const grid = arrb => h("div", { class: "grid" }, arrb.map(b => h("button", { class: "book", onclick: () => openBook(uid, b.id) }, coverEl(b, ui.tab === "all" && st(b) === "reading" ? "Reading" : null), h("div", { class: "t" }, b.title), h("div", { class: "a" }, arr(b.authors).join(", ")), b.rating ? starsEl(b.rating, true) : null)));
+  const tab = (k, label, n) => h("button", { class: "tab", role: "tab", "aria-selected": ui.tab === k ? "true" : "false", onclick: () => { ui.tab = k; ui.genre = null; render(); } }, label, n != null ? h("span", { class: "faint", style: { "font-size": "14px" } }, " " + n) : null);
+  const content = [];
+  if (!all.length) content.push(h("div", { class: "empty" }, shelf[uid] ? (edit ? "This shelf is empty. Tap Add a book to put the first one here." : p.name + " has not added any books yet.") : "Opening the shelf"));
+  else if (!list.length) content.push(h("div", { class: "empty" }, "No books match."));
+  else {
+    if (reading.length && !q && !ui.genre) content.push(h("section", { class: "section" }, h("h2", {}, "On the nightstand", h("small", {}, reading.length)), grid(reading.sort(sorters.title))));
+    keys.forEach(k => content.push(h("section", { class: "section" }, k ? h("h2", {}, k, h("small", {}, groups.get(k).length)) : null, grid(groups.get(k)))));
+  }
+  const authors = new Set(all.filter(b => st(b) !== "wishlist").flatMap(b => arr(b.authors))).size;
+  mount(
+    h("div", { class: "topbar" }, h("button", { class: "back", onclick: () => closeTo("/") }, "‹ Library"), h("div", { class: "ribbon", style: { "--c": color } })),
+    h("header", { class: "phead" }, h("div", { class: "sc faint" }, "the shelf of"), h("h1", {}, p.name), h("div", { class: "actions", style: { "justify-content": "center", "margin-top": "8px" } }, edit ? h("button", { class: "rename", type: "button", onclick: () => editShelf(uid) }, "✎ Edit shelf") : null, h("button", { class: "rename", type: "button", onclick: () => go("/year/" + encodeURIComponent(uid)) }, "◔ Year in books")),
+      h("div", { class: "stats sc" }, counts.read + " read · " + counts.reading + " reading · " + counts.wishlist + " wished · " + authors + " authors")),
+    h("div", { class: "fleuron" }, "❦"),
+    h("div", { class: "tabs", role: "tablist", style: { "--c": color } }, tab("all", "Shelf", counts.read + counts.reading), tab("reading", "Reading", counts.reading), tab("wishlist", "Wishlist", counts.wishlist)),
+    h("div", { class: "tools" },
+      h("input", { type: "search", placeholder: "Search title, author, notes", value: ui.q, "aria-label": "Search", oninput: e => { ui.q = e.target.value; render(); const i = $app.querySelector("input[type=search]"); i.focus(); i.setSelectionRange(i.value.length, i.value.length); } }),
+      h("select", { "aria-label": "Group by", onchange: e => { ui.group = e.target.value; localStorage.setItem("exl-group", ui.group); render(); } }, ...[["genre", "By genre"], ["author", "By author"], ["series", "By series"], ["none", "One shelf"]].map(([v, l]) => h("option", { value: v, selected: ui.group === v }, l))),
+      h("select", { "aria-label": "Order", onchange: e => { ui.sort = e.target.value; localStorage.setItem("exl-sort", ui.sort); render(); } }, ...[["title", "Title"], ["author", "Author"], ["year", "Year"], ["added", "Recently added"]].map(([v, l]) => h("option", { value: v, selected: ui.sort === v }, l)))),
+    genres.length > 1 ? h("div", { class: "chips" }, h("button", { class: "chip", "aria-pressed": ui.genre ? "false" : "true", onclick: () => { ui.genre = null; render(); } }, "All"), genres.map(g => h("button", { class: "chip", "aria-pressed": ui.genre === g ? "true" : "false", onclick: () => { ui.genre = ui.genre === g ? null : g; render(); } }, g))) : null,
+    ...content,
+    edit ? h("button", { class: "fab", onclick: () => addBook(uid) }, h("span", {}, "+"), "Add a book") : null
+  );
+}
+
+/* ---------- sheets ---------- */
+function sheet(...kids) {
+  let open = true;
+  const finish = () => { if (!open) return; open = false; document.removeEventListener("keydown", onKey); window.removeEventListener("popstate", onPop); document.body.style.overflow = ""; sh.style.transition = "transform .2s ease"; sh.style.transform = "translateY(100%)"; scrim.style.transition = "opacity .2s"; scrim.style.opacity = "0"; setTimeout(() => scrim.remove(), 200); };
+  const close = quiet => { if (!open) return; if (quiet === true) { if (history.state?.sheet) history.replaceState(null, ""); finish(); } else if (history.state?.sheet) history.back(); else finish(); };
+  const onPop = () => finish();
+  const onKey = e => { if (e.key === "Escape") close(); };
+  const x = h("button", { class: "sheetx", type: "button", "aria-label": "Close", onclick: () => close() }, "✕");
+  const grab = h("div", { class: "grabzone" }, h("div", { class: "grab" }));
+  const sh = h("div", { class: "sheet", role: "dialog", "aria-modal": "true" }, x, grab, ...kids);
+  const scrim = h("div", { class: "scrim", onclick: e => { if (e.target === scrim) close(); } }, sh);
+  let y0 = null, dy = 0;
+  sh.addEventListener("touchstart", e => { if (sh.scrollTop <= 0 && (e.target.closest(".grabzone") || !e.target.closest("input,textarea,select,button,.cropstage,.cropwrap"))) { y0 = e.touches[0].clientY; dy = 0; sh.style.transition = "none"; } }, { passive: true });
+  sh.addEventListener("touchmove", e => { if (y0 == null) return; dy = e.touches[0].clientY - y0; if (dy > 0 && sh.scrollTop <= 0) { sh.style.transform = "translateY(" + dy + "px)"; if (e.cancelable) e.preventDefault(); } else if (dy < 0) { y0 = null; sh.style.transform = ""; } }, { passive: false });
+  sh.addEventListener("touchend", () => { if (y0 == null) return; y0 = null; sh.style.transition = "transform .2s ease"; if (dy > 90) close(); else sh.style.transform = ""; });
+  document.addEventListener("keydown", onKey); window.addEventListener("popstate", onPop);
+  history.pushState({ sheet: true }, "");
+  document.body.style.overflow = "hidden";
+  document.body.append(scrim); return { close, sh };
+}
+
+function editShelf(uid) {
+  const p = profiles[uid]; let color = p.color || LEATHER[0];
+  const name = h("input", { required: true, maxlength: 24, autocomplete: "off" }); name.value = p.name || "";
+  const msg = h("div", { class: "status", role: "status" });
+  const sw = h("div", { class: "swatches", role: "group", "aria-label": "Binding colour" }, LEATHER.map(c => h("button", { type: "button", class: "swatch", style: { "--c": c }, "aria-label": "Binding " + c, "aria-pressed": c === color ? "true" : "false", onclick: e => { color = c; sw.querySelectorAll(".swatch").forEach(x => x.setAttribute("aria-pressed", x === e.currentTarget ? "true" : "false")); } })));
+  const save = async e => {
+    e.preventDefault(); const n = name.value.trim(); if (!n) { msg.textContent = "Add a name."; return; }
+    msg.textContent = "Saving";
+    try { await DB.saveProfile(uid, { name: n, color }); close(); toast("Shelf updated"); }
+    catch (err) { msg.textContent = err.code === "permission-denied" ? "Firebase refused the save. Check that the Firestore rules are published." : "Could not save: " + (err.code || err.message); }
+  };
+  const { close } = sheet(h("form", { onsubmit: save, style: { display: "flex", "flex-direction": "column", gap: "14px" } },
+    h("h2", {}, "Edit shelf"), h("label", { class: "field" }, "Name on the spine", name), h("div", { class: "field" }, "Binding", sw),
+    h("div", { class: "actions" }, h("button", { class: "btn primary", type: "submit" }, "Save"), h("button", { class: "btn ghost", type: "button", onclick: () => close() }, "Cancel")), msg));
+}
+
+function openBook(uid, id) {
+  const b = { id, ...(shelf[uid] || {})[id] }; if (!b.title) return;
+  const edit = canEdit(uid), st = stOf(b);
+  const upd = p => DB.updateBook(uid, id, p).then(() => Object.assign(b, p)).catch(e => toast("Could not save: " + (e.code || e.message)));
+  const meta = [arr(b.authors).join(", "), yr(b), b.series ? b.series + (b.seriesNo != null ? " " + b.seriesNo : "") : ""].filter(Boolean).join(" · ");
+  const notes = h("textarea", { rows: 4, placeholder: "Thoughts, where you stopped" }); notes.value = b.notes || "";
+  const msg = h("span", { class: "status", role: "status" });
+  const parts = [];
+  // rating
+  if (st !== "wishlist") {
+    if (edit) {
+      const row = h("div", { class: "stars", role: "group", "aria-label": "Your rating" });
+      const paint = () => row.querySelectorAll("button").forEach((x, i) => x.setAttribute("aria-pressed", i < (b.rating || 0) ? "true" : "false"));
+      for (let i = 1; i <= 5; i++) row.append(h("button", { type: "button", "aria-label": i + " stars", onclick: async () => { const r = b.rating === i ? 0 : i; b.rating = r; paint(); await upd({ rating: r }); } }, "★"));
+      paint(); parts.push(h("div", { class: "brow" }, h("span", { class: "sc faint" }, "your rating"), row));
+    } else if (b.rating) parts.push(h("div", { class: "brow" }, h("span", { class: "sc faint" }, "rating"), starsEl(b.rating)));
+  }
+  // reading progress
+  if (st === "reading") {
+    const pct = () => b.pages && b.page ? Math.min(100, Math.round(b.page / b.pages * 100)) : 0;
+    const bar = h("div", { class: "bigprog" }, h("i", { style: { width: pct() + "%" } })), lab = h("span", { class: "faint" }, pct() ? pct() + "%" : "");
+    if (edit) {
+      const pg = h("input", { type: "number", inputmode: "numeric", min: "0", value: b.page ?? "", "aria-label": "Current page" }), tot = h("input", { type: "number", inputmode: "numeric", min: "1", value: b.pages ?? "", "aria-label": "Total pages" });
+      const savep = async () => { const p = { page: parseInt(pg.value, 10) || 0, pages: parseInt(tot.value, 10) || 0 }; await upd(p); bar.firstChild.style.width = pct() + "%"; lab.textContent = pct() ? pct() + "%" : ""; };
+      pg.onchange = savep; tot.onchange = savep;
+      parts.push(h("div", { class: "pagebox" }, h("div", { class: "brow" }, h("span", { class: "sc faint" }, "progress"), lab), h("div", { class: "pagein" }, "Page ", pg, " of ", tot), bar));
+    } else if (pct()) parts.push(h("div", { class: "pagebox" }, h("div", { class: "brow" }, h("span", { class: "sc faint" }, "progress"), lab), bar));
+  }
+  // dates
+  if (st !== "wishlist") {
+    if (edit) {
+      const ds = h("input", { type: "date", value: b.started || "", max: today() }), df = h("input", { type: "date", value: b.finished || "", max: today() });
+      ds.onchange = () => upd({ started: ds.value }); df.onchange = () => upd({ finished: df.value });
+      parts.push(h("div", { class: "row dates" }, h("label", { class: "field" }, "Started", ds), st === "read" ? h("label", { class: "field" }, "Finished", df) : h("span")));
+    } else if (b.started || b.finished) parts.push(h("div", { class: "meta" }, [b.started ? "Started " + fmtDate(b.started) : "", b.finished ? "Finished " + fmtDate(b.finished) : ""].filter(Boolean).join(" · ")));
+  }
+  // who else has it
+  const k = norm(b.title), others = Object.entries(profiles).filter(([u]) => u !== uid).map(([u, p]) => { const o = books(u).find(x => norm(x.title) === k); return o ? p.name + (stOf(o) === "wishlist" ? " wants it" : stOf(o) === "reading" ? " is reading it" : " has read it" + (o.rating ? " " + "★".repeat(o.rating) : "")) : null; }).filter(Boolean);
+  const alsoEl = others.length ? h("div", { class: "also" }, "👥 " + others.join(" · ")) : null;
+  // quotes
+  const quotes = arr(b.quotes).slice(), qlist = h("div", { class: "quotes" });
+  const drawQ = () => qlist.replaceChildren(...quotes.map((t, i) => h("blockquote", {}, "“" + t + "”", edit ? h("button", { class: "qx", type: "button", "aria-label": "Delete quote", onclick: async () => { quotes.splice(i, 1); drawQ(); await upd({ quotes: quotes.slice() }); } }, "✕") : null)));
+  drawQ();
+  const qin = h("textarea", { rows: 2, placeholder: "Copy a line you loved" });
+  const quotesEl = edit ? h("details", { class: "fold", open: quotes.length > 0 }, h("summary", {}, "Favourite quotes", quotes.length ? h("span", { class: "faint" }, " " + quotes.length) : null), qlist, qin, h("button", { class: "btn", type: "button", onclick: async () => { const t = qin.value.trim(); if (!t) return; quotes.push(t); qin.value = ""; drawQ(); await upd({ quotes: quotes.slice() }); } }, "Add quote"))
+    : (quotes.length ? h("div", { class: "fold" }, h("div", { class: "sc faint" }, "favourite quotes"), qlist) : null);
+  // lending
+  let lendEl = null;
+  if (edit && st !== "wishlist") {
+    const who = h("input", { value: b.lentTo || "", placeholder: "Who has it", list: "readersList" }), when = h("input", { type: "date", value: b.lentOn || today() });
+    const dl = h("datalist", { id: "readersList" }, Object.values(profiles).map(p => h("option", { value: p.name })));
+    lendEl = h("details", { class: "fold", open: !!b.lentTo }, h("summary", {}, b.lentTo ? "Lent to " + b.lentTo + (b.lentOn ? " since " + fmtDate(b.lentOn) : "") : "Lend this book"), dl,
+      h("div", { class: "row" }, h("label", { class: "field" }, "Lent to", who), h("label", { class: "field" }, "On", when)),
+      h("div", { class: "actions" }, h("button", { class: "btn", type: "button", onclick: async () => { if (!who.value.trim()) return; await upd({ lentTo: who.value.trim(), lentOn: when.value }); close(); toast("Marked as lent to " + who.value.trim()); } }, "Save"),
+        b.lentTo ? h("button", { class: "btn ghost", type: "button", onclick: async () => { await upd({ lentTo: "", lentOn: "" }); close(); toast("Welcome back, book"); } }, "It came back") : null));
+  } else if (b.lentTo) lendEl = h("div", { class: "meta" }, "Lent to " + b.lentTo);
+  // follow authors
+  const me = myUid(), favs = () => arr(profiles[me]?.favAuthors);
+  const follow = me && canEdit(me) && arr(b.authors).length ? h("div", { class: "follows" }, arr(b.authors).map(a => { const btn = h("button", { class: "chip", type: "button" }); const paint = () => { const on = favs().includes(a); btn.textContent = (on ? "♥ Following " : "♡ Follow ") + a; btn.setAttribute("aria-pressed", on ? "true" : "false"); }; paint();
+    btn.onclick = async () => { const f = favs(), next = f.includes(a) ? f.filter(x => x !== a) : [...f, a]; profiles[me] = { ...profiles[me], favAuthors: next }; paint(); await DB.saveProfile(me, { favAuthors: next }); lsSet("cc-news-" + me, null); }; return btn; })) : null;
+
+  const { close } = sheet(
+    h("div", { class: "detail" }, coverEl(b), h("div", {}, h("h2", {}, b.title), b.altTitle ? h("div", { class: "faint", style: { "font-style": "italic" } }, b.altTitle) : null, h("div", { class: "meta", style: { "margin-top": "6px" } }, meta), arr(b.genres).length ? h("div", { class: "meta faint" }, arr(b.genres).join(" · ")) : null)),
+    edit ? h("div", { class: "seg", role: "group", "aria-label": "Status" }, ["wishlist", "reading", "read"].map(k => h("button", { "aria-pressed": st === k ? "true" : "false", onclick: async () => {
+      const p = { status: k }; if (k === "reading" && !b.started) p.started = today(); if (k === "read" && !b.finished) p.finished = today(); if (k === "read" && b.pages) p.page = b.pages; if (k === "read" && !b.started && b.status === "wishlist") p.started = today();
+      await DB.updateBook(uid, id, p); close(); toast(k === "read" ? "Finished! Give it some stars" : "Moved to " + STATUS[k]); if (k === "read") setTimeout(() => openBook(uid, id), 400);
+    } }, STATUS[k]))) : h("div", { class: "sc faint", style: { margin: "14px 0" } }, STATUS[st]),
+    ...parts, alsoEl,
+    b.plot ? h("p", { class: "plot" }, b.plot) : h("p", { class: "faint", style: { "font-style": "italic" } }, "No summary yet."),
+    b.source ? h("p", {}, h("a", { href: b.source, target: "_blank", rel: "noopener" }, "Read more")) : null,
+    edit ? h("div", { class: "margin" }, h("label", { class: "field" }, "Margin notes", notes), h("div", { class: "actions", style: { "margin-top": "8px" } }, h("button", { class: "btn", onclick: async () => { msg.textContent = "Saving"; await DB.updateBook(uid, id, { notes: notes.value.trim() }); msg.textContent = "Saved"; } }, "Save notes"), msg))
+      : (b.notes ? h("div", { class: "margin" }, h("div", { class: "sc faint" }, "margin notes"), h("p", { style: { margin: "6px 0 0", "font-style": "italic" } }, b.notes)) : null),
+    quotesEl, lendEl, follow,
+    edit ? h("div", { class: "actions", style: { "margin-top": "18px" } }, h("button", { class: "btn ghost", onclick: () => { close(true); addBook(uid, id); } }, "Edit details"), h("button", { class: "btn ghost", onclick: async () => { if (confirm("Remove " + b.title + " from the shelf?")) { await DB.deleteBook(uid, id); close(); toast("Removed"); } } }, "Remove")) : null
+  );
+}
+
+/* ---------- year in books ---------- */
+function finishedIn(uid, Y) { return books(uid).filter(b => stOf(b) === "read" && String(b.finished || "").startsWith(String(Y))); }
+function yearTeaser(uid) {
+  const Y = new Date().getFullYear(), n = finishedIn(uid, Y).length, g = profiles[uid]?.goals?.[Y];
+  return h("div", { class: "muted" }, g ? n + " of " + g + " books finished in " + Y : n + " finished in " + Y + ". Set a goal, see your stats.", g ? h("div", { class: "bigprog", style: { "margin-top": "8px" } }, h("i", { style: { width: Math.min(100, n / g * 100) + "%" } })) : null);
+}
+function renderYear(uid) {
+  const p = profiles[uid]; if (!p) { if (Object.keys(profiles).length) go("/"); return; }
+  watch(uid); ui.route = "year:" + uid; $app.dataset.view = ui.route;
+  const Y = ui.year || new Date().getFullYear(), list = finishedIn(uid, Y).sort((a, b) => a.finished.localeCompare(b.finished));
+  const edit = canEdit(uid), goal = p.goals?.[Y], color = p.color || LEATHER[0];
+  const months = Array(12).fill(0); list.forEach(b => months[parseInt(b.finished.slice(5, 7), 10) - 1]++);
+  const maxM = Math.max(1, ...months);
+  const tally = key => { const m = {}; list.forEach(b => arr(b[key]).forEach(x => m[x] = (m[x] || 0) + 1)); return Object.entries(m).sort((a, b) => b[1] - a[1]).slice(0, 5); };
+  const pages = list.reduce((s, b) => s + (b.pages || 0), 0), rated = list.filter(b => b.rating), avg = rated.length ? (rated.reduce((s, b) => s + b.rating, 0) / rated.length).toFixed(1) : null;
+  const best = [...rated].sort((a, b) => b.rating - a.rating || b.finished.localeCompare(a.finished))[0];
+  const undated = books(uid).filter(b => stOf(b) === "read" && !b.finished).length;
+  const bars = (rows) => h("div", { class: "hbars" }, rows.map(([k, n]) => h("div", { class: "hbar" }, h("span", {}, k), h("b", { style: { width: Math.max(8, n / rows[0][1] * 100) + "%", "--c": color } }, n))));
+  const goalIn = h("input", { type: "number", min: "1", inputmode: "numeric", value: goal || "", placeholder: "24", style: { width: "90px" } });
+  const board = Object.entries(profiles).map(([u, q]) => [q.name, finishedIn(u, Y).length]).sort((a, b) => b[1] - a[1]);
+  mount(
+    h("div", { class: "topbar" }, h("button", { class: "back", onclick: () => history.length > 1 ? history.back() : go("/") }, "‹ Back"), h("div", { class: "ribbon", style: { "--c": color } })),
+    h("header", { class: "phead" }, h("div", { class: "sc faint" }, p.name + "'s year in books"),
+      h("div", { class: "yearnav" }, h("button", { class: "back", "aria-label": "Previous year", onclick: () => { ui.year = Y - 1; render(); } }, "‹"), h("h1", {}, String(Y)), h("button", { class: "back", "aria-label": "Next year", disabled: Y >= new Date().getFullYear(), onclick: () => { ui.year = Y + 1; render(); } }, "›"))),
+    h("div", { class: "fleuron" }, "❦"),
+    h("div", { class: "statgrid" },
+      h("div", { class: "stat" }, h("b", {}, list.length), h("span", {}, "books finished")),
+      h("div", { class: "stat" }, h("b", {}, pages ? pages.toLocaleString("en-GB") : "–"), h("span", {}, "pages read")),
+      h("div", { class: "stat" }, h("b", {}, avg ? avg + "★" : "–"), h("span", {}, "average rating")),
+      h("div", { class: "stat" }, h("b", {}, new Set(list.flatMap(b => arr(b.authors))).size), h("span", {}, "authors"))),
+    h("section", { class: "section card" }, h("h2", { style: { "font-size": "22px" } }, "Reading goal"),
+      goal ? [h("div", { class: "muted" }, list.length + " of " + goal + (list.length >= goal ? ". Goal reached!" : ". " + (goal - list.length) + " to go.")), h("div", { class: "bigprog" }, h("i", { style: { width: Math.min(100, list.length / goal * 100) + "%", background: color } }))] : h("div", { class: "muted" }, "No goal set for " + Y + "."),
+      edit ? h("div", { class: "actions" }, "Books this year:", goalIn, h("button", { class: "btn", type: "button", onclick: async () => { const n = parseInt(goalIn.value, 10); if (!n) return; await DB.saveProfile(uid, { goals: { ...(p.goals || {}), [Y]: n } }); toast("Goal saved"); } }, "Save goal")) : null),
+    h("section", { class: "section" }, h("h2", {}, "Month by month"), h("div", { class: "months" }, months.map((n, i) => h("div", { class: "mcol" }, h("div", { class: "mbar", style: { height: (n / maxM * 100) + "%", "--c": color } }, n ? h("span", {}, n) : null), h("small", {}, "JFMAMJJASOND"[i]))))),
+    best ? h("section", { class: "section" }, h("h2", {}, "Favourite of the year"), h("button", { class: "book fav", onclick: () => openBook(uid, best.id) }, coverEl(best), h("div", {}, h("div", { class: "t", style: { "font-size": "18px" } }, best.title), h("div", { class: "a" }, arr(best.authors).join(", ")), starsEl(best.rating)))) : null,
+    tally("genres").length ? h("section", { class: "section" }, h("h2", {}, "Top genres"), bars(tally("genres"))) : null,
+    tally("authors").length ? h("section", { class: "section" }, h("h2", {}, "Most read authors"), bars(tally("authors"))) : null,
+    Object.keys(profiles).length > 1 ? h("section", { class: "section" }, h("h2", {}, "The club this year"), board[0][1] ? bars(board.filter(r => r[1] > 0)) : h("div", { class: "faint" }, "Nobody has finished a book with a date yet.")) : null,
+    list.length ? h("section", { class: "section" }, h("h2", {}, "Every book of " + Y), h("div", { class: "grid" }, list.map(b => h("button", { class: "book", onclick: () => openBook(uid, b.id) }, coverEl(b), h("div", { class: "a" }, fmtDate(b.finished)), b.rating ? starsEl(b.rating, true) : null)))) : h("div", { class: "empty", style: { "margin-top": "24px" } }, "No finished books with a date in " + Y + " yet."),
+    undated ? h("p", { class: "faint", style: { "text-align": "center", "font-size": "14px", "margin-top": "20px" } }, undated + " read books have no finish date, so they are not counted here. Open a book and set Finished to include it.") : null
+  );
+}
+
+/* ---------- news for you ---------- */
+function newsItems(uid) { const c = lsGet("cc-news-" + uid, null), hide = new Set(lsGet("cc-news-hide-" + uid, [])); return (c?.items || []).filter(i => !hide.has(i.key) && !books(uid).some(b => norm(b.title) === i.key)); }
+function newsCount() { const u = myUid(); if (!u) return 0; const seen = new Set(lsGet("cc-news-seen-" + u, [])); return newsItems(u).filter(i => !seen.has(i.key)).length; }
+let newsBusy = false;
+async function fetchNews(uid, force) {
+  const c = lsGet("cc-news-" + uid, null);
+  if (newsBusy || (!force && c && Date.now() - c.at < 20 * 3600e3)) return;
+  const mine = books(uid); if (!mine.length) return;
+  newsBusy = true;
+  try {
+    const read = mine.filter(b => stOf(b) !== "wishlist"), score = {};
+    read.forEach(b => arr(b.authors).forEach(a => score[a] = (score[a] || 0) + (b.rating >= 4 ? 2 : 1) - (b.rating && b.rating <= 2 ? 2 : 0)));
+    const favs = arr(profiles[uid]?.favAuthors);
+    const authors = [...new Set([...favs, ...Object.entries(score).filter(([, n]) => n >= 2).sort((a, b) => b[1] - a[1]).map(([a]) => a)])].slice(0, 14);
+    const series = {}; read.filter(b => b.series).forEach(b => series[b.series] = arr(b.authors)[0] || "");
+    const owned = mine.map(b => norm(b.title)).filter(Boolean);
+    const isOwned = k => owned.some(o => o === k || (k.length > 5 && o.length > 5 && (o.startsWith(k) || k.startsWith(o))));
+    const minY = new Date().getFullYear() - 1, junk = /summary|study guide|analysis of|box ?set|boxed|collection|coloring|colouring|journal|notebook|calendar|sampler|bundle|cofanetto|trilogy set|books? \d+ ?- ?\d+|quiz|trivia|workbook/i;
+    const found = new Map();
+    const take = (items, reason, mustAuthor) => (items || []).forEach(it => {
+      const v = it.volumeInfo || {}, y = parseInt(v.publishedDate, 10); if (!y || y < minY || !v.title) return;
+      if (junk.test(v.title + " " + (v.subtitle || ""))) return;
+      if (mustAuthor && !arr(v.authors).some(a => norm(a) === norm(mustAuthor))) return;
+      const key = norm(v.title); if (!key || isOwned(key)) return;
+      const prev = found.get(key); const thumb = v.imageLinks?.thumbnail?.replace("http:", "https:").replace("&edge=curl", "");
+      if (prev && (prev.cover || !thumb)) return;
+      found.set(key, { key, title: v.title, authors: arr(v.authors).slice(0, 2), date: v.publishedDate, cover: thumb || "", plot: (v.description || "").slice(0, 900), reason, link: v.infoLink || "" });
+    });
+    const gb = q => fetch("https://www.googleapis.com/books/v1/volumes?" + new URLSearchParams({ q, orderBy: "newest", maxResults: 20, printType: "books" })).then(r => r.json()).catch(() => ({}));
+    for (const [sname, a] of Object.entries(series).slice(0, 10)) { const r = await gb('intitle:"' + sname + '"' + (a ? ' inauthor:"' + a + '"' : "")); take(r.items, "Next in " + sname, a); }
+    for (const a of authors) { const r = await gb('inauthor:"' + a + '"'); take(r.items, (favs.includes(a) ? "You follow " : "New from ") + a, a); }
+    const items = [...found.values()].sort((a, b) => (b.date || "").localeCompare(a.date || ""));
+    lsSet("cc-news-" + uid, { at: Date.now(), items, authors, series: Object.keys(series) });
+  } finally { newsBusy = false; }
+  render();
+}
+function renderNews() {
+  ui.route = "news"; $app.dataset.view = "news";
+  const uid = myUid(); if (!uid) { go("/"); return; }
+  watch(uid);
+  const c = lsGet("cc-news-" + uid, null), items = newsItems(uid);
+  lsSet("cc-news-seen-" + uid, [...new Set([...lsGet("cc-news-seen-" + uid, []), ...items.map(i => i.key)])]);
+  const now = today();
+  const card = i => h("div", { class: "letter newsitem" },
+    h("div", { class: "newsrow" }, coverEl({ title: i.title, authors: i.authors, cover: i.cover }),
+      h("div", {}, h("div", { class: "sc faint" }, i.reason), h("div", { class: "t" }, i.title), h("div", { class: "muted" }, i.authors.join(", ")),
+        h("div", { class: i.date > now ? "soon" : "faint" }, (i.date > now ? "Coming " : "Out since ") + (i.date.length >= 10 ? fmtDate(i.date) : i.date)))),
+    i.plot ? h("details", { class: "fold" }, h("summary", {}, "What it's about"), h("p", { style: { margin: "6px 0 0" } }, i.plot)) : null,
+    h("div", { class: "actions" },
+      h("button", { class: "btn primary", type: "button", onclick: async () => { await DB.setBook(uid, slug(i.title), { title: i.title, authors: i.authors, status: "wishlist", genres: [], type: "Book", added: today(), cover: i.cover || undefined, plot: i.plot || undefined, year: parseInt(i.date, 10) || undefined, notes: "Found in News: " + i.reason }); toast("Added to your wishlist"); } }, "Add to wishlist"),
+      h("button", { class: "btn ghost", type: "button", onclick: () => { lsSet("cc-news-hide-" + uid, [...lsGet("cc-news-hide-" + uid, []), i.key]); render(); } }, "Not interested")));
+  const favs = arr(profiles[uid]?.favAuthors);
+  mount(
+    h("div", { class: "topbar" }, h("button", { class: "back", onclick: () => go("/") }, "‹ Library")),
+    h("header", { class: "phead" }, h("div", { class: "sc faint" }, "fresh from the press"), h("h1", {}, "News for you")),
+    h("div", { class: "fleuron" }, "❦"),
+    h("p", { class: "muted", style: { "text-align": "center" } }, c ? "Watching " + (c.series?.length || 0) + " series and " + (c.authors?.length || 0) + " authors. Checked " + new Date(c.at).toLocaleString("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) + "." : "Looking for new books for the first time."),
+    h("div", { class: "actions", style: { "justify-content": "center" } }, h("button", { class: "btn", type: "button", disabled: newsBusy, onclick: () => { fetchNews(uid, true); toast("Checking for new books"); } }, newsBusy ? "Checking…" : "Check now")),
+    favs.length ? h("p", { class: "faint", style: { "text-align": "center", "font-size": "14px" } }, "You follow: " + favs.join(", ")) : h("p", { class: "faint", style: { "text-align": "center", "font-size": "14px" } }, "Tip: open a book and tap ♡ Follow on an author to always get their new books."),
+    items.length ? h("div", { class: "cards" }, items.map(card)) : h("div", { class: "empty", style: { "margin-top": "20px" } }, newsBusy || !c ? "Searching, this takes a few seconds" : "Nothing new right now. Rate the books you loved, or follow more authors."),
+  );
+  if (!c && !newsBusy) fetchNews(uid);
+}
+
+function addBook(uid, editId) {
+  const old = editId ? { ...(shelf[uid] || {})[editId] } : null;
+  const f = { title: h("input", { required: true, autocomplete: "off" }), authors: h("input", { autocomplete: "off" }), year: h("input", { type: "number", inputmode: "numeric" }),
+    status: h("select", {}, ...Object.entries(STATUS).map(([k, l]) => h("option", { value: k }, l))), genres: h("input", { autocomplete: "off", list: "genreList" }),
+    series: h("input", { autocomplete: "off" }), seriesNo: h("input", { type: "number", inputmode: "decimal" }), plot: h("textarea", { rows: 4 }) };
+  let cover = old?.cover || "";
+  if (old) { f.title.value = old.title || ""; f.authors.value = arr(old.authors).join(", "); f.year.value = old.year ?? ""; f.status.value = old.status || "read"; f.genres.value = arr(old.genres).join(", "); f.series.value = old.series || ""; f.seriesNo.value = old.seriesNo ?? ""; f.plot.value = old.plot || ""; }
+  else f.status.value = ui.tab === "wishlist" ? "wishlist" : ui.tab === "reading" ? "reading" : "read";
+  const gl = h("datalist", { id: "genreList" }, [...new Set(Object.keys(shelf).flatMap(u => books(u).flatMap(b => arr(b.genres))))].sort().map(g => h("option", { value: g })));
+  const q = h("input", { type: "search", placeholder: "Type a title or author", autocomplete: "off" }), results = h("div", { class: "results" }), msg = h("div", { class: "status", role: "status" });
+  const preview = h("div", { style: { width: "70px" } }); const showCover = () => preview.replaceChildren(cover ? coverEl({ title: f.title.value, cover }) : "");
+  showCover();
+  let qt, qn = 0;
+  q.oninput = () => { clearTimeout(qt); const v = q.value.trim(); if (v.length < 3) { results.replaceChildren(); return; } qt = setTimeout(() => lookup(v), 400); };
+  async function lookup(v) {
+    const n = ++qn; results.replaceChildren(h("div", { class: "faint" }, "Searching"));
+    const ol = fetch("https://openlibrary.org/search.json?" + new URLSearchParams({ q: v, limit: 5, fields: "title,author_name,first_publish_year,cover_i,subject" })).then(x => x.json())
+      .then(r => (r.docs || []).map(d => ({ title: d.title, authors: arr(d.author_name).slice(0, 2), year: d.first_publish_year || "", cover: d.cover_i ? "https://covers.openlibrary.org/b/id/" + d.cover_i + "-M.jpg" : "", thumb: d.cover_i ? "https://covers.openlibrary.org/b/id/" + d.cover_i + "-S.jpg" : "", subject: d.subject || [] }))).catch(() => []);
+    const gb = fetch("https://www.googleapis.com/books/v1/volumes?" + new URLSearchParams({ q: v, maxResults: 5, printType: "books" })).then(x => x.json())
+      .then(r => (r.items || []).map(i => i.volumeInfo).map(d => { const t = d.imageLinks?.thumbnail?.replace("http:", "https:").replace("&edge=curl", ""); return { title: d.title + (d.subtitle ? ": " + d.subtitle : ""), authors: arr(d.authors).slice(0, 2), year: parseInt(d.publishedDate, 10) || "", cover: t || "", thumb: d.imageLinks?.smallThumbnail?.replace("http:", "https:") || t || "", plot: d.description || "", subject: d.categories || [] }; })).catch(() => []);
+    const [A, B] = await Promise.all([ol, gb]);
+    if (n !== qn) return;
+    const seen = new Set(), list = [];
+    for (const d of [...A, ...B]) { const k = (d.title || "").toLowerCase().replace(/[^a-z0-9]/g, "").slice(0, 30) + "|" + (d.authors[0] || "").toLowerCase().split(" ").pop(); if (!d.title || seen.has(k)) continue; seen.add(k); list.push(d); }
+    if (!list.length) { results.replaceChildren(h("div", { class: "faint" }, "Nothing found, fill it in by hand below.")); return; }
+    results.replaceChildren(...list.slice(0, 8).map(d => h("button", { class: "result", type: "button", onclick: () => {
+      f.title.value = d.title || ""; f.authors.value = d.authors.join(", "); f.year.value = d.year || "";
+      if (d.cover && !String(cover).startsWith("data:")) cover = d.cover;
+      if (d.plot && !f.plot.value) f.plot.value = d.plot.slice(0, 900);
+      if (!f.genres.value && d.subject.length) { const known = new Set(Object.keys(shelf).flatMap(u => books(u).flatMap(b => arr(b.genres)))); const pick = d.subject.filter(s => known.has(s)).slice(0, 2); if (pick.length) f.genres.value = pick.join(", "); }
+      showCover(); results.replaceChildren(); q.value = ""; say("Filled in from " + d.title); f.title.focus();
+    } }, d.thumb ? h("img", { src: d.thumb, alt: "" }) : h("span", { class: "noimg" }), h("div", {}, h("b", {}, d.title), h("small", {}, [d.authors[0], d.year].filter(Boolean).join(" · "))))));
+  }
+  const pmsg = h("div", { class: "status", role: "status" }); const say = t => { pmsg.textContent = t; };
+  const camIn = mode => { const i = h("input", { type: "file", accept: "image/*", hidden: true }); i.onchange = () => { const fl = i.files[0]; i.value = ""; if (fl) (mode === "scan" ? scan(fl) : photoCover(fl)); }; return i; };
+  const scanIn = camIn("scan"), photoIn = camIn("photo");
+  async function loadImg(fl) { const url = URL.createObjectURL(fl); const im = new Image(); im.src = url; await im.decode(); return im; }
+  const cropBox = h("div", { class: "cropwrap", hidden: true });
+  async function photoCover(fl) {
+    let im; try { im = await loadImg(fl); } catch (e) { say("Could not read that image."); return; }
+    // a barcode anywhere in the picture beats reading text
+    let isbnFound = false;
+    getBD().then(BD => new BD({ formats: ["ean_13", "upc_a", "ean_8"] }).detect(im)).then(c => { const isbn = pickIsbn(c); if (isbn) { isbnFound = true; cropBox.hidden = true; cropBox.replaceChildren(); byIsbn(isbn); } }).catch(() => {});
+    const NW = im.naturalWidth, NH = im.naturalHeight;
+    // frame in natural pixels, 2:3, starts as the largest that fits, centred
+    let fh = Math.min(NH, NW * 1.5), fw = fh / 1.5, fx = (NW - fw) / 2, fy = (NH - fh) / 2;
+    const frame = h("div", { class: "cropframe" }), stage = h("div", { class: "cropstage" }, im, frame);
+    im.className = "cropimg"; im.alt = "Picked image";
+    const maxH = Math.min(NH, NW * 1.5);
+    const size = h("input", { type: "range", min: "15", max: "100", value: "100", "aria-label": "Frame size" });
+    const draw = () => { const k = stage.clientWidth / NW; Object.assign(frame.style, { left: fx * k + "px", top: fy * k + "px", width: fw * k + "px", height: fh * k + "px" }); };
+    const clamp = () => { fx = Math.max(0, Math.min(NW - fw, fx)); fy = Math.max(0, Math.min(NH - fh, fy)); };
+    size.oninput = () => { const cx = fx + fw / 2, cy = fy + fh / 2; fh = maxH * size.value / 100; fw = fh / 1.5; fx = cx - fw / 2; fy = cy - fh / 2; clamp(); draw(); };
+    let drag = null;
+    frame.addEventListener("pointerdown", e => { drag = { x: e.clientX, y: e.clientY, fx, fy }; frame.setPointerCapture(e.pointerId); e.preventDefault(); });
+    frame.addEventListener("pointermove", e => { if (!drag) return; const k = stage.clientWidth / NW; fx = drag.fx + (e.clientX - drag.x) / k; fy = drag.fy + (e.clientY - drag.y) / k; clamp(); draw(); });
+    frame.addEventListener("pointerup", () => drag = null);
+    const ocrOn = h("input", { type: "checkbox", checked: !editId });
+    const use = h("button", { class: "btn primary", type: "button" }, "Use as cover");
+    use.onclick = async () => {
+      const c = document.createElement("canvas"); c.width = 320; c.height = 480;
+      c.getContext("2d").drawImage(im, fx, fy, fw, fh, 0, 0, 320, 480);
+      let data = c.toDataURL("image/webp", 0.72); if (!data.startsWith("data:image/webp")) data = c.toDataURL("image/jpeg", 0.72);
+      cover = data; showCover(); cropBox.hidden = true; cropBox.replaceChildren();
+      if (ocrOn.checked && !isbnFound) readCover(im, fx, fy, fw, fh); else if (!isbnFound) say("Cover set");
+    };
+    cropBox.replaceChildren(h("div", { class: "faint", style: { "font-size": "14px" } }, "Drag the frame over the cover, use the slider to resize it"), stage, h("label", { class: "field" }, "Frame size", size),
+      h("label", { style: { display: "flex", gap: "8px", "align-items": "center", "font-size": "14px" } }, ocrOn, "Read title and author from the image"),
+      h("div", { class: "actions" }, use, h("button", { class: "btn ghost", type: "button", onclick: () => { cropBox.hidden = true; cropBox.replaceChildren(); } }, "Cancel")));
+    cropBox.hidden = false; requestAnimationFrame(draw); im.onload = draw; new ResizeObserver(draw).observe(stage);
+    cropBox.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+  async function readCover(im, sx, sy, sw, sh) {
+    say("Reading the cover, this takes a few seconds the first time");
+    try {
+      if (!window.Tesseract) await new Promise((ok, ko) => document.head.append(h("script", { src: "https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js", onload: ok, onerror: ko })));
+      const c = document.createElement("canvas"), H = 1200, W = 800; c.width = W; c.height = H;
+      const g = c.getContext("2d"); g.filter = "grayscale(1) contrast(1.4)"; g.drawImage(im, sx, sy, sw, sh, 0, 0, W, H);
+      const w = await Tesseract.createWorker("eng+ita");
+      const { data } = await w.recognize(c); await w.terminate();
+      const lines = (data.lines || []).filter(l => l.confidence > 45).map(l => l.text.replace(/[^\p{L}\p{N}'’ .,:&-]/gu, " ").replace(/\s+/g, " ").trim()).filter(t => t.replace(/[^\p{L}]/gu, "").length >= 3);
+      if (!lines.length) { say("Could not read any text. Type the title above."); return; }
+      const guess = lines.slice(0, 4).join(" ").slice(0, 90);
+      q.value = guess; say("Read: \u201C" + guess + "\u201D. Pick the right book below, or fix the words in the search box.");
+      await lookup(guess); q.scrollIntoView({ behavior: "smooth", block: "start" });
+      if (!f.title.value) f.title.value = lines[0];
+    } catch (e) { say("Reading text needs internet. Type the title above."); }
+  }
+  async function getBD() {
+    let BD = window.BarcodeDetector;
+    try { if (BD && (await BD.getSupportedFormats()).includes("ean_13")) return BD; } catch (e) {}
+    return (await import("https://cdn.jsdelivr.net/npm/barcode-detector@2.3.1/+esm")).BarcodeDetector;
+  }
+  const pickIsbn = codes => codes.map(c => c.rawValue).find(v => /^97[89]\d{10}$/.test(v)) || codes.map(c => c.rawValue).find(v => /^\d{10,13}$/.test(v));
+  async function scan(fl) {
+    say("Reading the barcode");
+    try { const BD = await getBD(), im = await loadImg(fl), isbn = pickIsbn(await new BD({ formats: ["ean_13", "upc_a", "ean_8"] }).detect(im)); if (!isbn) { say("No barcode found in that photo. Try closer and with more light, or type the title."); return; } await byIsbn(isbn); }
+    catch (e) { say("Barcode reading needs internet. Type the title instead."); }
+  }
+  async function byIsbn(isbn) {
+    say("Looking up ISBN " + isbn);
+    let d = null;
+    try { const r = await fetch("https://openlibrary.org/search.json?" + new URLSearchParams({ isbn, limit: 1, fields: "title,author_name,first_publish_year,cover_i" })).then(x => x.json()); const o = r.docs?.[0]; if (o) d = { title: o.title, authors: arr(o.author_name).slice(0, 2), year: o.first_publish_year, cover: o.cover_i ? "https://covers.openlibrary.org/b/id/" + o.cover_i + "-M.jpg" : "" }; } catch (e) {}
+    if (!d) try { const r = await fetch("https://www.googleapis.com/books/v1/volumes?q=isbn:" + isbn).then(x => x.json()); const v = r.items?.[0]?.volumeInfo; if (v) d = { title: v.title + (v.subtitle ? ": " + v.subtitle : ""), authors: arr(v.authors).slice(0, 2), year: parseInt(v.publishedDate, 10) || "", cover: v.imageLinks?.thumbnail ? v.imageLinks.thumbnail.replace("http:", "https:").replace("&edge=curl", "") : "", plot: v.description || "" }; } catch (e) {}
+    if (!d) { say("ISBN " + isbn + " was not found online. Type the title and take a photo of the cover."); return; }
+    f.title.value = d.title || ""; f.authors.value = d.authors.join(", "); f.year.value = d.year || "";
+    if (d.plot && !f.plot.value) f.plot.value = d.plot.slice(0, 900);
+    if (d.cover && !String(cover).startsWith("data:")) cover = d.cover;
+    showCover(); say("Found it: " + d.title);
+  }
+  async function liveCamera(mode) {
+    const fallback = () => (mode === "scan" ? scanIn : photoIn).click();
+    if (!navigator.mediaDevices?.getUserMedia) { fallback(); return; }
+    let stream;
+    try { stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: "environment" }, width: { ideal: 1920 }, height: { ideal: 1080 } }, audio: false }); }
+    catch (e) { if (e.name === "NotAllowedError") say("Camera permission was refused. Allow the camera for this site in the phone settings, or use Screenshot or gallery."); else fallback(); return; }
+    const video = h("video", { playsinline: true, muted: true, autoplay: true, class: "camvideo" }); video.srcObject = stream; video.muted = true;
+    const guide = h("div", { class: mode === "scan" ? "camguide bar" : "camguide" });
+    const hint = h("div", { class: "camhint" }, mode === "scan" ? "Point at the barcode on the back of the book" : "Fit the front cover inside the frame");
+    let done = false, timer;
+    const vis = () => { if (document.hidden) stop(); };
+    const stop = () => { done = true; clearTimeout(timer); stream.getTracks().forEach(t => t.stop()); ov.remove(); document.removeEventListener("visibilitychange", vis); };
+    const shutter = h("button", { class: "camshutter", type: "button", "aria-label": "Take photo" });
+    const ov = h("div", { class: "camera" }, video, guide, hint,
+      h("div", { class: "cambar" }, h("button", { class: "btn", type: "button", onclick: () => stop() }, "Cancel"), mode === "photo" ? shutter : h("span", { style: { width: "72px" } }),
+        h("button", { class: "btn", type: "button", onclick: () => { stop(); fallback(); } }, "Gallery")));
+    document.body.append(ov); document.addEventListener("visibilitychange", vis);
+    try { await video.play(); } catch (e) {}
+    if (mode === "photo") {
+      shutter.onclick = () => {
+        if (!video.videoWidth) return;
+        const vw = video.videoWidth, vh = video.videoHeight, R = video.getBoundingClientRect(), G = guide.getBoundingClientRect();
+        const k = Math.max(R.width / vw, R.height / vh), ox = (R.width - vw * k) / 2, oy = (R.height - vh * k) / 2;
+        let sx = (G.left - R.left - ox) / k, sy = (G.top - R.top - oy) / k, sw = G.width / k, sh2 = G.height / k;
+        sx = Math.max(0, sx); sy = Math.max(0, sy); sw = Math.min(vw - sx, sw); sh2 = Math.min(vh - sy, sh2);
+        const c = document.createElement("canvas"); c.width = Math.round(sw); c.height = Math.round(sh2); c.getContext("2d").drawImage(video, sx, sy, sw, sh2, 0, 0, c.width, c.height);
+        stop(); c.toBlob(bl => photoCover(bl), "image/jpeg", 0.92);
+      };
+    } else {
+      let det; try { det = new (await getBD())({ formats: ["ean_13", "upc_a", "ean_8"] }); } catch (e) { stop(); say("Barcode reading needs internet. Type the title instead."); return; }
+      const tick = async () => {
+        if (done) return;
+        try { if (video.readyState >= 2) { const isbn = pickIsbn(await det.detect(video)); if (isbn && !done) { navigator.vibrate?.(60); stop(); byIsbn(isbn); return; } } } catch (e) {}
+        timer = setTimeout(tick, 250);
+      };
+      tick();
+    }
+  }
+  const save = async e => {
+    e.preventDefault();
+    const title = f.title.value.trim(); if (!title) { msg.textContent = "Add a title."; return; }
+    const authors = f.authors.value.split(",").map(s => s.trim()).filter(Boolean);
+    let id = editId || slug(title);
+    if (!editId && shelf[uid]?.[id]) id = slug(title + " " + (authors[0] || Date.now()));
+    if (!editId && shelf[uid]?.[id]) { msg.textContent = "This book is already on the shelf."; return; }
+    const d = { ...(old || {}), title, authors, status: f.status.value, genres: f.genres.value.split(",").map(s => s.trim()).filter(Boolean), type: old?.type || "Book", added: old?.added || today() };
+    const y = parseInt(f.year.value, 10); if (!isNaN(y)) d.year = y; else delete d.year;
+    const s = f.series.value.trim(); if (s) { d.series = s; const n = parseFloat(f.seriesNo.value); if (!isNaN(n)) d.seriesNo = n; else delete d.seriesNo; } else { delete d.series; delete d.seriesNo; }
+    const pl = f.plot.value.trim(); if (pl) d.plot = pl; else delete d.plot;
+    if (cover) d.cover = cover;
+    msg.textContent = "Saving";
+    try { await DB.setBook(uid, id, d); close(); toast(editId ? "Saved" : title + " is on the shelf"); } catch (err) { msg.textContent = "Could not save: " + (err.code || err.message); }
+  };
+  const { close } = sheet(h("form", { onsubmit: save, style: { display: "flex", "flex-direction": "column", gap: "14px" } },
+    h("h2", {}, editId ? "Edit book" : "Add a book"),
+    editId ? null : h("label", { class: "field" }, "Find it online for cover and details", q), results,
+    h("div", { class: "actions" }, editId ? null : h("button", { class: "btn", type: "button", onclick: () => liveCamera("scan") }, "▥ Scan barcode"), h("button", { class: "btn", type: "button", onclick: () => liveCamera("photo") }, "📷 Photo of cover"), h("button", { class: "btn ghost", type: "button", onclick: () => photoIn.click() }, "🖼 Screenshot or gallery"), scanIn, photoIn), pmsg, cropBox,
+    h("div", { style: { display: "flex", gap: "12px", "align-items": "flex-start" } }, preview, h("div", { style: { flex: "1", display: "flex", "flex-direction": "column", gap: "12px" } }, h("label", { class: "field" }, "Title", f.title), h("label", { class: "field" }, "Author (comma between several)", f.authors))),
+    h("div", { class: "row" }, h("label", { class: "field" }, "Year", f.year), h("label", { class: "field" }, "Status", f.status)),
+    h("label", { class: "field" }, "Genres (comma between several)", f.genres, gl),
+    h("div", { class: "row" }, h("label", { class: "field" }, "Series", f.series), h("label", { class: "field" }, "Number in series", f.seriesNo)),
+    h("label", { class: "field" }, "Plot (optional)", f.plot),
+    h("div", { class: "actions" }, h("button", { class: "btn primary", type: "submit" }, editId ? "Save" : "Put on the shelf"), h("button", { class: "btn ghost", type: "button", onclick: () => close() }, "Cancel")), msg));
+  if (!editId) setTimeout(() => q.focus(), 300);
+}
+
+/* ---------- letters (book swap) ---------- */
+function renderLetters() {
+  ui.route = "letters"; $app.dataset.view = "letters";
+  const others = Object.entries(profiles).filter(([u]) => DB.mode === "local" || u !== meUid());
+  const fromSel = h("select", {}, Object.entries(profiles).map(([u, p]) => h("option", { value: u }, p.name)));
+  const toSel = h("select", {}, others.map(([u, p]) => h("option", { value: u }, p.name)));
+  if (DB.mode === "local" && others.length > 1) toSel.value = others[1][0];
+  const t = h("input", { required: true, autocomplete: "off" }), a = h("input", { autocomplete: "off" }), w = h("textarea", { rows: 3 }), msg = h("span", { class: "status", role: "status" });
+  const send = async e => {
+    e.preventDefault();
+    const from = DB.mode === "local" ? fromSel.value : meUid(), to = toSel.value;
+    if (!t.value.trim()) { msg.textContent = "Add a title."; return; } if (!to || from === to) { msg.textContent = "Pick someone else to write to."; return; }
+    msg.textContent = "Sending";
+    try { await DB.addSug({ from, to, title: t.value.trim(), author: a.value.trim(), why: w.value.trim(), at: today() }); t.value = a.value = w.value = ""; msg.textContent = "Sent to " + nameOf(to); } catch (err) { msg.textContent = "Could not send: " + (err.code || err.message); }
+  };
+  const letter = (s, incoming) => {
+    const onShelf = Object.values(shelf[s.to] || {}).some(b => (b.title || "").toLowerCase() === (s.title || "").toLowerCase());
+    const acts = h("div", { class: "actions" });
+    if (incoming && canEdit(s.to)) acts.append(h("button", { class: "btn primary", disabled: onShelf, onclick: async () => {
+      watch(s.to);
+      await DB.setBook(s.to, slug(s.title), { title: s.title, authors: s.author ? s.author.split(",").map(x => x.trim()) : [], status: "wishlist", genres: [], type: "Book", added: today(), notes: "Suggested by " + nameOf(s.from) + (s.why ? ": " + s.why : "") });
+      await DB.delSug(s.id); toast("Added to the wishlist");
+    } }, onShelf ? "Already on the shelf" : "Add to my wishlist"));
+    acts.append(h("button", { class: "btn ghost", onclick: async () => { await DB.delSug(s.id); } }, incoming ? "Dismiss" : "Withdraw"));
+    return h("div", { class: "letter" }, h("div", { class: "sc faint" }, (incoming ? "from " + nameOf(s.from) : "to " + nameOf(s.to)) + (s.at ? " · " + s.at : "")), h("div", { class: "t" }, s.title), s.author ? h("div", { class: "muted" }, s.author) : null, s.why ? h("p", {}, "“" + s.why + "”") : null, acts);
+  };
+  const sections = [];
+  if (DB.mode === "local") {
+    Object.entries(profiles).forEach(([u, p]) => { const l = sugs.filter(s => s.to === u); sections.push(h("section", { class: "section" }, h("h2", {}, "For " + p.name, h("small", {}, l.length)), l.length ? h("div", { class: "cards", style: { "margin-top": "0" } }, l.map(s => letter(s, true))) : h("div", { class: "empty" }, "No letters yet."))); });
+  } else {
+    const inbox = sugs.filter(s => s.to === meUid()), sent = sugs.filter(s => s.from === meUid());
+    sections.push(h("section", { class: "section" }, h("h2", {}, "For you", h("small", {}, inbox.length)), inbox.length ? h("div", { class: "cards", style: { "margin-top": "0" } }, inbox.map(s => letter(s, true))) : h("div", { class: "empty" }, "No letters yet.")));
+    if (sent.length) sections.push(h("section", { class: "section" }, h("h2", {}, "Sent", h("small", {}, sent.length)), h("div", { class: "cards", style: { "margin-top": "0" } }, sent.map(s => letter(s, false)))));
+  }
+  mount(
+    h("div", { class: "topbar" }, h("button", { class: "back", onclick: () => closeTo("/") }, "‹ Library")),
+    h("header", { class: "phead" }, h("div", { class: "sc faint" }, "correspondence"), h("h1", {}, "Letters")),
+    h("div", { class: "fleuron" }, "❦"),
+    others.length ? h("form", { class: "card", onsubmit: send },
+      h("h2", { style: { "font-size": "24px" } }, "Recommend a book"),
+      h("div", { class: "row" }, DB.mode === "local" ? h("label", { class: "field" }, "From", fromSel) : null, h("label", { class: "field" }, "To", toSel)),
+      h("div", { class: "row" }, h("label", { class: "field" }, "Title", t), h("label", { class: "field" }, "Author", a)),
+      h("label", { class: "field" }, "Why they should read it", w),
+      h("div", { class: "actions" }, h("button", { class: "btn primary", type: "submit" }, "Send"), msg)) : h("div", { class: "empty" }, "Add another reader to start writing letters."),
+    ...sections
+  );
+}
+
+/* ---------- profiles and auth ---------- */
+function renderNewProfile(first) {
+  ui.route = "new"; $app.dataset.view = "new";
+  if (DB.mode === "firebase" && profiles[meUid()] && !first) { toast("You already have a shelf. New readers join from their own phone."); go("/"); return; }
+  let color = LEATHER[Object.keys(profiles).length % LEATHER.length];
+  const name = h("input", { required: true, autocomplete: "given-name", maxlength: 24 }), msg = h("div", { class: "status", role: "status" });
+  const sw = h("div", { class: "swatches", role: "group", "aria-label": "Binding colour" }, LEATHER.map(c => h("button", { type: "button", class: "swatch", style: { "--c": c }, "aria-label": "Binding " + c, "aria-pressed": c === color ? "true" : "false", onclick: e => { color = c; sw.querySelectorAll(".swatch").forEach(x => x.setAttribute("aria-pressed", x === e.currentTarget ? "true" : "false")); } })));
+  const sources = [["none", "Start with an empty shelf"], ["seed", "Jacopo's books (the original shelf)"]];
+  let legacy = null; try { legacy = JSON.parse(localStorage.getItem("shelves-v1") || "null"); } catch (e) {}
+  if (legacy) { sources.push(["phone-jacopo", "Jacopo's shelf saved on this phone"]); if (Object.keys(legacy.gaia_books || {}).length) sources.push(["phone-gaia", "Gaia's shelf saved on this phone"]); }
+  let v2 = null; try { v2 = JSON.parse(localStorage.getItem("exlibris-v2") || "null"); } catch (e) {}
+  if (v2?.profiles) Object.entries(v2.profiles).forEach(([k, pp]) => { if (Object.keys(v2.books?.[k] || {}).length) sources.push(["v2-" + k, pp.name + "'s shelf saved on this phone (" + Object.keys(v2.books[k]).length + " books)"]); });
+  const src = h("select", {}, sources.map(([v, l]) => h("option", { value: v }, l)));
+  if (v2?.profiles && sources.some(([v]) => v === "v2-jacopo")) src.value = "v2-jacopo";
+  const fileIn = h("input", { type: "file", accept: ".json,application/json" });
+  const submit = h("button", { class: "btn primary", type: "submit" }, "Create the shelf");
+  const go2 = async e => {
+    e.preventDefault(); const n = name.value.trim(); if (!n) { msg.textContent = "Add a name."; return; }
+    msg.textContent = "Binding your volume";
+    try {
+      const uid = DB.mode === "firebase" ? meUid() : (slug(n) + (profiles[slug(n)] ? "-" + Date.now().toString(36) : ""));
+      const p = { name: n, color, created: Date.now() };
+      let seed = null;
+      if (fileIn.files[0]) { const d = JSON.parse(await fileIn.files[0].text()); seed = d.books && !d.profiles ? (src.value === "phone-gaia" ? d.gaia_books : d.books) : null; if (d.profiles) { const k = Object.keys(d.profiles)[0]; seed = d.books?.[k]; } }
+      else if (src.value === "seed") { const d = await fetch("data.json").then(r => r.json()); seed = d.books; p.seedFrom = "data.json"; p.seen = Object.keys(d.books); }
+      else if (src.value === "phone-jacopo") { seed = legacy.books; p.seedFrom = "data.json"; p.seen = Object.keys(legacy.books || {}); }
+      else if (src.value === "phone-gaia") seed = legacy.gaia_books;
+      else if (src.value.startsWith("v2-")) { const k = src.value.slice(3); seed = v2.books[k]; if (v2.profiles[k].seedFrom) { p.seedFrom = v2.profiles[k].seedFrom; p.seen = v2.profiles[k].seen || []; } if (!name.value.trim()) name.value = v2.profiles[k].name; }
+      ui.creating = true; submit.disabled = true;
+      await DB.saveProfile(uid, p);
+      profiles[uid] = { ...(profiles[uid] || {}), ...p };
+      if (seed && Object.keys(seed).length) { msg.textContent = "Shelving " + Object.keys(seed).length + " books"; await DB.setBooks(uid, seed); }
+      if (DB.mode === "local") DB.use(uid);
+      ui.creating = false; $app.dataset.view = ""; toast("Your shelf is ready");
+      if (location.hash.slice(1) === "/" || !location.hash) render(); else location.hash = "/";
+      window.scrollTo(0, 0);
+    } catch (err) {
+      ui.creating = false; submit.disabled = false;
+      const t = err.code === "permission-denied" ? "Firebase refused the save. Check that the Firestore rules are published." : "Something went wrong: " + (err.code || err.message);
+      msg.textContent = t; toast(t);
+    }
+  };
+  mount(
+    first ? null : h("div", { class: "topbar" }, h("button", { class: "back", onclick: () => go("/") }, "‹ Library")),
+    h("header", { class: "titlepage" }, h("div", { class: "kicker" }, "Ex Libris"), h("h1", {}, first ? "Your volume" : "A new reader"), h("p", {}, "Pick a name and a binding for the shelf")),
+    h("div", { class: "fleuron" }, "❦"),
+    h("form", { class: "auth", onsubmit: go2 },
+      h("label", { class: "field" }, "Name on the spine", name),
+      h("div", { class: "field" }, "Binding", sw),
+      h("label", { class: "field" }, "Books to start with", src),
+      h("label", { class: "field" }, "Or load a backup file", fileIn),
+      submit, msg,
+      DB.mode === "firebase" ? h("button", { class: "btn ghost", type: "button", onclick: () => DB.signOut() }, "Sign out") : null)
+  );
+  setTimeout(() => name.focus(), 50);
+}
+
+function renderAuth() {
+  ui.route = "auth"; $app.dataset.view = "auth";
+  let mode = "in";
+  const email = h("input", { type: "email", autocomplete: "email", required: true }), pass = h("input", { type: "password", autocomplete: "current-password", required: true, minlength: 6 }), msg = h("div", { class: "status", role: "status" });
+  const btn = h("button", { class: "btn primary", type: "submit" }, "Sign in"), swap = h("button", { class: "btn ghost", type: "button" }, "New here? Create an account");
+  swap.onclick = () => { mode = mode === "in" ? "up" : "in"; btn.textContent = mode === "in" ? "Sign in" : "Create account"; swap.textContent = mode === "in" ? "New here? Create an account" : "I already have an account"; pass.autocomplete = mode === "in" ? "current-password" : "new-password"; msg.textContent = ""; };
+  const errs = { "auth/invalid-credential": "Wrong email or password.", "auth/email-already-in-use": "That email already has an account, sign in instead.", "auth/weak-password": "Use at least 6 characters.", "auth/invalid-email": "That email does not look right.", "auth/network-request-failed": "No internet connection." };
+  const submit = async e => { e.preventDefault(); btn.disabled = true; msg.textContent = mode === "in" ? "Signing in" : "Creating your account"; try { await (mode === "in" ? DB.signIn : DB.signUp)(email.value.trim(), pass.value); } catch (err) { msg.textContent = errs[err.code] || "Could not sign in: " + err.code; } btn.disabled = false; };
+  mount(
+    h("header", { class: "titlepage" }, h("div", { class: "kicker" }, "Ex Libris"), h("h1", {}, "The Codex Club"), h("p", {}, "Sign in to open your shelf")),
+    h("div", { class: "fleuron" }, "❦"),
+    h("form", { class: "auth", onsubmit: submit }, h("label", { class: "field" }, "Email", email), h("label", { class: "field" }, "Password", pass), btn, swap, msg,
+      h("button", { class: "btn ghost", type: "button", onclick: async () => { if (!email.value) { msg.textContent = "Type your email first."; return; } try { await DB.reset(email.value.trim()); msg.textContent = "Check your inbox for a reset link."; } catch (err) { msg.textContent = errs[err.code] || err.code; } } }, "Forgot password"))
+  );
+}
+
+/* ---------- backup (local mode) ---------- */
+async function exportBackup() {
+  const name = "exlibris-backup-" + today() + ".json", blob = new Blob([JSON.stringify(DB.exportAll())], { type: "application/json" }), file = new File([blob], name, { type: "application/json" });
+  if (navigator.canShare?.({ files: [file] })) { try { await navigator.share({ files: [file], title: name }); return; } catch (e) { if (e.name === "AbortError") return; } }
+  const a = h("a", { href: URL.createObjectURL(blob), download: name }); a.click(); toast("Backup saved");
+}
+async function importBackup(e) {
+  const f = e.target.files[0]; if (!f) return;
+  try { const d = JSON.parse(await f.text()); if (!d.profiles) throw 0; if (!confirm("Replace the library on this phone with this backup?")) return; await DB.importAll(d); toast("Backup loaded"); } catch (err) { toast("That file is not a library backup"); }
+  e.target.value = "";
+}
+
+/* ---------- boot ---------- */
+function go(path) { if (location.hash.slice(1) === path) render(); else location.hash = path; }
+window.addEventListener("hashchange", render);
+(async () => {
+  try { DB = FIREBASE_CONFIG ? await firebaseAdapter(FIREBASE_CONFIG) : localAdapter(); }
+  catch (e) { DB = localAdapter(); setTimeout(() => toast("Sync is unreachable, working on this phone only"), 500); }
+  await DB.init();
+  user = DB.user();
+  DB.watchProfiles(p => { profiles = p; Object.keys(p).forEach(watch); render(); });
+  DB.watchSugs(s => { sugs = s; render(); });
+  setTimeout(() => { const u = myUid(); if (u && navigator.onLine) fetchNews(u); }, 4000);
+  DB.onAuth(u => { const was = user?.uid; user = u; if (was !== u?.uid) { render(); } });
+  render();
+})();
+/* ---------- pull down to update ---------- */
+(() => {
+  const ind = h("div", { class: "ptr", "aria-hidden": "true" }, h("span", {}, "↻")); document.body.append(ind);
+  let y0 = null, dy = 0, busy = false;
+  const ready = () => !busy && window.scrollY <= 0 && !document.querySelector(".scrim,.turn");
+  addEventListener("touchstart", e => { y0 = ready() && e.touches.length === 1 ? e.touches[0].clientY : null; dy = 0; ind.style.transition = "none"; }, { passive: true });
+  addEventListener("touchmove", e => { if (y0 == null) return; dy = e.touches[0].clientY - y0; if (dy <= 0 || window.scrollY > 0) { ind.style.transform = "translate(-50%,-70px)"; return; } const d = Math.min(dy * 0.5, 90); ind.style.transform = "translate(-50%," + (d - 60) + "px)"; ind.firstChild.style.transform = "rotate(" + dy * 2 + "deg)"; ind.style.opacity = Math.min(1, dy / 120); }, { passive: true });
+  addEventListener("touchend", async () => {
+    if (y0 == null) return; y0 = null; ind.style.transition = "transform .2s ease";
+    if (dy < 140 || window.scrollY > 0) { ind.style.transform = "translate(-50%,-70px)"; return; }
+    busy = true; ind.style.transform = "translate(-50%,24px)"; ind.firstChild.style.transform = ""; ind.classList.add("spin");
+    try { const reg = await navigator.serviceWorker?.getRegistration(); await reg?.update(); } catch (e) {}
+    setTimeout(() => location.reload(), 300);
+  });
+})();
+if (PREVIEW) document.getElementById("pvbar").hidden = false;
+if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost")) navigator.serviceWorker.register("sw.js");
+</script>
+</body>
+</html>
