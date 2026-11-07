@@ -1421,6 +1421,7 @@ function demoActs(db) {
   [[9, 22, 38, 31, 0], [8, 21, 52, 44, 31], [6, 7, 25, 18, 75], [5, 22, 64, 57, 93], [3, 21, 41, 36, 150], [2, 13, 30, 22, 186], [1, 22, 72, 61, 208], [0, 8, 28, 20, 269]].forEach(([dA, hr, mins, pages, from], i) => {
     const [id, b] = i % 3 === 2 ? cm : lw; mk("jacopo", dA, hr, { type: "session", bookId: id, book: b.title, authors: arr(b.authors), cover: b.cover || "", mins, pages, from, to: from + pages, feel: ["🙂", "😍", "🤯", "😴"][i % 4], name: sessionName(new Date(now - dA * 864e5).setHours(hr)), kudos: i % 2 ? ["gaia"] : [], comments: i === 6 ? [{ uid: "gaia", text: "72 minutes, what a session!", at: new Date(now - 864e5 * .9).toISOString() }] : [] });
   });
+  Object.values(out).forEach(x => { const bk = jb[x.bookId]; if (bk && x.to > (bk.page || 0)) { bk.page = x.to; bk.pages = bk.pages || (/leviathan/i.test(bk.title) ? 592 : 418); } });
   [[7, 20, 45, 40, 30], [4, 21, 35, 28, 70], [2, 9, 50, 22, 98], [0, 18, 40, 30, 90]].forEach(([dA, hr, mins, pages, from], i) => mk("gaia", dA, hr, { type: "session", bookId: "dune", book: "Dune", authors: ["Frank Herbert"], cover: "", mins, pages, from, to: from + pages, feel: "😍", name: sessionName(new Date(now - dA * 864e5).setHours(hr)), kudos: i % 2 ? [] : ["jacopo"], comments: [] }));
   mk("gaia", 5, 23, { type: "finished", bookId: "circe", book: "Circe", authors: ["Madeline Miller"], cover: "", rating: 5, kudos: ["jacopo"], comments: [{ uid: "jacopo", text: "Adding it to my wishlist", at: new Date(now - 864e5 * 4.8).toISOString() }] });
   return out;
