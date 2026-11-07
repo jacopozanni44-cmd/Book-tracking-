@@ -706,7 +706,7 @@ function roomSVG(uid, S) {
  ${shelves}${decor}${books}
  <rect x="12" y="436" width="112" height="36" fill="#3F2617"/><rect x="276" y="436" width="112" height="36" fill="#3F2617"/>
  <rect x="22" y="444" width="44" height="22" rx="1" fill="#4E301D"/><rect x="70" y="444" width="44" height="22" rx="1" fill="#4E301D"/><rect x="286" y="444" width="44" height="22" rx="1" fill="#4E301D"/><rect x="334" y="444" width="44" height="22" rx="1" fill="#4E301D"/>
- ${label(332, 488, "Bookcase · " + total)}
+ ${label(332, 78, "Bookcase · " + total)}
 </g>
 <!-- ladder -->
 <g aria-hidden="true" opacity=".95"><path d="M40 92 L18 470 M78 92 L60 470" stroke="#8C6239" stroke-width="5" stroke-linecap="round"/>${[130, 180, 230, 280, 330, 380, 430].map(y => { const t = (y - 92) / 378; return `<path d="M${40 - 22 * t} ${y} L${78 - 18 * t} ${y}" stroke="#A97B4C" stroke-width="4"/>`; }).join("")}<rect x="30" y="86" width="56" height="4" rx="2" fill="url(#brass)"/></g>
