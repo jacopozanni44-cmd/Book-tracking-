@@ -10,6 +10,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Codex Club">
 <title>The Codex Club</title>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -197,11 +198,90 @@ button.card:hover{border-color:var(--ink-3)}
 .ptr.spin span{animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 body{overscroll-behavior-y:contain}
+#pvbar{position:sticky;top:0;z-index:50;background:#A8742B;color:#fff;font-size:13px;text-align:center;padding:6px 12px}
+.stars{display:flex;gap:2px}.stars button{border:0;background:none;font-size:28px;line-height:1;padding:2px;color:var(--edge)}
+.stars button[aria-pressed="true"]{color:var(--gilt)}
+.stars-ro{color:var(--gilt);letter-spacing:1px}.stars-ro .off{color:var(--edge)}.stars-ro.sm{font-size:12px}
+.brow{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:10px 0}
+.pagebox{margin:6px 0 4px}.pagein{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:8px}
+.pagein input{width:84px;font-size:16px;background:var(--paper);border:1px solid var(--edge);border-radius:8px;padding:6px 8px}
+.bigprog{height:8px;border-radius:4px;background:var(--paper-3);overflow:hidden}.bigprog i{display:block;height:100%;background:var(--accent);border-radius:4px}
+.prog{position:absolute;left:0;right:0;bottom:0;height:5px;background:rgba(0,0,0,.35);z-index:1}.prog i{display:block;height:100%;background:var(--gilt)}
+.pill.lent{left:6px;right:auto;background:var(--accent);color:var(--accent-ink)}
+.dates{margin:6px 0 4px}
+.also{margin:12px 0 0;font-size:14px;color:var(--ink-2);background:var(--paper-2);border-radius:8px;padding:8px 12px}
+.fold{margin-top:14px;border-top:1px solid var(--edge);padding-top:10px}
+.fold summary{cursor:pointer;font-family:var(--display);font-size:19px;font-weight:600}
+.fold textarea,.fold input{width:100%;font-size:16px;background:var(--paper);border:1px solid var(--edge);border-radius:8px;padding:8px 10px;margin:8px 0}
+.quotes blockquote{margin:10px 0;padding:6px 30px 6px 12px;border-left:3px solid var(--gilt);font-style:italic;position:relative}
+.qx{position:absolute;right:0;top:4px;border:0;background:none;color:var(--ink-3)}
+.follows{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
+.statgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+@media (min-width:640px){.statgrid{grid-template-columns:repeat(4,1fr)}}
+.stat{border:1px solid var(--edge);background:var(--paper-2);border-radius:10px;padding:14px;text-align:center}
+.stat b{display:block;font-family:var(--display);font-size:34px;line-height:1}.stat span{font-size:13px;color:var(--ink-3)}
+.yearnav{display:flex;align-items:center;justify-content:center;gap:18px}.yearnav .back{font-size:30px}.yearnav .back:disabled{opacity:.25}
+.months{display:grid;grid-template-columns:repeat(12,1fr);gap:4px;height:140px;align-items:end}
+.mcol{display:flex;flex-direction:column;align-items:center;height:100%;justify-content:flex-end;gap:4px}
+.mbar{width:100%;min-height:2px;background:var(--c,var(--accent));border-radius:3px 3px 0 0;position:relative}
+.mbar span{position:absolute;top:-18px;left:0;right:0;text-align:center;font-size:11px;color:var(--ink-2)}
+.mcol small{font-size:11px;color:var(--ink-3)}
+.hbars{display:flex;flex-direction:column;gap:8px}.hbar{display:grid;grid-template-columns:minmax(90px,38%) 1fr;gap:10px;align-items:center;font-size:14px}
+.hbar span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.hbar b{background:var(--c,var(--accent));color:#fff;border-radius:4px;padding:2px 8px;font-size:12px;text-align:right;min-width:24px}
+.book.fav{flex-direction:row;gap:16px;align-items:center}.book.fav .cover{width:110px;flex:0 0 110px}
+.newsrow{display:grid;grid-template-columns:76px 1fr;gap:12px;align-items:start}
+.soon{color:var(--accent);font-weight:600;font-size:14px}
+.room{position:relative;max-width:460px;margin:0 auto;overflow:hidden;border-radius:14px;box-shadow:var(--shadow);background:#1E120A;aspect-ratio:400/700;touch-action:pan-y}
+.roomsvg.layer{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;will-change:transform}
+.roomsvg.layer .obj[role=button]{pointer-events:auto}
+.room3d{position:relative;max-width:560px;margin:0 auto;border-radius:14px;overflow:hidden;box-shadow:var(--shadow);background:#2A1C12;height:min(64vh,600px);touch-action:none}
+.r3bar{display:flex;justify-content:center;gap:8px;margin-top:12px;flex-wrap:wrap}
+.r3btn{border:1px solid var(--edge);background:var(--paper-2);border-radius:22px;min-width:46px;height:44px;font-size:20px;color:var(--ink)}
+.r3btn.wide{font-size:15px;padding:0 18px}
+.r3btn[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+.room3d.decoon{height:min(46vh,520px)}
+body.full3d{overflow:hidden}
+body.full3d #pvbar{display:none}
+body.full3d #app{padding:0;max-width:none}
+.r3full{position:fixed;inset:0;z-index:25;background:#2A1C12}
+.r3full .room3d{position:absolute;inset:0;height:auto;max-width:none;margin:0;border-radius:0;box-shadow:none}
+.r3full.decoon .room3d{bottom:46vh}
+.r3top{position:absolute;left:0;right:0;top:0;padding:calc(env(safe-area-inset-top) + 10px) 12px 10px;display:flex;align-items:center;justify-content:space-between;gap:10px;background:linear-gradient(rgba(20,12,6,.65),rgba(20,12,6,0));pointer-events:none}
+.r3top>*{pointer-events:auto}
+.r3title{font-family:var(--display);font-size:22px;color:#F4EBD6;text-shadow:0 1px 4px #000}
+.r3pill{border:1px solid rgba(230,198,122,.5);background:rgba(26,16,9,.7);color:#F4EBD6;border-radius:20px;padding:8px 14px;font-family:var(--display);font-size:17px;backdrop-filter:blur(6px)}
+.r3menu{position:relative}.r3menu summary{list-style:none;cursor:pointer;width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1px solid rgba(230,198,122,.5);background:rgba(26,16,9,.7);color:#F4EBD6;font-size:20px}
+.r3menu summary::-webkit-details-marker{display:none}
+.r3menu button{position:absolute;right:0;top:46px;white-space:nowrap;border:1px solid var(--edge);background:var(--paper);color:var(--ink);border-radius:10px;padding:10px 14px;box-shadow:var(--shadow)}
+.r3bottom{position:absolute;left:0;right:0;bottom:0;padding:10px 10px calc(env(safe-area-inset-bottom) + 12px);display:flex;flex-direction:column;align-items:center;gap:8px;background:linear-gradient(rgba(20,12,6,0),rgba(20,12,6,.6));pointer-events:none}
+.r3bottom>*{pointer-events:auto}
+.r3full .r3bar{margin:0}
+.r3full .r3btn{background:rgba(26,16,9,.72);color:#F4EBD6;border-color:rgba(230,198,122,.5);backdrop-filter:blur(6px)}
+.r3full .r3btn[aria-pressed="true"]{background:#E6C67A;color:#1A1009}
+.r3tag{display:block;font:600 10px Literata,serif;letter-spacing:.12em;text-transform:uppercase;color:#E6C67A;text-align:center}
+.r3hint{color:#F4EBD6;font-style:italic;font-size:14px;text-align:center;text-shadow:0 1px 3px #000;transition:opacity .6s}.r3hint.gone{opacity:0}
+.r3full .deco{width:100%;flex:1;min-height:0;max-height:none;margin:0;background:var(--paper);box-shadow:0 -6px 20px rgba(0,0,0,.3)}
+.r3full.decoon .r3bottom{background:var(--paper);top:auto;height:46vh;justify-content:flex-start;padding-top:10px}
+.r3full.decoon .r3btn{background:var(--paper-2);color:var(--ink);border-color:var(--edge)}
+.deco{max-height:34vh;overflow:auto;max-width:560px;margin:10px auto 0;border:1px solid var(--edge);background:var(--paper-2);border-radius:12px;padding:12px 14px}
+.decorow{margin:8px 0}.decoopts{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+.dswatch{width:34px;height:34px;border-radius:50%;border:2px solid var(--paper);background:var(--c);box-shadow:0 0 0 1px var(--edge)}
+.dswatch[aria-pressed="true"]{box-shadow:0 0 0 3px var(--ink)}
+.room3d canvas{display:block;width:100%;height:100%}
+.room3d .r3msg{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#E6C67A;font-style:italic;text-align:center;padding:20px}
+.roomsvg{display:block;width:100%;height:auto;--rw:#E9DCC1;--rw2:#E3D4B6;--rp:#D6C29E;--rf:#A27850;--rf2:#7F5A38}
+@media (prefers-color-scheme:dark){.roomsvg{--rw:#3A3027;--rw2:#352B23;--rp:#2E251D;--rf:#5A4030;--rf2:#3F2C1F}}
+.roomsvg .obj[role=button]{cursor:pointer;outline:none}
+.roomsvg .obj[role=button]:hover,.roomsvg .obj[role=button]:focus-visible{filter:brightness(1.08) drop-shadow(0 0 6px rgba(255,220,140,.7))}
+.roomsvg .lbl rect{fill:rgba(26,16,9,.82);stroke:rgba(230,198,122,.55);stroke-width:.8}.roomsvg .lbl text{fill:#F4EBD6;font:600 11px Literata,Georgia,serif;letter-spacing:.02em}
+.roomhint{text-align:center;font-style:italic;margin-top:12px}
+.result .cover{width:38px;flex:0 0 38px}
 .toast{position:fixed;left:50%;bottom:calc(90px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:10px 16px;border-radius:8px;font-size:14px;z-index:60;box-shadow:var(--shadow);max-width:90vw}
 .auth{max-width:420px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
 </style>
 </head>
 <body>
+<div id="pvbar" hidden>Preview version. Changes to books are real, the new features are being tested.</div>
 <div id="app" class="page"><div class="titlepage"><div class="kicker">Ex Libris</div><h1>Opening the library</h1></div></div>
 <script type="module">
 /* ------------------------------------------------------------------
@@ -239,6 +319,15 @@ const arr = v => Array.isArray(v) ? v : (v ? [v] : []);
 const slug = t => String(t || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 80) || "book";
 const hash = s => { let x = 0; for (const c of String(s)) x = (x * 31 + c.charCodeAt(0)) | 0; return Math.abs(x); };
 const today = () => new Date().toISOString().slice(0, 10);
+const PREVIEW = location.pathname.includes("/preview/");
+const ASSET = PREVIEW ? "../" : "";
+const stOf = b => b.status === "reading" ? "reading" : b.status === "wishlist" ? "wishlist" : "read";
+const norm = t => String(t || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/\(.*?\)|\[.*?\]/g, "").split(/[:.]\s/)[0].replace(/^(the|a|an|il|la|lo|i|gli|le|l')\s+/, "").replace(/[^a-z0-9]/g, "");
+const fmtDate = d => d ? new Date(d + "T12:00:00").toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "";
+const lsGet = (k, d) => { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch (e) { return d; } };
+const lsSet = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} };
+function myUid() { if (DB.mode === "firebase") return meUid(); const s = sessionStorage.getItem("exlibris-me"); if (s && profiles[s]) return s; return Object.entries(profiles).sort((a, b) => (a[1].created || 0) - (b[1].created || 0))[0]?.[0] || null; }
+function starsEl(r, small) { return h("span", { class: "stars-ro" + (small ? " sm" : ""), "aria-label": r ? r + " out of 5" : "Not rated" }, "★★★★★".slice(0, r || 0), h("span", { class: "off" }, "★★★★★".slice(0, 5 - (r || 0)))); }
 const yr = b => b.yearLabel || (b.year != null ? (b.year < 0 ? -b.year + " BC" : b.year) : "");
 let toastT;
 function toast(msg) { document.querySelector(".toast")?.remove(); const t = h("div", { class: "toast", role: "status" }, msg); document.body.append(t); clearTimeout(toastT); toastT = setTimeout(() => t.remove(), 3200); }
@@ -304,7 +393,7 @@ async function firebaseAdapter(cfg) {
     watchProfiles(f) { return F.onSnapshot(F.collection(fs, "profiles"), s => { const o = {}; s.forEach(d => o[d.id] = d.data()); f(o); }, e => toast("Could not load profiles: " + e.code)); },
     saveProfile: (uid, d) => F.setDoc(F.doc(fs, "profiles", uid), d, { merge: true }),
     watchBooks(uid, f) { return F.onSnapshot(books(uid), s => { const o = {}; s.forEach(d => o[d.id] = d.data()); f(o); }, e => toast("Could not load books: " + e.code)); },
-    setBook: (uid, id, d) => F.setDoc(F.doc(books(uid), id), d),
+    setBook: (uid, id, d) => F.setDoc(F.doc(books(uid), id), JSON.parse(JSON.stringify(d))),
     updateBook: (uid, id, p) => F.updateDoc(F.doc(books(uid), id), p),
     deleteBook: (uid, id) => F.deleteDoc(F.doc(books(uid), id)),
     async setBooks(uid, map) { const ids = Object.keys(map); for (let i = 0; i < ids.length; i += 400) { const b = F.writeBatch(fs); ids.slice(i, i + 400).forEach(id => b.set(F.doc(books(uid), id), map[id])); await b.commit(); } },
@@ -340,7 +429,9 @@ function coverEl(b, pill) {
   const c = h("div", { class: "cover" });
   if (pill) c.append(h("span", { class: "pill" }, pill));
   const cloth = () => h("div", { class: "cloth", style: { "--cc": LEATHER[hash(b.title) % LEATHER.length] } }, h("b", {}, b.title || "Untitled"), h("i", {}, arr(b.authors).join(", ")));
-  if (b.cover) { const img = h("img", { src: b.cover, alt: "Cover of " + b.title, loading: "lazy" }); img.onerror = () => img.replaceWith(cloth()); c.append(img); } else c.append(cloth());
+  if (b.status === "reading" && b.pages && b.page) c.append(h("div", { class: "prog" }, h("i", { style: { width: Math.min(100, Math.round(b.page / b.pages * 100)) + "%" } })));
+  if (b.lentTo) c.append(h("span", { class: "pill lent" }, "Lent"));
+  if (b.cover) { const img = h("img", { src: /^(https?:|data:|blob:)/.test(b.cover) ? b.cover : ASSET + b.cover, alt: "Cover of " + b.title, loading: "lazy" }); img.onerror = () => img.replaceWith(cloth()); c.append(img); } else c.append(cloth());
   return c;
 }
 
@@ -357,11 +448,16 @@ function turn({ color, kicker, name, paper, opening }) {
 /* ---------- views ---------- */
 function render() {
   const r = location.hash.slice(1) || "/";
+  document.body.classList.toggle("full3d", r.startsWith("/room3d/") && !lsGet("cc-room2d", false));
   if (DB.mode === "firebase" && !user) return renderAuth();
   if (user && DB.mode === "firebase" && !profiles[user.uid] && !r.startsWith("/new")) { if ($app.dataset.view === "new") return; return renderNewProfile(true); }
   if (r.startsWith("/new") && $app.dataset.view === "new" && ui.creating) return;
   if (r.startsWith("/p/")) return renderShelf(decodeURIComponent(r.slice(3)));
   if (r === "/letters") return renderLetters();
+  if (r.startsWith("/year")) return renderYear(decodeURIComponent(r.slice(6)) || myUid());
+  if (r === "/news") return renderNews();
+  if (r.startsWith("/room/")) return renderRoom(decodeURIComponent(r.slice(6)));
+  if (r.startsWith("/room3d/")) return renderRoom3D(decodeURIComponent(r.slice(8)));
   if (r.startsWith("/new")) return renderNewProfile(false);
   return renderLibrary();
 }
@@ -380,13 +476,12 @@ function renderLibrary() {
   const forMe = sugs.filter(s => DB.mode === "local" ? true : s.to === meUid()).length;
   const mine = meUid() && profiles[meUid()];
   mount(
-    h("header", { class: "titlepage" }, h("div", { class: "kicker" }, "Ex Libris"), h("h1", {}, "The Codex Club"), h("p", {}, list.length ? "Choose a volume to open it" : "Add the first reader to begin")),
+    h("header", { class: "titlepage" }, h("div", { class: "kicker" }, "Ex Libris"), h("h1", {}, "The Codex Club"), h("p", {}, list.length ? "Open your volume to step into your room" : "Add the first reader to begin")),
     h("div", { class: "case" }, h("div", { class: "spines" }, spines), h("div", { class: "plank" })),
     h("div", { class: "cards" },
-      h("button", { class: "card", onclick: () => go("/letters") }, h("h2", {}, "Letters ", forMe ? h("span", { class: "badge" }, forMe) : null), h("div", { class: "muted" }, "Suggest books to each other and send the good ones straight to a wishlist.")),
       DB.mode === "local" ? h("div", { class: "card" }, h("h2", {}, "Backup"), h("div", { class: "muted" }, "This library lives only on this phone until sync is switched on. Save a backup now and then."),
         h("div", { class: "actions" }, h("button", { class: "btn", onclick: exportBackup }, "Save backup"), h("label", { class: "btn ghost" }, "Load backup", h("input", { type: "file", accept: ".json,application/json", hidden: true, onchange: importBackup })))) : null),
-    h("div", { class: "foot" }, h("div", { class: "faint", style: { "font-size": "12px", "margin-bottom": "4px" } }, "Version 7 Nov j"), DB.mode === "firebase" ? ["Signed in as ", mine ? mine.name : user.email, " · ", h("button", { onclick: () => DB.signOut() }, "Sign out")] : "Sync is not set up yet, so changes stay on this phone.")
+    h("div", { class: "foot" }, h("div", { class: "faint", style: { "font-size": "12px", "margin-bottom": "4px" } }, PREVIEW ? "Preview version" : "Version 7 Nov k"), DB.mode === "firebase" ? ["Signed in as ", mine ? mine.name : user.email, " · ", h("button", { onclick: () => DB.signOut() }, "Sign out")] : "Sync is not set up yet, so changes stay on this phone.")
   );
 }
 
@@ -395,7 +490,7 @@ async function openShelf(uid) {
   ui.tab = "all"; ui.q = ""; ui.genre = null;
   const t = turn({ color: p.color, kicker: "Ex Libris", name: p.name, opening: true });
   await new Promise(r => setTimeout(r, reduce ? 0 : 160));
-  go("/p/" + encodeURIComponent(uid)); window.scrollTo(0, 0);
+  go(roomPath(uid)); window.scrollTo(0, 0);
   await t; mergeSeed(uid);
 }
 async function closeTo(path) { const t = turn({ paper: true, kicker: "Ex Libris", name: "", opening: false }); await new Promise(r => setTimeout(r, reduce ? 0 : 700)); go(path); window.scrollTo(0, 0); await t; }
@@ -421,7 +516,7 @@ function renderShelf(uid) {
   else groups.set("", list);
   const keys = [...groups.keys()].sort((a, b) => (a === "Other" || a === "Standalone") - (b === "Other" || b === "Standalone") || a.localeCompare(b));
   const reading = ui.tab === "all" ? all.filter(b => st(b) === "reading") : [];
-  const grid = arrb => h("div", { class: "grid" }, arrb.map(b => h("button", { class: "book", onclick: () => openBook(uid, b.id) }, coverEl(b, ui.tab === "all" && st(b) === "reading" ? "Reading" : null), h("div", { class: "t" }, b.title), h("div", { class: "a" }, arr(b.authors).join(", ")))));
+  const grid = arrb => h("div", { class: "grid" }, arrb.map(b => h("button", { class: "book", onclick: () => openBook(uid, b.id) }, coverEl(b, ui.tab === "all" && st(b) === "reading" ? "Reading" : null), h("div", { class: "t" }, b.title), h("div", { class: "a" }, arr(b.authors).join(", ")), b.rating ? starsEl(b.rating, true) : null)));
   const tab = (k, label, n) => h("button", { class: "tab", role: "tab", "aria-selected": ui.tab === k ? "true" : "false", onclick: () => { ui.tab = k; ui.genre = null; render(); } }, label, n != null ? h("span", { class: "faint", style: { "font-size": "14px" } }, " " + n) : null);
   const content = [];
   if (!all.length) content.push(h("div", { class: "empty" }, shelf[uid] ? (edit ? "This shelf is empty. Tap Add a book to put the first one here." : p.name + " has not added any books yet.") : "Opening the shelf"));
@@ -432,8 +527,8 @@ function renderShelf(uid) {
   }
   const authors = new Set(all.filter(b => st(b) !== "wishlist").flatMap(b => arr(b.authors))).size;
   mount(
-    h("div", { class: "topbar" }, h("button", { class: "back", onclick: () => closeTo("/") }, "‹ Library"), h("div", { class: "ribbon", style: { "--c": color } })),
-    h("header", { class: "phead" }, h("div", { class: "sc faint" }, "the shelf of"), h("h1", {}, p.name), edit ? h("button", { class: "rename", type: "button", onclick: () => editShelf(uid) }, "✎ Edit shelf") : null,
+    h("div", { class: "topbar" }, h("button", { class: "back", onclick: () => go(roomPath(uid)) }, "‹ Room"), h("button", { class: "back", onclick: () => closeTo("/") }, "Club ›")),
+    h("header", { class: "phead" }, h("div", { class: "sc faint" }, "the shelf of"), h("h1", {}, p.name), h("div", { class: "actions", style: { "justify-content": "center", "margin-top": "8px" } }, edit ? h("button", { class: "rename", type: "button", onclick: () => editShelf(uid) }, "✎ Edit shelf") : null, h("button", { class: "rename", type: "button", onclick: () => go("/year/" + encodeURIComponent(uid)) }, "◔ Year in books")),
       h("div", { class: "stats sc" }, counts.read + " read · " + counts.reading + " reading · " + counts.wishlist + " wished · " + authors + " authors")),
     h("div", { class: "fleuron" }, "❦"),
     h("div", { class: "tabs", role: "tablist", style: { "--c": color } }, tab("all", "Shelf", counts.read + counts.reading), tab("reading", "Reading", counts.reading), tab("wishlist", "Wishlist", counts.wishlist)),
@@ -486,20 +581,806 @@ function editShelf(uid) {
 
 function openBook(uid, id) {
   const b = { id, ...(shelf[uid] || {})[id] }; if (!b.title) return;
-  const edit = canEdit(uid);
-  const st = b.status === "reading" ? "reading" : b.status === "wishlist" ? "wishlist" : "read";
+  const edit = canEdit(uid), st = stOf(b);
+  const upd = p => DB.updateBook(uid, id, p).then(() => Object.assign(b, p)).catch(e => toast("Could not save: " + (e.code || e.message)));
   const meta = [arr(b.authors).join(", "), yr(b), b.series ? b.series + (b.seriesNo != null ? " " + b.seriesNo : "") : ""].filter(Boolean).join(" · ");
-  const notes = h("textarea", { rows: 4, placeholder: "Thoughts, quotes, where you stopped" }); notes.value = b.notes || "";
+  const notes = h("textarea", { rows: 4, placeholder: "Thoughts, where you stopped" }); notes.value = b.notes || "";
   const msg = h("span", { class: "status", role: "status" });
+  const parts = [];
+  // rating
+  if (st !== "wishlist") {
+    if (edit) {
+      const row = h("div", { class: "stars", role: "group", "aria-label": "Your rating" });
+      const paint = () => row.querySelectorAll("button").forEach((x, i) => x.setAttribute("aria-pressed", i < (b.rating || 0) ? "true" : "false"));
+      for (let i = 1; i <= 5; i++) row.append(h("button", { type: "button", "aria-label": i + " stars", onclick: async () => { const r = b.rating === i ? 0 : i; b.rating = r; paint(); await upd({ rating: r }); } }, "★"));
+      paint(); parts.push(h("div", { class: "brow" }, h("span", { class: "sc faint" }, "your rating"), row));
+    } else if (b.rating) parts.push(h("div", { class: "brow" }, h("span", { class: "sc faint" }, "rating"), starsEl(b.rating)));
+  }
+  // reading progress
+  if (st === "reading") {
+    const pct = () => b.pages && b.page ? Math.min(100, Math.round(b.page / b.pages * 100)) : 0;
+    const bar = h("div", { class: "bigprog" }, h("i", { style: { width: pct() + "%" } })), lab = h("span", { class: "faint" }, pct() ? pct() + "%" : "");
+    if (edit) {
+      const pg = h("input", { type: "number", inputmode: "numeric", min: "0", value: b.page ?? "", "aria-label": "Current page" }), tot = h("input", { type: "number", inputmode: "numeric", min: "1", value: b.pages ?? "", "aria-label": "Total pages" });
+      const savep = async () => { const p = { page: parseInt(pg.value, 10) || 0, pages: parseInt(tot.value, 10) || 0 }; await upd(p); bar.firstChild.style.width = pct() + "%"; lab.textContent = pct() ? pct() + "%" : ""; };
+      pg.onchange = savep; tot.onchange = savep;
+      parts.push(h("div", { class: "pagebox" }, h("div", { class: "brow" }, h("span", { class: "sc faint" }, "progress"), lab), h("div", { class: "pagein" }, "Page ", pg, " of ", tot), bar));
+    } else if (pct()) parts.push(h("div", { class: "pagebox" }, h("div", { class: "brow" }, h("span", { class: "sc faint" }, "progress"), lab), bar));
+  }
+  // dates
+  if (st !== "wishlist") {
+    if (edit) {
+      const ds = h("input", { type: "date", value: b.started || "", max: today() }), df = h("input", { type: "date", value: b.finished || "", max: today() });
+      ds.onchange = () => upd({ started: ds.value }); df.onchange = () => upd({ finished: df.value });
+      parts.push(h("div", { class: "row dates" }, h("label", { class: "field" }, "Started", ds), st === "read" ? h("label", { class: "field" }, "Finished", df) : h("span")));
+    } else if (b.started || b.finished) parts.push(h("div", { class: "meta" }, [b.started ? "Started " + fmtDate(b.started) : "", b.finished ? "Finished " + fmtDate(b.finished) : ""].filter(Boolean).join(" · ")));
+  }
+  // who else has it
+  const k = norm(b.title), others = Object.entries(profiles).filter(([u]) => u !== uid).map(([u, p]) => { const o = books(u).find(x => norm(x.title) === k); return o ? p.name + (stOf(o) === "wishlist" ? " wants it" : stOf(o) === "reading" ? " is reading it" : " has read it" + (o.rating ? " " + "★".repeat(o.rating) : "")) : null; }).filter(Boolean);
+  const alsoEl = others.length ? h("div", { class: "also" }, "👥 " + others.join(" · ")) : null;
+  // quotes
+  const quotes = arr(b.quotes).slice(), qlist = h("div", { class: "quotes" });
+  const drawQ = () => qlist.replaceChildren(...quotes.map((t, i) => h("blockquote", {}, "“" + t + "”", edit ? h("button", { class: "qx", type: "button", "aria-label": "Delete quote", onclick: async () => { quotes.splice(i, 1); drawQ(); await upd({ quotes: quotes.slice() }); } }, "✕") : null)));
+  drawQ();
+  const qin = h("textarea", { rows: 2, placeholder: "Copy a line you loved" });
+  const quotesEl = edit ? h("details", { class: "fold", open: quotes.length > 0 }, h("summary", {}, "Favourite quotes", quotes.length ? h("span", { class: "faint" }, " " + quotes.length) : null), qlist, qin, h("button", { class: "btn", type: "button", onclick: async () => { const t = qin.value.trim(); if (!t) return; quotes.push(t); qin.value = ""; drawQ(); await upd({ quotes: quotes.slice() }); } }, "Add quote"))
+    : (quotes.length ? h("div", { class: "fold" }, h("div", { class: "sc faint" }, "favourite quotes"), qlist) : null);
+  // lending
+  let lendEl = null;
+  if (edit && st !== "wishlist") {
+    const who = h("input", { value: b.lentTo || "", placeholder: "Who has it", list: "readersList" }), when = h("input", { type: "date", value: b.lentOn || today() });
+    const dl = h("datalist", { id: "readersList" }, Object.values(profiles).map(p => h("option", { value: p.name })));
+    lendEl = h("details", { class: "fold", open: !!b.lentTo }, h("summary", {}, b.lentTo ? "Lent to " + b.lentTo + (b.lentOn ? " since " + fmtDate(b.lentOn) : "") : "Lend this book"), dl,
+      h("div", { class: "row" }, h("label", { class: "field" }, "Lent to", who), h("label", { class: "field" }, "On", when)),
+      h("div", { class: "actions" }, h("button", { class: "btn", type: "button", onclick: async () => { if (!who.value.trim()) return; await upd({ lentTo: who.value.trim(), lentOn: when.value }); close(); toast("Marked as lent to " + who.value.trim()); } }, "Save"),
+        b.lentTo ? h("button", { class: "btn ghost", type: "button", onclick: async () => { await upd({ lentTo: "", lentOn: "" }); close(); toast("Welcome back, book"); } }, "It came back") : null));
+  } else if (b.lentTo) lendEl = h("div", { class: "meta" }, "Lent to " + b.lentTo);
+  // follow authors
+  const me = myUid(), favs = () => arr(profiles[me]?.favAuthors);
+  const follow = me && canEdit(me) && arr(b.authors).length ? h("div", { class: "follows" }, arr(b.authors).map(a => { const btn = h("button", { class: "chip", type: "button" }); const paint = () => { const on = favs().includes(a); btn.textContent = (on ? "♥ Following " : "♡ Follow ") + a; btn.setAttribute("aria-pressed", on ? "true" : "false"); }; paint();
+    btn.onclick = async () => { const f = favs(), next = f.includes(a) ? f.filter(x => x !== a) : [...f, a]; profiles[me] = { ...profiles[me], favAuthors: next }; paint(); await DB.saveProfile(me, { favAuthors: next }); lsSet("cc-news-" + me, null); }; return btn; })) : null;
+
   const { close } = sheet(
     h("div", { class: "detail" }, coverEl(b), h("div", {}, h("h2", {}, b.title), b.altTitle ? h("div", { class: "faint", style: { "font-style": "italic" } }, b.altTitle) : null, h("div", { class: "meta", style: { "margin-top": "6px" } }, meta), arr(b.genres).length ? h("div", { class: "meta faint" }, arr(b.genres).join(" · ")) : null)),
-    edit ? h("div", { class: "seg", role: "group", "aria-label": "Status" }, ["wishlist", "reading", "read"].map(k => h("button", { "aria-pressed": st === k ? "true" : "false", onclick: async () => { await DB.updateBook(uid, id, { status: k }); close(); toast("Moved to " + STATUS[k]); } }, STATUS[k]))) : h("div", { class: "sc faint", style: { margin: "14px 0" } }, STATUS[st]),
+    edit ? h("div", { class: "seg", role: "group", "aria-label": "Status" }, ["wishlist", "reading", "read"].map(k => h("button", { "aria-pressed": st === k ? "true" : "false", onclick: async () => {
+      const p = { status: k }; if (k === "reading" && !b.started) p.started = today(); if (k === "read" && !b.finished) p.finished = today(); if (k === "read" && b.pages) p.page = b.pages; if (k === "read" && !b.started && b.status === "wishlist") p.started = today();
+      await DB.updateBook(uid, id, p); close(); toast(k === "read" ? "Finished! Give it some stars" : "Moved to " + STATUS[k]); if (k === "read") setTimeout(() => openBook(uid, id), 400);
+    } }, STATUS[k]))) : h("div", { class: "sc faint", style: { margin: "14px 0" } }, STATUS[st]),
+    ...parts, alsoEl,
     b.plot ? h("p", { class: "plot" }, b.plot) : h("p", { class: "faint", style: { "font-style": "italic" } }, "No summary yet."),
     b.source ? h("p", {}, h("a", { href: b.source, target: "_blank", rel: "noopener" }, "Read more")) : null,
     edit ? h("div", { class: "margin" }, h("label", { class: "field" }, "Margin notes", notes), h("div", { class: "actions", style: { "margin-top": "8px" } }, h("button", { class: "btn", onclick: async () => { msg.textContent = "Saving"; await DB.updateBook(uid, id, { notes: notes.value.trim() }); msg.textContent = "Saved"; } }, "Save notes"), msg))
       : (b.notes ? h("div", { class: "margin" }, h("div", { class: "sc faint" }, "margin notes"), h("p", { style: { margin: "6px 0 0", "font-style": "italic" } }, b.notes)) : null),
+    quotesEl, lendEl, follow,
     edit ? h("div", { class: "actions", style: { "margin-top": "18px" } }, h("button", { class: "btn ghost", onclick: () => { close(true); addBook(uid, id); } }, "Edit details"), h("button", { class: "btn ghost", onclick: async () => { if (confirm("Remove " + b.title + " from the shelf?")) { await DB.deleteBook(uid, id); close(); toast("Removed"); } } }, "Remove")) : null
   );
+}
+
+
+/* ---------- the reading room ---------- */
+function roomState(uid) {
+  const all = books(uid), mine = canEdit(uid) && uid === myUid();
+  const read = all.filter(b => stOf(b) === "read").length;
+  const reading = all.filter(b => stOf(b) === "reading").sort((a, b) => (b.started || "").localeCompare(a.started || "") || (b.page || 0) - (a.page || 0));
+  const Y = new Date().getFullYear(), fin = finishedIn(uid, Y).length, goal = profiles[uid]?.goals?.[Y];
+  const mail = sugs.filter(s => s.to === uid).length, news = mine ? newsCount() : 0, lent = all.filter(b => b.lentTo);
+  return { all, mine, read, reading, Y, fin, goal, mail, news, lent };
+}
+function roomSVG(uid, S) {
+  const p = profiles[uid], c = p.color || LEATHER[0], night = matchMedia("(prefers-color-scheme: dark)").matches;
+  const R = (seed, n) => hash(seed) % n;
+  const spinePal = ["#6E2B24", "#2F4535", "#27344D", "#8E6A2E", "#4C2E45", "#38525A", "#7A5434", "#3B3B3B", "#EDE4D2", "#D9CDB4", "#F3EEE3", "#B9472F", "#1F2A38", "#C9B48A"];
+  // bookcase compartments: [x0, x1, bottom y, height]
+  const comps = [];
+  [[24, 112], [288, 376]].forEach(([x0, x1]) => [140, 214, 288, 362, 436].forEach(y => comps.push([x0, x1, y, 66])));
+  [140, 200].forEach(y => comps.push([132, 268, y, 52]));
+  const total = S.all.length, filled = Math.min(comps.length, Math.max(total ? 2 : 0, Math.ceil(Math.sqrt(total) * 1.6)));
+  const order = comps.map((_, i) => i).sort((x, y) => R("o" + x, 97) - R("o" + y, 97));
+  let books = "", decor = "";
+  order.forEach((ci, rank) => {
+    const [x0, x1, yb, hmax] = comps[ci];
+    if (rank >= filled) { // empty slot gets an ornament
+      const cx = (x0 + x1) / 2, t = R("d" + ci, 4);
+      decor += t === 0 ? `<path d="M${cx - 8} ${yb} q-6 -14 2 -22 q-4 -8 6 -12 q10 4 6 12 q8 8 2 22z" fill="#E9E1D0"/><path d="M${cx - 8} ${yb} h16" stroke="#C8BCA4"/>`
+        : t === 1 ? `<circle cx="${cx}" cy="${yb - 20}" r="13" fill="#3E5A6B"/><path d="M${cx - 13} ${yb - 20} h26 M${cx} ${yb - 33} v26" stroke="#C9A65A" stroke-width="1"/><ellipse cx="${cx}" cy="${yb - 20}" rx="6" ry="13" fill="none" stroke="#C9A65A" stroke-width="1"/><path d="M${cx - 9} ${yb} h18 l-3 -6 h-12z" fill="#7A5434"/>`
+        : t === 2 ? `<rect x="${cx - 9}" y="${yb - 14}" width="18" height="14" rx="2" fill="#B9AE98"/><path d="M${cx} ${yb - 14} q-10 -12 -4 -24 M${cx} ${yb - 14} q8 -14 2 -26 M${cx} ${yb - 14} q2 -10 10 -18" stroke="#4E6B3A" stroke-width="3" fill="none" stroke-linecap="round"/>`
+        : `<rect x="${cx - 18}" y="${yb - 8}" width="36" height="8" fill="#6E2B24"/><rect x="${cx - 16}" y="${yb - 15}" width="32" height="7" fill="#27344D"/><rect x="${cx - 17}" y="${yb - 21}" width="34" height="6" fill="#EDE4D2"/>`;
+      return;
+    }
+    let x = x0 + 2, k = 0;
+    while (x < x1 - 6) {
+      const key = ci + "-" + k++, w = 5 + R("w" + key, 6), hh = Math.min(hmax - 6, hmax * .62 + R("h" + key, hmax * .35)), col = spinePal[R("c" + key, spinePal.length)];
+      const light = /^#(E|D|F|C9)/.test(col);
+      if (R("lean" + key, 9) === 0 && x < x1 - 20) { books += `<rect x="${x + 4}" y="${yb - hh + 2}" width="${w}" height="${hh}" fill="${col}" transform="rotate(14 ${x + 4} ${yb})"/>`; x += w + 12; continue; }
+      books += `<rect x="${x}" y="${yb - hh}" width="${w}" height="${hh}" fill="${col}"/>`;
+      if (!light && w > 6) books += `<rect x="${x}" y="${yb - hh + 6}" width="${w}" height="1.4" fill="#D9B56A" opacity=".8"/><rect x="${x}" y="${yb - 9}" width="${w}" height="1.4" fill="#D9B56A" opacity=".6"/>`;
+      else books += `<rect x="${x + w / 2 - .6}" y="${yb - hh + 8}" width="1.2" height="${hh * .45}" fill="#2A221C" opacity=".35"/>`;
+      books += `<rect x="${x + w - 1}" y="${yb - hh}" width="1" height="${hh}" fill="#000" opacity=".25"/>`;
+      x += w + .6;
+      if (R("gap" + key, 13) === 0) x += 10;
+    }
+  });
+  const shelves = comps.map(([x0, x1, yb, hm]) => `<rect x="${x0 - 4}" y="${yb}" width="${x1 - x0 + 8}" height="6" fill="url(#shelfwood)"/><rect x="${x0}" y="${yb - hm - 2}" width="${x1 - x0}" height="3" fill="#FFE2A0" opacity="${night ? .95 : .7}"/><rect x="${x0}" y="${yb - hm + 1}" width="${x1 - x0}" height="${hm - 1}" fill="url(#led)"/>`).join("");
+
+  const letter = S.mine ? (S.mail
+    ? `<g transform="translate(140 346) rotate(-4)"><rect width="52" height="30" fill="#F1E6CC"/><path d="M0 0 L26 18 L52 0" fill="#E6D7B6" stroke="#9C8B6E" stroke-width=".8"/><rect width="52" height="30" fill="none" stroke="#9C8B6E" stroke-width=".8"/><circle cx="26" cy="18" r="6.5" fill="#8E1F1A"/><circle cx="26" cy="18" r="3.8" fill="#B23A31"/></g>`
+    : `<g transform="translate(138 344) rotate(-3)"><rect y="10" width="54" height="24" fill="#E9DDC2" stroke="#9C8B6E" stroke-width=".8"/><rect x="6" y="-4" width="42" height="30" fill="#FFFDF6" stroke="#C9BEA6" stroke-width=".8"/><path d="M11 4 h32 M11 9 h32 M11 14 h24" stroke="#B9AE98" stroke-width="1"/><path d="M0 10 L27 26 L54 10" fill="none" stroke="#9C8B6E" stroke-width=".8"/></g>`) : "";
+  const paper = S.mine ? (S.news
+    ? `<g transform="translate(108 566) rotate(-9)"><rect width="56" height="30" fill="#F2EEE4" stroke="#8A8274" stroke-width=".8"/><rect x="4" y="4" width="48" height="6" fill="#2A221C"/><rect x="4" y="13" width="20" height="12" fill="#B9B2A2"/><path d="M28 15 h24 M28 19 h24 M28 23 h24" stroke="#8A8274" stroke-width=".9"/></g><g transform="translate(166 556)"><circle r="11" fill="#B23A31" stroke="#F4EBD6" stroke-width="1.5"/><text y="4" text-anchor="middle" font-size="10.5" font-weight="700" fill="#fff" font-family="Literata,serif">${S.news > 9 ? "9+" : S.news}</text></g>`
+    : `<g transform="translate(100 576) rotate(-4)"><rect width="74" height="24" fill="#EDE8DC" stroke="#8A8274" stroke-width=".8"/><path d="M37 0 v24 M5 6 h27 M5 11 h27 M5 16 h20 M42 6 h27 M42 11 h27 M42 16 h22" stroke="#A39B8C" stroke-width=".9"/></g>`) : "";
+  const cur = S.reading[0];
+  const openBk = cur ? `<g transform="translate(292 566)"><path d="M0 8 Q14 1 28 8 L28 24 Q14 17 0 24Z" fill="#FFFBF0" stroke="#8A7B6B" stroke-width=".8"/><path d="M28 8 Q42 1 56 8 L56 24 Q42 17 28 24Z" fill="#F7F1E2" stroke="#8A7B6B" stroke-width=".8"/><path d="M5 12 q9 -4 19 0 M5 16 q9 -4 19 0 M32 12 q9 -4 19 0 M32 16 q9 -4 19 0" stroke="#C9BEA6" stroke-width=".7" fill="none"/></g>` : "";
+  const lit = !!cur;
+  const pct = S.goal ? Math.min(1, S.fin / S.goal) : 0;
+  const label = (x, y, t) => `<g class="lbl" transform="translate(${x} ${y})"><rect x="${-t.length * 3.2 - 8}" y="-11" width="${t.length * 6.4 + 16}" height="18" rx="9"/><text y="2" text-anchor="middle">${t.replace(/&/g, "&amp;").replace(/</g, "&lt;")}</text></g>`;
+  const ini = (p.name || "?").trim()[0].toUpperCase();
+  const tufts = []; for (let r = 0; r < 2; r++) for (let i = 0; i < 9; i++) tufts.push(`<circle cx="${34 + i * 19 + (r ? 9 : 0)}" cy="${538 + r * 14}" r="1.6" fill="#000" opacity=".35"/>`);
+  const lentBk = S.lent.length ? `<rect x="226" y="462" width="7" height="20" fill="#27344D"/><rect x="234" y="458" width="7" height="24" fill="#6E2B24"/><rect x="242" y="463" width="7" height="19" fill="#EDE4D2"/>` : "";
+  return `<svg class="roomsvg" viewBox="0 0 400 700" role="group" aria-label="${p.name.replace(/"/g, "")}'s study">
+<defs>
+ <linearGradient id="wal" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#3B2416"/><stop offset=".5" stop-color="#4A2E1C"/><stop offset="1" stop-color="#3B2416"/></linearGradient>
+ <linearGradient id="shelfwood" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6A4429"/><stop offset="1" stop-color="#3A2214"/></linearGradient>
+ <linearGradient id="led" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFD98A" stop-opacity="${night ? .42 : .3}"/><stop offset=".55" stop-color="#FFD98A" stop-opacity=".06"/><stop offset="1" stop-color="#FFD98A" stop-opacity="0"/></linearGradient>
+ <linearGradient id="inner" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#24150C"/><stop offset="1" stop-color="#1A0F08"/></linearGradient>
+ <linearGradient id="desk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5A3820"/><stop offset="1" stop-color="#3A2214"/></linearGradient>
+ <linearGradient id="leather" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".18"/><stop offset=".45" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".35"/></linearGradient>
+ <linearGradient id="brass" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#8A6A2C"/><stop offset=".5" stop-color="#E6C67A"/><stop offset="1" stop-color="#8A6A2C"/></linearGradient>
+ <pattern id="parquet" width="40" height="20" patternUnits="userSpaceOnUse"><rect width="40" height="20" fill="#5B3920"/><path d="M0 20 L20 0 M20 20 L40 0" stroke="#4A2E19" stroke-width="7"/><path d="M0 0 L20 20 M20 0 L40 20" stroke="#6B4528" stroke-width="1" opacity=".5"/></pattern>
+ <pattern id="carpet" width="26" height="16" patternUnits="userSpaceOnUse"><rect width="26" height="16" fill="${c}"/><path d="M13 1 L24 8 L13 15 L2 8Z" fill="none" stroke="#E6C67A" stroke-opacity=".35" stroke-width="1"/><circle cx="13" cy="8" r="1.4" fill="#E6C67A" opacity=".45"/></pattern>
+ <pattern id="coffer" width="50" height="50" patternUnits="userSpaceOnUse"><rect width="50" height="50" fill="#2A170C"/><rect x="5" y="5" width="40" height="40" fill="#3A2214"/><rect x="9" y="9" width="32" height="32" fill="#2E1A0E"/><circle cx="25" cy="25" r="2.2" fill="#FFE2A0" opacity="${night ? .95 : .7}"/></pattern>
+ <radialGradient id="pool"><stop offset="0" stop-color="#FFD27A" stop-opacity="${night ? .55 : .35}"/><stop offset="1" stop-color="#FFD27A" stop-opacity="0"/></radialGradient>
+ <radialGradient id="vig" cx=".5" cy=".45" r=".75"><stop offset=".55" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity="${night ? .6 : .38}"/></radialGradient>
+</defs>
+<rect width="400" height="62" fill="url(#coffer)"/>
+<rect y="50" width="400" height="420" fill="url(#wal)"/>
+<rect y="50" width="400" height="12" fill="#5A3820"/><rect y="60" width="400" height="3" fill="#2A170C"/>
+<!-- floor -->
+<rect y="470" width="400" height="230" fill="url(#parquet)"/><rect y="468" width="400" height="6" fill="#2A170C"/>
+<path d="M30 600 L370 600 L400 700 L0 700Z" fill="url(#carpet)"/><path d="M30 600 L370 600 L400 700 L0 700Z" fill="#000" opacity=".18"/><path d="M36 606 L364 606 L392 700 M8 700 L36 606" stroke="#E6C67A" stroke-opacity=".5" stroke-width="2" fill="none"/>
+<!-- built-in bookcases -->
+<rect x="14" y="62" width="108" height="410" fill="#4A2E1C"/><rect x="278" y="62" width="108" height="410" fill="#4A2E1C"/>
+<rect x="24" y="68" width="88" height="374" fill="url(#inner)"/><rect x="288" y="68" width="88" height="374" fill="url(#inner)"/>
+<rect x="128" y="62" width="144" height="146" fill="#4A2E1C"/><rect x="132" y="80" width="136" height="126" fill="url(#inner)"/>
+<g class="obj" data-go="shelf" role="button" tabindex="0" aria-label="Bookcase, ${total} books">
+ <rect x="14" y="62" width="108" height="410" fill="transparent"/><rect x="278" y="62" width="108" height="410" fill="transparent"/><rect x="128" y="62" width="144" height="146" fill="transparent"/>
+ ${shelves}${decor}${books}
+ <rect x="12" y="436" width="112" height="36" fill="#3F2617"/><rect x="276" y="436" width="112" height="36" fill="#3F2617"/>
+ <rect x="22" y="444" width="44" height="22" rx="1" fill="#4E301D"/><rect x="70" y="444" width="44" height="22" rx="1" fill="#4E301D"/><rect x="286" y="444" width="44" height="22" rx="1" fill="#4E301D"/><rect x="334" y="444" width="44" height="22" rx="1" fill="#4E301D"/>
+ ${label(332, 78, "Bookcase · " + total)}
+</g>
+<!-- ladder -->
+<g aria-hidden="true" opacity=".95"><path d="M40 92 L18 470 M78 92 L60 470" stroke="#8C6239" stroke-width="5" stroke-linecap="round"/>${[130, 180, 230, 280, 330, 380, 430].map(y => { const t = (y - 92) / 378; return `<path d="M${40 - 22 * t} ${y} L${78 - 18 * t} ${y}" stroke="#A97B4C" stroke-width="4"/>`; }).join("")}<rect x="30" y="86" width="56" height="4" rx="2" fill="url(#brass)"/></g>
+<circle cx="200" cy="80" r="70" fill="url(#pool)"/>
+<!-- centre niche: portrait and sconces -->
+<rect x="128" y="208" width="144" height="160" fill="#3F2617"/><rect x="138" y="216" width="124" height="146" fill="none" stroke="#5A3820" stroke-width="3"/>
+<rect x="132" y="206" width="136" height="3" fill="#FFE2A0" opacity="${night ? .9 : .6}"/><rect x="132" y="209" width="136" height="60" fill="url(#led)"/>
+<g aria-hidden="true">${[148, 252].map(x => `<rect x="${x - 2}" y="246" width="4" height="16" fill="url(#brass)"/><path d="M${x - 7} 246 h14 l-3 -12 h-8z" fill="#F3E3B5"/><circle cx="${x}" cy="238" r="22" fill="url(#pool)"/>`).join("")}</g>
+<g class="obj" data-go="profile" role="button" tabindex="0" aria-label="Profile and settings">
+ <rect x="174" y="226" width="52" height="64" fill="url(#brass)"/><rect x="179" y="231" width="42" height="54" fill="${c}"/><rect x="179" y="231" width="42" height="54" fill="url(#leather)"/>
+ <text x="200" y="267" text-anchor="middle" font-family="Cormorant Garamond,serif" font-weight="700" font-size="28" fill="#F1D99A">${ini}</text>
+ ${label(200, 306, S.mine ? "You" : p.name)}
+</g>
+<!--L:mid--><!-- desk -->
+<g class="obj" data-go="letters" role="button" tabindex="0" aria-label="${S.mine ? (S.mail ? S.mail + " new letters" : "Letters") : "Desk"}">
+ <rect x="112" y="372" width="176" height="10" fill="url(#desk)"/><rect x="112" y="370" width="176" height="3" fill="#7A5434"/>
+ <rect x="120" y="382" width="52" height="88" fill="#4A2E1C"/><rect x="228" y="382" width="52" height="88" fill="#4A2E1C"/>
+ ${[392, 420, 448].map(y => `<rect x="124" y="${y}" width="44" height="24" rx="1" fill="#55361F"/><rect x="141" y="${y + 11}" width="10" height="2.5" rx="1" fill="url(#brass)"/><rect x="232" y="${y}" width="44" height="24" rx="1" fill="#55361F"/><rect x="249" y="${y + 11}" width="10" height="2.5" rx="1" fill="url(#brass)"/>`).join("")}
+ <rect x="172" y="382" width="56" height="88" fill="#1E120A"/>
+ <rect x="128" y="366" width="34" height="5" fill="#2F4535"/><rect x="129" y="361" width="31" height="5" fill="#EDE4D2"/>
+ ${letter}
+ <g aria-hidden="true"><rect x="270" y="364" width="12" height="6" rx="2" fill="url(#brass)"/><path d="M276 364 L268 336" stroke="url(#brass)" stroke-width="2.5"/><path d="M256 338 Q268 322 284 334 L280 340 Q268 332 260 344Z" fill="#2F5A3A"/><circle cx="270" cy="352" r="34" fill="url(#pool)"/></g>
+ ${S.mine && S.mail ? `<g transform="translate(196 340)"><circle r="10" fill="#B23A31" stroke="#F4EBD6" stroke-width="1.5"/><text y="4" text-anchor="middle" font-size="10" font-weight="700" fill="#fff" font-family="Literata,serif">${S.mail}</text></g>` : ""}
+ ${S.mine ? label(200, 458, S.mail ? "New letter" : "Letters") : ""}
+</g>
+<g class="obj" data-go="year" role="button" tabindex="0" aria-label="Year in books">
+ <path d="M214 370 L218 340 L250 340 L246 370Z" fill="#FFFDF6" stroke="#B9AE98" stroke-width=".8"/><path d="M218 340 L250 340 L249 348 L217 348Z" fill="#8E1F1A"/>
+ <text x="233" y="347" text-anchor="middle" font-size="7" font-weight="700" fill="#fff" font-family="Literata,serif">${S.Y}</text>
+ <text x="232" y="362" text-anchor="middle" font-size="11" font-weight="700" fill="#2A221C" font-family="Cormorant Garamond,serif">${S.fin}${S.goal ? "/" + S.goal : ""}</text>
+ <rect x="221" y="365" width="22" height="2.5" fill="#E2D6BC"/><rect x="221" y="365" width="${22 * pct}" height="2.5" fill="#8E1F1A"/>
+ ${label(252, 398, "Year")}
+</g>
+<!--L:fore--><!-- lent basket -->
+<g class="obj" data-go="lent" role="button" tabindex="0" aria-label="Lent books, ${S.lent.length}">
+ ${lentBk}<path d="M222 478 L256 478 L251 508 L227 508Z" fill="#A27850"/><path d="M222 478 h34" stroke="#7A5434" stroke-width="3"/><path d="M225 488 h29 M226 498 h27" stroke="#7A5434" stroke-width="1.3"/>
+</g>
+<!-- chesterfield -->
+<g class="obj" data-go="news" role="button" tabindex="0" aria-label="${S.mine ? (S.news ? S.news + " new books in the news" : "News") : "Sofa"}">
+ <ellipse cx="116" cy="652" rx="112" ry="10" fill="#000" opacity=".35"/>
+ <rect x="20" y="526" width="192" height="52" rx="10" fill="${c}"/><rect x="20" y="526" width="192" height="52" rx="10" fill="url(#leather)"/>${tufts.join("")}
+ <rect x="24" y="578" width="184" height="40" rx="6" fill="${c}"/><rect x="24" y="578" width="184" height="40" rx="6" fill="url(#leather)"/><path d="M85 580 v36 M147 580 v36" stroke="#000" stroke-opacity=".25"/>
+ <path d="M4 552 q0 -16 18 -16 q14 0 14 16 v84 h-32z" fill="${c}"/><path d="M4 552 q0 -16 18 -16 q14 0 14 16 v84 h-32z" fill="url(#leather)"/>
+ <path d="M196 552 q0 -16 18 -16 q14 0 14 16 v84 h-32z" fill="${c}"/><path d="M196 552 q0 -16 18 -16 q14 0 14 16 v84 h-32z" fill="url(#leather)"/>
+ <rect x="10" y="636" width="7" height="12" fill="#2A170C"/><rect x="215" y="636" width="7" height="12" fill="#2A170C"/>
+ ${paper}
+ ${S.mine ? label(116, 674, S.news ? "News · " + S.news : "News") : ""}
+</g>
+<!-- wingback armchair and floor lamp -->
+<g class="obj" data-go="reading" role="button" tabindex="0" aria-label="${cur ? "Reading " + cur.title.replace(/"/g, "") : "Armchair, nothing on the go"}">
+ ${lit ? `<circle cx="372" cy="470" r="130" fill="url(#pool)"/>` : ""}
+ <ellipse cx="318" cy="652" rx="70" ry="9" fill="#000" opacity=".35"/>
+ <path d="M266 520 q0 -34 52 -34 q52 0 52 34 v80 h-104z" fill="#6E3420"/><path d="M266 520 q0 -34 52 -34 q52 0 52 34 v80 h-104z" fill="url(#leather)"/>
+ <path d="M258 548 q0 -18 18 -18 v30 h-18z M378 548 q0 -18 -18 -18 v30 h18z" fill="#5E2A19"/>
+ <rect x="270" y="584" width="96" height="36" rx="6" fill="#6E3420"/><rect x="270" y="584" width="96" height="36" rx="6" fill="url(#leather)"/>
+ <path d="M254 556 q0 -12 14 -12 q10 0 10 12 v76 h-24z" fill="#5E2A19"/><path d="M358 556 q0 -12 10 -12 q14 0 14 12 v76 h-24z" fill="#5E2A19"/>
+ <path d="M254 556 q0 -12 14 -12 q10 0 10 12 v76 h-24z M358 556 q0 -12 10 -12 q14 0 14 12 v76 h-24z" fill="url(#leather)"/>
+ <rect x="262" y="632" width="6" height="14" fill="#2A170C"/><rect x="368" y="632" width="6" height="14" fill="#2A170C"/>
+ ${openBk}
+ <line x1="386" y1="440" x2="386" y2="646" stroke="url(#brass)" stroke-width="3.5"/><ellipse cx="386" cy="648" rx="11" ry="3.5" fill="#8A6A2C"/>
+ <path d="M368 440 L398 440 L392 414 L374 414Z" fill="${lit ? "#F7DE9A" : "#CDBA8E"}" stroke="#8A6A2C"/>
+ ${label(318, 674, cur ? (cur.title.length > 18 ? cur.title.slice(0, 17) + "…" : cur.title) : "Armchair")}
+</g>
+<!--L:front--><!-- chandelier -->
+<g aria-hidden="true"><line x1="200" y1="62" x2="200" y2="92" stroke="#8A6A2C" stroke-width="1.5"/><ellipse cx="200" cy="104" rx="30" ry="6" fill="none" stroke="url(#brass)" stroke-width="2.5"/><path d="M200 92 q-4 10 0 22 q4 -12 0 -22" fill="#E6C67A"/>${[-30, -15, 0, 15, 30].map(dx => `<rect x="${199 + dx}" y="${92 - Math.abs(dx) / 6}" width="2.5" height="10" fill="#F6EBD0"/><ellipse cx="${200 + dx}" cy="${89 - Math.abs(dx) / 6}" rx="2" ry="3.5" fill="#FFE7A3"/><circle cx="${200 + dx}" cy="${88 - Math.abs(dx) / 6}" r="9" fill="url(#pool)"/>`).join("")}</g>
+<!--L:vig--><rect width="400" height="700" fill="url(#vig)" pointer-events="none"/>
+</svg>`;
+}
+const PAR = { tx: 0, ty: 0, x: 0, y: 0, src: "idle", t0: performance.now(), loop: false, perm: false };
+function startParallax() {
+  if (PAR.loop) return; PAR.loop = true;
+  addEventListener("deviceorientation", e => { if (e.gamma == null) return; PAR.src = "tilt"; PAR.tx = Math.max(-1, Math.min(1, e.gamma / 25)); PAR.ty = Math.max(-1, Math.min(1, ((e.beta || 45) - 45) / 25)); });
+  const tick = () => {
+    const layers = document.querySelectorAll(".room .layer");
+    if (layers.length) {
+      if (PAR.src === "idle" && !reduce) { const t = (performance.now() - PAR.t0) / 1000; PAR.tx = Math.sin(t * .45) * .35; PAR.ty = Math.sin(t * .3) * .15; }
+      PAR.x += (PAR.tx - PAR.x) * .08; PAR.y += (PAR.ty - PAR.y) * .08;
+      layers.forEach(l => { if (l.dataset.flying) return; const d = +l.dataset.depth; l.style.transform = `translate3d(${(-PAR.x * d * 14).toFixed(2)}px, ${(-PAR.y * d * 10).toFixed(2)}px, 0) scale(${l.dataset.scale})`; });
+    }
+    requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
+}
+function renderRoom(uid) {
+  const p = profiles[uid]; if (!p) { if (Object.keys(profiles).length) go("/"); return; }
+  watch(uid); ui.route = "room:" + uid; $app.dataset.view = ui.route;
+  const S = roomState(uid), mine = S.mine;
+  const full = roomSVG(uid, S);
+  const open = full.slice(0, full.indexOf("<defs>")), defs = full.slice(full.indexOf("<defs>"), full.indexOf("</defs>") + 7);
+  const body = full.slice(full.indexOf("</defs>") + 7, full.lastIndexOf("</svg>"));
+  const [back, rest1] = body.split("<!--L:mid-->"), [mid, rest2] = rest1.split("<!--L:fore-->"), [fore, rest3] = rest2.split("<!--L:front-->"), [front, vig] = rest3.split("<!--L:vig-->");
+  const layer = (inner, depth, scale) => open.replace('class="roomsvg"', `class="roomsvg layer" data-depth="${depth}" data-scale="${scale}"`).replace(/role="group" aria-label="[^"]*"/, 'aria-hidden="false"') + defs + inner + "</svg>";
+  const wrap = h("div", { class: "room", role: "group", "aria-label": p.name + "'s study" });
+  wrap.innerHTML = layer(back, .35, 1.07) + layer(mid, .6, 1.04) + layer(fore, 1, 1.04) + layer(front, 1.6, 1.04) + layer(vig, 0, 1);
+  const act = {
+    shelf: () => { ui.tab = "all"; ui.q = ""; ui.genre = null; go("/p/" + encodeURIComponent(uid)); },
+    letters: () => mine && go("/letters"),
+    news: () => mine && go("/news"),
+    year: () => go("/year/" + encodeURIComponent(uid)),
+    profile: () => mine ? editShelf(uid) : toast(p.name + "'s room"),
+    reading: () => S.reading[0] ? openBook(uid, S.reading[0].id) : (ui.tab = "reading", go("/p/" + encodeURIComponent(uid))),
+    lent: () => lentSheet(uid, S.lent)
+  };
+  wrap.querySelectorAll(".obj[role=button]").forEach(g => {
+    const run = () => {
+      const key = g.dataset.go; if ((key === "letters" || key === "news") && !mine) return;
+      const instant = key === "profile" || key === "lent" || (key === "reading" && S.reading[0]);
+      if (instant || reduce) { act[key](); return; }
+      const bb = g.getBBox(), ox = ((bb.x + bb.width / 2) / 4) + "%", oy = ((bb.y + bb.height / 2) / 7) + "%";
+      const own = +g.closest(".layer").dataset.depth; let done = false;
+      wrap.querySelectorAll(".layer").forEach(l => {
+        const d = +l.dataset.depth; l.dataset.flying = "1"; l.style.transformOrigin = ox + " " + oy;
+        const z = d === 0 ? 1 : 1 + 1.4 * (d / own), fade = d > own + .01 ? 0 : 1;
+        l.animate([{ transform: l.style.transform || "none", opacity: 1 }, { transform: `scale(${z * (d > own + .01 ? 1.8 : 1)})`, opacity: fade }], { duration: 520, easing: "cubic-bezier(.5,0,.75,0)", fill: "forwards" }).onfinish = () => { if (!done) { done = true; window.scrollTo(0, 0); act[key](); } };
+      });
+    };
+    g.addEventListener("click", run); g.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); run(); } });
+  });
+  // drag or move the pointer to look around
+  wrap.addEventListener("pointermove", e => { if (PAR.src === "tilt") return; const r = wrap.getBoundingClientRect(); PAR.src = "pointer"; PAR.tx = ((e.clientX - r.left) / r.width - .5) * 2; PAR.ty = ((e.clientY - r.top) / r.height - .5) * 2; });
+  wrap.addEventListener("pointerleave", () => { if (PAR.src === "pointer") { PAR.src = "idle"; PAR.t0 = performance.now(); } });
+  startParallax();
+  const needPerm = typeof DeviceOrientationEvent !== "undefined" && typeof DeviceOrientationEvent.requestPermission === "function" && !PAR.perm;
+  mount(
+    h("div", { class: "topbar" }, h("button", { class: "back", onclick: () => closeTo("/") }, "‹ Club"), h("div", { class: "sc faint" }, mine ? "your room" : p.name + "'s room")),
+    wrap,
+    h("div", { class: "actions", style: { "justify-content": "center", "margin-top": "12px" } },
+      needPerm ? h("button", { class: "btn", type: "button", onclick: async e => { try { PAR.perm = (await DeviceOrientationEvent.requestPermission()) === "granted"; } catch (err) {} e.target.remove(); } }, "✦ Tilt the phone to look around") : null,
+      h("button", { class: "btn", type: "button", onclick: () => { lsSet("cc-room2d", false); go("/room3d/" + encodeURIComponent(uid)); } }, "◈ Switch to the 3D room")),
+    h("p", { class: "faint roomhint" }, mine ? (S.mail ? "A sealed letter is waiting on your desk. " : "") + "Tap anything in the room." : "You are visiting " + p.name + ". Tap the bookcase, the armchair or the calendar.")
+  );
+}
+
+/* ---------- 3D room (beta) ---------- */
+const roomPath = uid => (lsGet("cc-room2d", false) ? "/room/" : "/room3d/") + encodeURIComponent(uid);
+const R3 = { mode: "iso", az: Math.PI / 4, zoom: 1, draft: null, deco: false };
+const DECO = {
+  wall: [["#C9B08A", "Warm plaster"], ["#E8E2D6", "Ivory"], ["#2F4535", "Forest green"], ["#27344D", "Navy"], ["#7A2E2A", "Oxblood"], ["#5A6B5A", "Sage"], ["#B5654A", "Terracotta"], ["#3B3B3B", "Charcoal"]],
+  wood: [["#4A2C1A", "Walnut"], ["#5A1F14", "Mahogany"], ["#9A7044", "Oak"], ["#6E2F1E", "Cherry"], ["#1E1612", "Ebony"], ["#D8D0C2", "Painted white"]],
+  sofa: [["#7A2E2A", "Oxblood"], ["#2F4F3A", "Bottle green"], ["#2B3A55", "Navy"], ["#A8742B", "Mustard"], ["#5A3550", "Plum"], ["#3F5E63", "Teal"], ["#C9A86A", "Tan"], ["#8C8C86", "Grey"]],
+  chair: [["#6E3420", "Cognac"], ["#3A2416", "Dark brown"], ["#7A2E2A", "Oxblood"], ["#2F4F3A", "Bottle green"], ["#C9A86A", "Tan"], ["#3B3B3B", "Black"], ["#8C8C86", "Grey"]],
+  carpet: [["#7A2E2A", "Red"], ["#2B3A55", "Blue"], ["#2F4F3A", "Green"], ["#A8742B", "Gold"], ["#D9CDB4", "Cream"], ["#5A3550", "Plum"], ["#3B3B3B", "Charcoal"]],
+  curtain: [["#7A2E2A", "Oxblood"], ["#2F4F3A", "Green"], ["#2B3A55", "Navy"], ["#A8742B", "Mustard"], ["#E8E2D6", "Linen"], ["#5A3550", "Plum"]],
+  pattern: [["diamond", "Diamonds"], ["medallion", "Persian"], ["stripes", "Stripes"], ["plain", "Plain"]],
+  floor: [["herringbone", "Herringbone"], ["planks", "Planks"], ["checker", "Marble checks"], ["stone", "Stone"]],
+  presets: {
+    study: ["Walnut study", { wall: "#C9B08A", wood: "#4A2C1A", sofa: null, chair: "#6E3420", carpet: null, curtain: null, pattern: "diamond", floor: "herringbone" }],
+    victorian: ["Victorian library", { wall: "#2F4535", wood: "#5A1F14", sofa: "#7A2E2A", chair: "#3A2416", carpet: "#7A2E2A", curtain: "#7A2E2A", pattern: "medallion", floor: "herringbone" }],
+    nordic: ["Nordic", { wall: "#E8E2D6", wood: "#9A7044", sofa: "#8C8C86", chair: "#C9A86A", carpet: "#D9CDB4", curtain: "#E8E2D6", pattern: "stripes", floor: "planks" }],
+    riviera: ["Riviera", { wall: "#E8E2D6", wood: "#6E2F1E", sofa: "#3F5E63", chair: "#C9A86A", carpet: "#A8742B", curtain: "#3F5E63", pattern: "medallion", floor: "stone" }],
+    midnight: ["Midnight", { wall: "#27344D", wood: "#1E1612", sofa: "#A8742B", chair: "#3B3B3B", carpet: "#1F2A38", curtain: "#A8742B", pattern: "diamond", floor: "checker" }]
+  }
+};
+function roomCfg(uid) { const p = profiles[uid] || {}, c = p.color || LEATHER[0], base = { ...DECO.presets.study[1], sofa: c, carpet: c, curtain: c }; const saved = { ...base, ...(p.room || {}) }; for (const k of ["sofa", "carpet", "curtain"]) if (!saved[k]) saved[k] = c; return R3.draft?.uid === uid ? { ...saved, ...R3.draft.cfg } : saved; }
+function rebuildRoom() { R3.keepView = true; const y = scrollY, ps = document.querySelector(".deco")?.scrollTop || 0; $app.dataset.view = ""; render(); scrollTo(0, y); const d = document.querySelector(".deco"); if (d) d.scrollTop = ps; }
+function decoPanel(uid) {
+  const cfg = roomCfg(uid), msg = h("span", { class: "status" });
+  const set = (k, v) => { R3.draft = { uid, cfg: { ...(R3.draft?.uid === uid ? R3.draft.cfg : {}), [k]: v } }; rebuildRoom(); };
+  const row = (k, label, swatch) => h("div", { class: "decorow" }, h("div", { class: "sc faint" }, label), h("div", { class: "decoopts" }, DECO[k].map(([v, name]) => swatch
+    ? h("button", { type: "button", class: "dswatch", style: { "--c": v }, title: name, "aria-label": label + ": " + name, "aria-pressed": cfg[k] === v ? "true" : "false", onclick: () => set(k, v) })
+    : h("button", { type: "button", class: "chip", "aria-pressed": cfg[k] === v ? "true" : "false", onclick: () => set(k, v) }, name))));
+  return h("div", { class: "deco" },
+    h("div", { class: "decorow" }, h("div", { class: "sc faint" }, "styles"), h("div", { class: "decoopts" }, Object.entries(DECO.presets).map(([k, [name, pc]]) => h("button", { type: "button", class: "chip", onclick: () => { const c = profiles[uid]?.color || LEATHER[0]; R3.draft = { uid, cfg: Object.fromEntries(Object.entries(pc).map(([a, b]) => [a, b || c])) }; rebuildRoom(); } }, name)))),
+    row("wall", "walls", true), row("wood", "wood", true), row("floor", "floor"), row("sofa", "sofa", true), row("chair", "armchair", true), row("carpet", "carpet colour", true), row("pattern", "carpet pattern"), row("curtain", "curtains", true),
+    h("div", { class: "actions", style: { "justify-content": "center", "margin-top": "6px" } },
+      h("button", { class: "btn primary", type: "button", onclick: async () => { msg.textContent = "Saving"; try { await DB.saveProfile(uid, { room: roomCfg(uid) }); R3.draft = null; R3.deco = false; toast("Room saved"); rebuildRoom(); } catch (e) { msg.textContent = "Could not save: " + (e.code || e.message); } } }, "Save the room"),
+      h("button", { class: "btn ghost", type: "button", onclick: () => { R3.draft = null; R3.deco = false; rebuildRoom(); } }, "Cancel"), msg));
+}
+function webglOK() { try { const c = document.createElement("canvas"); return !!(c.getContext("webgl2") || c.getContext("webgl")); } catch (e) { return false; } }
+async function renderRoom3D(uid) {
+  const p = profiles[uid]; if (!p) { if (Object.keys(profiles).length) go("/"); return; }
+  watch(uid);
+  if ($app.dataset.view === "room3d:" + uid && $app.querySelector(".room3d canvas")) return;
+  if (!webglOK()) { location.replace("#/room/" + encodeURIComponent(uid)); return; }
+  ui.route = "room3d:" + uid; $app.dataset.view = ui.route;
+  const S = roomState(uid), mine = S.mine, cfg = roomCfg(uid);
+  const box = h("div", { class: "room3d" + (mine && R3.deco ? " decoon" : "") }, h("div", { class: "r3msg" }, "Furnishing the room…"));
+  const modeBtn = h("button", { class: "r3btn wide", type: "button" }), rotL = h("button", { class: "r3btn", type: "button", "aria-label": "Rotate left" }, "↺"), rotR = h("button", { class: "r3btn", type: "button", "aria-label": "Rotate right" }, "↻");
+  const zIn = h("button", { class: "r3btn", type: "button", "aria-label": "Zoom in" }, "+"), zOut = h("button", { class: "r3btn", type: "button", "aria-label": "Zoom out" }, "−");
+  const decoBtn = mine ? h("button", { class: "r3btn wide", type: "button", "aria-pressed": R3.deco ? "true" : "false", onclick: () => { R3.deco = !R3.deco; if (!R3.deco) R3.draft = null; rebuildRoom(); } }, "🎨 Decorate") : null;
+  const bar = h("div", { class: "r3bar" }, zOut, rotL, modeBtn, rotR, zIn, decoBtn);
+  const hint = h("div", { class: "r3hint" }, (mine && S.mail ? "A sealed letter is waiting on your desk. " : "") + "Drag to turn, pinch to zoom, tap to open.");
+  setTimeout(() => hint.classList.add("gone"), 5000);
+  const menu = h("details", { class: "r3menu" }, h("summary", { "aria-label": "More" }, "⋯"), h("button", { type: "button", onclick: () => { lsSet("cc-room2d", true); go("/room/" + encodeURIComponent(uid)); } }, "Use the illustrated room"));
+  mount(h("div", { class: "r3full" + (mine && R3.deco ? " decoon" : "") },
+    box,
+    h("div", { class: "r3top" }, h("button", { class: "r3pill", type: "button", onclick: () => closeTo("/") }, "‹ Club"), h("div", { class: "r3title" }, mine ? "Your room" : p.name + "'s room", PREVIEW ? h("small", { class: "r3tag" }, "preview") : null), menu),
+    h("div", { class: "r3bottom" }, ...(mine && R3.deco ? [bar, decoPanel(uid)] : [hint, bar]))));
+  let THREE, OrbitControls, RoundedBoxGeometry;
+  try {
+    THREE = await import("three");
+    ({ OrbitControls } = await import("three/addons/controls/OrbitControls.js"));
+    ({ RoundedBoxGeometry } = await import("three/addons/geometries/RoundedBoxGeometry.js"));
+  } catch (e) { location.replace("#/room/" + encodeURIComponent(uid)); setTimeout(() => toast("The 3D room needs internet the first time"), 400); return; }
+  if (!box.isConnected) return;
+  const night = matchMedia("(prefers-color-scheme: dark)").matches, c = cfg.sofa;
+  let W = box.clientWidth, H = box.clientHeight;
+  const renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setPixelRatio(Math.min(devicePixelRatio, 2)); renderer.setSize(W, H);
+  renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.clippingPlanes = [new THREE.Plane(new THREE.Vector3(0, 1, 0), .13)]; renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = night ? 1 : 1.2; renderer.outputColorSpace = THREE.SRGBColorSpace;
+  box.replaceChildren(renderer.domElement);
+  const scene = new THREE.Scene(); const bg = night ? "#120A06" : "#2A1C12"; scene.background = new THREE.Color(bg);
+
+  const tex = (w, hh, draw) => { const cv = document.createElement("canvas"); cv.width = w; cv.height = hh; draw(cv.getContext("2d"), w, hh); const t = new THREE.CanvasTexture(cv); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4; return t; };
+  const mat = (color, o = {}) => new THREE.MeshStandardMaterial({ color, roughness: .6, metalness: 0, ...o });
+  const tone = (hex, k) => "#" + new THREE.Color(hex).multiplyScalar(k).getHexString();
+  const walnut = mat(cfg.wood, { roughness: .45 }), walnutDark = mat(tone(cfg.wood, .62), { roughness: .5 }), brass = mat("#C9A65A", { metalness: .9, roughness: .3 });
+  const plaster = mat(night ? tone(cfg.wall, .55) : cfg.wall, { roughness: .9 }), wainscot = mat(tone(cfg.wood, .85), { roughness: .5 });
+  const leather = col => mat(col, { roughness: .42, metalness: .05 });
+  const add = (geo, m, x, y, z, parent = scene, cast = true) => { const o = new THREE.Mesh(geo, m); o.position.set(x, y, z); o.castShadow = cast; o.receiveShadow = true; parent.add(o); return o; };
+  const B = (w, h2, d) => new THREE.BoxGeometry(w, h2, d);
+  const RB = (w, h2, d, r) => new RoundedBoxGeometry(w, h2, d, 4, r);
+  const clickables = [], labels = [];
+  const group = (go, x, y, z, ry = 0, parent = scene) => { const g = new THREE.Group(); g.position.set(x, y, z); g.rotation.y = ry; g.userData.go = go; parent.add(g); clickables.push(g); return g; };
+  const sprite = (text, x, y, z, parent = scene, badge) => {
+    const t = tex(badge ? 64 : 512, badge ? 64 : 96, (g, w) => {
+      if (badge) { g.fillStyle = "#B23A31"; g.beginPath(); g.arc(32, 32, 28, 0, 7); g.fill(); g.strokeStyle = "#F4EBD6"; g.lineWidth = 4; g.stroke(); g.fillStyle = "#fff"; g.font = "bold 30px Georgia"; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText(text, 32, 34); return; }
+      g.font = "600 40px Literata, Georgia, serif"; const tw = g.measureText(text).width + 50; g.fillStyle = "rgba(26,16,9,.86)"; g.strokeStyle = "rgba(230,198,122,.75)"; g.lineWidth = 3;
+      g.beginPath(); g.roundRect((w - tw) / 2, 14, tw, 68, 34); g.fill(); g.stroke(); g.fillStyle = "#F4EBD6"; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText(text, w / 2, 50);
+    });
+    const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: t, depthTest: false, transparent: true }));
+    sp.userData.base = badge ? [.28, .28] : [1.45, .27]; sp.scale.set(...sp.userData.base, 1); sp.position.set(x, y, z); sp.renderOrder = 10; parent.add(sp); labels.push(sp); return sp;
+  };
+  const RS = 3.2, WH = 3;   // half room size, wall height
+  const walls = { N: new THREE.Group(), S: new THREE.Group(), E: new THREE.Group(), W: new THREE.Group() };
+  Object.values(walls).forEach(g => scene.add(g));
+  const normals = { N: [0, -1], S: [0, 1], E: [1, 0], W: [-1, 0] };
+
+  // floor, skirting, carpet
+  const W0 = new THREE.Color(cfg.wood), woodTone = k => "#" + W0.clone().multiplyScalar(k).getHexString();
+  const parquet = tex(512, 512, (g, w) => {
+    if (cfg.floor === "checker") { for (let y = 0; y < 8; y++) for (let x = 0; x < 8; x++) { g.fillStyle = (x + y) % 2 ? "#1E1C1A" : "#ECE7DD"; g.fillRect(x * 64, y * 64, 64, 64); } g.strokeStyle = "rgba(120,110,100,.25)"; for (let i = 0; i < 30; i++) { g.beginPath(); let x = (i * 71) % w, y = 0; g.moveTo(x, y); while (y < w) { x += Math.sin(y * .04 + i) * 8; y += 14; g.lineTo(x, y); } g.stroke(); } return; }
+    if (cfg.floor === "stone") { g.fillStyle = "#8A7E6C"; g.fillRect(0, 0, w, w); for (let y = 0; y < 4; y++) for (let x = 0; x < 4; x++) { g.fillStyle = ["#C9B99C", "#BFAE90", "#D2C3A6", "#B8A586"][(x * 3 + y) % 4]; g.fillRect(x * 128 + 3, y * 128 + 3, 122, 122); } return; }
+    if (cfg.floor === "planks") { for (let y = 0; y < 16; y++) { let x = -(y * 97 % 200); while (x < w) { const len = 140 + (x * 7 + y * 13) % 120; g.fillStyle = [woodTone(1.15), woodTone(1.05), woodTone(1.25), woodTone(.95)][(Math.abs(x) + y) % 4]; g.fillRect(x + 1, y * 32 + 1, len - 2, 30); x += len; } } return; }
+    g.fillStyle = woodTone(.9); g.fillRect(0, 0, w, w); for (let y = 0; y < 16; y++) for (let x = 0; x < 8; x++) { g.fillStyle = [woodTone(1.2), woodTone(1.1), woodTone(1.3), woodTone(1)][(x * 7 + y * 3) % 4]; g.save(); g.translate(x * 64 + (y % 2) * 32, y * 32); g.rotate((y % 2 ? 1 : -1) * Math.PI / 4); g.fillRect(-4, -20, 60, 18); g.restore(); }
+  });
+  parquet.wrapS = parquet.wrapT = THREE.RepeatWrapping; parquet.repeat.set(3, 3);
+  const floor = add(B(RS * 2 + .24, .12, RS * 2 + .24), mat("#fff", { map: parquet, roughness: cfg.floor === "checker" ? .2 : cfg.floor === "stone" ? .8 : .5 }), 0, -.06, 0, scene, false);
+  add(B(RS * 2 + .3, .1, RS * 2 + .3), walnutDark, 0, -.17, 0, scene, false);
+  const carpetT = tex(512, 512, (g, w) => {
+    const cc = cfg.carpet, light = new THREE.Color(cc).getHSL({}).l > .6, line = light ? "rgba(90,60,30,.35)" : "rgba(230,198,122,.45)";
+    g.fillStyle = cc; g.fillRect(0, 0, w, w); g.strokeStyle = line; g.fillStyle = line;
+    if (cfg.pattern === "diamond") { g.lineWidth = 3; for (let y = 0; y < w; y += 48) for (let x = 0; x < w; x += 64) { g.beginPath(); g.moveTo(x + 32, y + 4); g.lineTo(x + 60, y + 24); g.lineTo(x + 32, y + 44); g.lineTo(x + 4, y + 24); g.closePath(); g.stroke(); } }
+    else if (cfg.pattern === "medallion") { g.lineWidth = 6; [190, 150, 110, 70, 35].forEach((r, i) => { g.beginPath(); g.ellipse(w / 2, w / 2, r * 1.25, r, 0, 0, 7); g.globalAlpha = .5 + i * .1; i % 2 ? g.fill() : g.stroke(); }); g.globalAlpha = 1; g.lineWidth = 3; for (let i = 0; i < 4; i++) { g.beginPath(); g.arc(i % 2 ? w - 40 : 40, i < 2 ? 40 : w - 40, 26, 0, 7); g.stroke(); } g.lineWidth = 10; g.strokeRect(34, 34, w - 68, w - 68); }
+    else if (cfg.pattern === "stripes") { for (let y = 0; y < w; y += 64) { g.fillRect(0, y + 8, w, 10); g.fillRect(0, y + 30, w, 4); } }
+    g.lineWidth = 14; g.strokeRect(10, 10, w - 20, w - 20);
+  });
+  add(B(3.4, .02, 2.8), mat("#fff", { map: carpetT, roughness: .95 }), .5, .011, .2, scene, false);
+
+  // wall builder with openings: holes = [[from, to, bottom, top]] along the wall
+  const wallPanel = (side, holes = []) => {
+    const g = walls[side], horiz = side === "N" || side === "S", sign = side === "N" || side === "W" ? -1 : 1;
+    const piece = (a0, a1, y0, y1) => { if (a1 - a0 < .01 || y1 - y0 < .01) return; const len = a1 - a0, mid = (a0 + a1) / 2;
+      const plast = add(horiz ? B(len, y1 - y0, .12) : B(.12, y1 - y0, len), plaster, horiz ? mid : sign * (RS + .06), (y0 + y1) / 2, horiz ? sign * (RS + .06) : mid, g, false); plast.userData.keep = true;
+      if (y0 < 1.05) { const top = Math.min(1.05, y1); add(horiz ? B(len, top - y0, .03) : B(.03, top - y0, len), wainscot, horiz ? mid : sign * (RS - .015), (y0 + top) / 2, horiz ? sign * (RS - .015) : mid, g, false); } };
+    let a = -RS - .12; const sorted = holes.slice().sort((x, y) => x[0] - y[0]);
+    for (const [h0, h1, b0, t0] of sorted) { piece(a, h0, 0, WH); piece(h0, h1, 0, b0); piece(h0, h1, t0, WH); a = h1; }
+    piece(a, RS + .12, 0, WH);
+    add(horiz ? B(RS * 2 + .24, .08, .16) : B(.16, .08, RS * 2 + .24), walnut, horiz ? 0 : sign * (RS + .02), WH - .04, horiz ? sign * (RS + .02) : 0, g, false).userData.keep = true;
+    add(horiz ? B(RS * 2, .03, .05) : B(.05, .03, RS * 2), walnut, horiz ? 0 : sign * (RS - .02), 1.06, horiz ? sign * (RS - .02) : 0, g, false);
+  };
+  wallPanel("N"); wallPanel("E"); wallPanel("W", [[-.8, .8, .9, 2.4]]); wallPanel("S", [[1.1, 2.1, 0, 2.15]]);
+
+  // NORTH: built-in bookcases, niche with portrait and sconces
+  const pal = ["#6E2B24", "#2F4535", "#27344D", "#8E6A2E", "#4C2E45", "#38525A", "#7A5434", "#3B3B3B", "#EDE4D2", "#D9CDB4", "#F3EEE3", "#B9472F", "#1F2A38", "#C9B48A"];
+  const N = walls.N, comps = [], shelfYs = [.62, 1.1, 1.58, 2.06, 2.54];
+  [[-3.12, -.95], [.95, 3.12]].forEach(([x0, x1]) => {
+    add(B(x1 - x0 + .08, WH - .1, .46), walnutDark, (x0 + x1) / 2, (WH - .1) / 2, -RS + .23, N);
+    shelfYs.forEach(y => { add(B(x1 - x0, .035, .4), walnut, (x0 + x1) / 2, y - .018, -RS + .22, N); add(B(x1 - x0 - .04, .01, .02), mat("#FFE2A0", { emissive: "#FFD27A", emissiveIntensity: night ? 3 : 2 }), (x0 + x1) / 2, y + .43, -RS + .4, N, false); comps.push([x0 + .03, x1 - .03, y]); });
+    add(B(x1 - x0 + .08, .4, .5), walnut, (x0 + x1) / 2, .2, -RS + .25, N);
+  });
+  add(B(1.9, .95, .46), walnutDark, 0, 2.47, -RS + .23, N); [2.08, 2.52].forEach(y => { add(B(1.86, .035, .4), walnut, 0, y - .018, -RS + .22, N); comps.push([-.9, .9, y]); });
+  const total = S.all.length, filled = Math.min(comps.length, Math.max(total ? 2 : 0, Math.ceil(Math.sqrt(total) * 1.8)));
+  const pos = [];
+  comps.forEach(([x0, x1, y], ci) => { if ((hash("f" + ci) % comps.length) >= filled) return; let x = x0, k = 0; while (x < x1 - .05) { const key = ci + "-" + k++, w = .03 + (hash("w" + key) % 5) * .008, hh = .26 + (hash("h" + key) % 12) * .012, d = .2 + (hash("d" + key) % 5) * .015; pos.push([x + w / 2, y + hh / 2, -RS + .3 + d / 2, w, hh, d, pal[hash("c" + key) % pal.length], hash("l" + key) % 11 === 0]); x += w + .003; if (hash("g" + key) % 15 === 0) x += .08; } });
+  const im = new THREE.InstancedMesh(B(1, 1, 1), mat("#fff", { roughness: .7 }), Math.max(1, pos.length)); im.castShadow = true; im.receiveShadow = true;
+  const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), col = new THREE.Color();
+  pos.forEach(([x, y, z, w, hh, d, cl, lean], i) => { q.setFromEuler(new THREE.Euler(0, 0, lean ? .22 : 0)); m4.compose(new THREE.Vector3(x, y, z), q, new THREE.Vector3(w, hh, d)); im.setMatrixAt(i, m4); im.setColorAt(i, col.set(cl)); });
+  if (!pos.length) im.count = 0;
+  const shelfG = group("shelf", 0, 0, 0, 0, N); shelfG.add(im);
+  [-2.03, 2.03].forEach(x => { const hb = new THREE.Mesh(B(2.2, WH - .1, .5), new THREE.MeshBasicMaterial({ visible: false })); hb.position.set(x, (WH - .1) / 2, -RS + .25); shelfG.add(hb); });
+  sprite("Bookcase · " + total, 2.03, WH + .2, -RS + .4, shelfG);
+  const portG = group("profile", 0, 1.55, -RS + .03, 0, N);
+  add(B(.56, .7, .04), brass, 0, 0, 0, portG);
+  const porT = tex(256, 320, (g, w, hh) => { g.fillStyle = c; g.fillRect(0, 0, w, hh); const gr = g.createLinearGradient(0, 0, 0, hh); gr.addColorStop(0, "rgba(255,255,255,.15)"); gr.addColorStop(1, "rgba(0,0,0,.35)"); g.fillStyle = gr; g.fillRect(0, 0, w, hh); g.fillStyle = "#F1D99A"; g.font = "bold 170px Georgia"; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText((p.name || "?")[0].toUpperCase(), w / 2, hh / 2 + 10); });
+  add(B(.46, .6, .01), mat("#fff", { map: porT }), 0, 0, .025, portG);
+  sprite(mine ? "You" : p.name, 0, .55, .15, portG);
+  [-.62, .62].forEach(x => { add(B(.04, .14, .04), brass, x, 1.62, -RS + .03, N); add(new THREE.CylinderGeometry(.05, .07, .1, 16), mat("#F3E3B5", { emissive: "#FFD9A0", emissiveIntensity: 1.3 }), x, 1.75, -RS + .1, N, false); const sl = new THREE.PointLight("#FFD9A0", night ? 1 : .6, 1.8, 2); sl.position.set(x, 1.75, -RS + .3); N.add(sl); });
+  [[-2.03, 2.2], [2.03, 2.2], [-2.03, 1], [2.03, 1]].forEach(([x, y]) => { const l = new THREE.PointLight("#FFD27A", night ? 1.4 : .8, 2.4, 2); l.position.set(x, y, -RS + .75); N.add(l); });
+  // ladder against the bookcase
+  const lad = new THREE.Group(); lad.position.set(-2.55, 0, -RS + .62); lad.rotation.x = -.17; N.add(lad);
+  [-.22, .22].forEach(x => add(B(.05, 2.9, .05), mat("#8C6239"), x, 1.45, 0, lad));
+  for (let y = .35; y < 2.9; y += .38) add(B(.44, .035, .04), mat("#A97B4C"), 0, y, 0, lad);
+
+  // desk in the niche with letter, lamp and calendar
+  const desk = group("letters", 0, 0, -RS + .55);
+  add(B(1.8, .06, .8), walnut, 0, .77, 0, desk); [-.68, .68].forEach(x => { add(B(.42, .74, .72), walnutDark, x, .37, 0, desk); [.18, .42, .62].forEach(y => add(B(.05, .02, .02), brass, x, y, .37, desk)); });
+  const chair = new THREE.Group(); chair.position.set(0, 0, .75); desk.add(chair);
+  add(RB(.5, .08, .48, .03), leather(c), 0, .48, 0, chair); add(RB(.5, .5, .06, .03), leather(c), 0, .76, .22, chair); [-.2, .2].forEach(x => [-.2, .2].forEach(z => add(B(.035, .46, .035), walnutDark, x, .23, z, chair)));
+  const env = new THREE.Group(); env.position.set(-.3, .81, .08); env.rotation.y = .15; desk.add(env);
+  add(B(.36, .008, .24), mat(S.mail ? "#F1E6CC" : "#FFFDF6"), 0, 0, 0, env);
+  if (mine && S.mail) { add(new THREE.CylinderGeometry(.035, .035, .012, 20), mat("#8E1F1A", { roughness: .35 }), 0, .01, .02, env); sprite(String(S.mail), .22, .22, 0, env, true); }
+  else if (mine) { const pg = add(B(.28, .004, .3), mat("#FFFDF6"), .02, .012, -.08, env); pg.rotation.x = -.5; }
+  if (mine) sprite(S.mail ? "New letter" : "Letters", -.3, .75, .5, desk);
+  const lampG = new THREE.Group(); lampG.position.set(.62, .8, -.15); desk.add(lampG);
+  add(new THREE.CylinderGeometry(.07, .08, .03, 20), brass, 0, .015, 0, lampG); add(new THREE.CylinderGeometry(.01, .01, .35, 8), brass, 0, .19, 0, lampG);
+  const shade = add(new THREE.CylinderGeometry(.06, .16, .1, 20, 1, true, 0, Math.PI), mat("#2F5A3A", { side: THREE.DoubleSide, roughness: .3, emissive: "#1A3A22", emissiveIntensity: .4 }), 0, .38, 0, lampG); shade.rotation.set(0, Math.PI / 2, Math.PI / 2);
+  const dl = new THREE.PointLight("#FFD9A0", night ? 2.2 : 1.3, 2.5, 2); dl.position.set(0, .3, .1); lampG.add(dl);
+  const yearG = group("year", .22, .8, -RS + .5);
+  const calT = tex(256, 256, (g, w) => { g.fillStyle = "#FFFDF6"; g.fillRect(0, 0, w, w); g.fillStyle = "#8E1F1A"; g.fillRect(0, 0, w, 64); g.fillStyle = "#fff"; g.font = "bold 44px Georgia"; g.textAlign = "center"; g.fillText(String(S.Y), w / 2, 48); g.fillStyle = "#2A221C"; g.font = "bold 96px Georgia"; g.fillText(S.fin + (S.goal ? "/" + S.goal : ""), w / 2, 170); if (S.goal) { g.fillStyle = "#E2D6BC"; g.fillRect(40, 200, 176, 16); g.fillStyle = "#8E1F1A"; g.fillRect(40, 200, 176 * Math.min(1, S.fin / S.goal), 16); } });
+  const cal = add(B(.24, .24, .02), mat("#fff", { map: calT }), 0, .12, 0, yearG); cal.rotation.x = -.25;
+  sprite("Year", .25, .55, .25, yearG);
+
+  // WEST: window with curtains, plant, lent basket
+  const Wg = walls.W, sky = night ? "#1C2740" : "#BFD9EA";
+  add(B(.06, 1.5, 1.6), mat(sky, { emissive: sky, emissiveIntensity: night ? .5 : 1.1, roughness: .1 }), -RS - .02, 1.65, 0, Wg, false);
+  add(B(.1, 1.6, .06), walnut, -RS + .02, 1.65, 0, Wg); add(B(.1, .06, 1.7), walnut, -RS + .02, 1.65, 0, Wg); add(B(.1, .06, 1.7), walnut, -RS + .02, .88, 0, Wg); add(B(.1, .06, 1.7), walnut, -RS + .02, 2.42, 0, Wg);
+  add(B(.3, .06, 1.8), walnut, -RS + .12, .86, 0, Wg);
+  [-1, 1].forEach(sd => add(B(.06, 1.9, .42), mat(cfg.curtain, { roughness: .85 }), -RS + .14, 1.55, sd * 1.0, Wg));
+  add(new THREE.CylinderGeometry(.015, .015, 2.2, 8), brass, -RS + .18, 2.55, 0, Wg).rotation.x = Math.PI / 2;
+  if (night) { add(new THREE.SphereGeometry(.09, 16, 16), mat("#F3E6B8", { emissive: "#F3E6B8", emissiveIntensity: 1 }), -RS - .1, 2.05, .4, Wg, false); }
+  else { const sun = new THREE.DirectionalLight("#FFE8C2", 1.6); sun.position.set(-8, 5, 1); sun.target.position.set(0, 0, 0); sun.castShadow = true; sun.shadow.mapSize.set(1024, 1024); Object.assign(sun.shadow.camera, { left: -5, right: 5, top: 5, bottom: -5 }); scene.add(sun, sun.target); }
+  const plant = new THREE.Group(); plant.position.set(-2.75, 0, -1.55); scene.add(plant);
+  add(new THREE.CylinderGeometry(.2, .15, .38, 20), mat("#B9AE98"), 0, .19, 0, plant);
+  for (let i = 0; i < 9; i++) { const lf = add(new THREE.SphereGeometry(.16, 10, 8), mat(["#3F5E3A", "#4E6B3A", "#35502F"][i % 3]), Math.cos(i) * .14, .55 + (i % 4) * .15, Math.sin(i * 2) * .14, plant); lf.scale.set(1, .5, 1.6); lf.rotation.y = i; }
+  const bas = group("lent", -2.7, 0, 1.6);
+  add(new THREE.CylinderGeometry(.22, .17, .28, 20), mat("#A27850", { roughness: .9 }), 0, .14, 0, bas);
+  S.lent.slice(0, 3).forEach((b, i) => add(B(.05, .26, .17), mat(pal[i * 3]), -.07 + i * .07, .32, 0, bas));
+  if (S.lent.length) sprite("Lent · " + S.lent.length, 0, .75, 0, bas);
+
+  // EAST: a proper fireplace
+  const E = new THREE.Group(), FX = RS - .02; scene.add(E);   // the fireplace stands on the floor, only the chimney breast belongs to the wall
+  const marble = tex(256, 256, (g, w) => { g.fillStyle = "#E4DDD0"; g.fillRect(0, 0, w, w); for (let i = 0; i < 26; i++) { g.strokeStyle = `rgba(${120 + (i % 3) * 20},${110 + (i % 4) * 10},100,${.08 + (i % 5) * .03})`; g.lineWidth = 1 + (i % 3); g.beginPath(); let x = (i * 53) % w, y = 0; g.moveTo(x, y); while (y < w) { x += Math.sin(y * .05 + i) * 9; y += 12; g.lineTo(x, y); } g.stroke(); } });
+  const marbleM = mat("#fff", { map: marble, roughness: .25, metalness: .02 });
+  const brick = tex(256, 256, (g, w) => { g.fillStyle = "#2A1A14"; g.fillRect(0, 0, w, w); for (let r = 0; r < 16; r++) for (let k = -1; k < 5; k++) { const x = k * 64 + (r % 2) * 32, y = r * 16; g.fillStyle = ["#5A2A1E", "#4E241A", "#64301F", "#46201A"][(r * 3 + k * 7 + 40) % 4]; g.fillRect(x + 2, y + 2, 60, 12); } const gr = g.createLinearGradient(0, 0, 0, w); gr.addColorStop(0, "rgba(0,0,0,.85)"); gr.addColorStop(.55, "rgba(0,0,0,.35)"); gr.addColorStop(1, "rgba(0,0,0,0)"); g.fillStyle = gr; g.fillRect(0, 0, w, w); });
+  const brickM = mat("#fff", { map: brick, roughness: .95 });
+  // chimney breast
+  add(B(.3, WH, 2.3), plaster, FX - .15, WH / 2, 0, walls.E).userData.keep = true; add(B(.3, .08, 2.3), walnut, FX - .15, WH - .04, 0, walls.E);
+  // surround: legs, frieze, mantel shelf with corbels
+  [-1, 1].forEach(sd => { add(B(.16, 1.12, .26), marbleM, FX - .38, .56, sd * .82, E); add(B(.2, .08, .32), marbleM, FX - .38, .04, sd * .82, E); add(B(.12, .1, .2), marbleM, FX - .42, 1.07, sd * .82, E); });
+  add(B(.16, .22, 1.9), marbleM, FX - .38, 1.21, 0, E);
+  add(B(.36, .06, 2.15), marbleM, FX - .42, 1.35, 0, E); add(B(.3, .03, 2.05), marbleM, FX - .4, 1.305, 0, E);
+  // firebox: brick back and sides, sooty top
+  add(B(.04, .98, 1.4), brickM, FX - .02, .49, 0, E, false);
+  [-1, 1].forEach(sd => { const sdw = add(B(.4, .98, .04), brickM, FX - .2, .49, sd * .69, E, false); sdw.rotation.y = sd * .25; });
+  add(B(.4, .04, 1.4), mat("#120A06"), FX - .2, .98, 0, E, false);
+  // hearth slab
+  add(B(.75, .06, 2.3), marbleM, FX - .5, .03, 0, E);
+  add(B(.36, .02, 1.36), mat("#1A100A", { roughness: 1 }), FX - .22, .07, 0, E, false);
+  // iron grate and logs
+  const iron = mat("#1B1714", { roughness: .5, metalness: .7 });
+  [-.32, .32].forEach(z => { add(B(.3, .03, .03), iron, FX - .25, .14, z, E); add(B(.03, .2, .03), iron, FX - .38, .2, z, E); });
+  for (let i = 0; i < 5; i++) add(B(.03, .03, .7), iron, FX - .14 - i * .055, .16, 0, E, false);
+  const bark = tex(128, 64, (g, w, hh) => { g.fillStyle = "#3A2618"; g.fillRect(0, 0, w, hh); for (let i = 0; i < 40; i++) { g.strokeStyle = i % 2 ? "#2A1A10" : "#4A3020"; g.beginPath(); g.moveTo(0, i * 1.6); g.lineTo(w, i * 1.6 + Math.sin(i) * 3); g.stroke(); } });
+  const logM = mat("#fff", { map: bark, roughness: .95 }), charM = mat("#1A0E08", { emissive: "#FF5A10", emissiveIntensity: .6, roughness: 1 });
+  [[.2, .21, -.08, .3], [.24, .27, .09, -.25], [.3, .33, 0, .05]].forEach(([dx, y, z, ry], i) => { const lg = add(new THREE.CylinderGeometry(.055, .065, .62, 12), i === 2 ? charM : logM, FX - dx - .05, y, z, E); lg.rotation.set(Math.PI / 2, ry, 0); });
+  // glowing embers bed
+  const emberT = tex(128, 64, (g, w, hh) => { const gr = g.createRadialGradient(w / 2, hh / 2, 2, w / 2, hh / 2, w / 2); gr.addColorStop(0, "#FFE08A"); gr.addColorStop(.35, "#FF7A1A"); gr.addColorStop(.7, "#9A2A08"); gr.addColorStop(1, "rgba(40,10,0,0)"); g.fillStyle = gr; g.fillRect(0, 0, w, hh); for (let i = 0; i < 60; i++) { g.fillStyle = `rgba(255,${180 + (i % 60)},80,${.3 + (i % 5) * .1})`; g.fillRect((i * 37) % w, (i * 19) % hh, 2, 2); } });
+  const embers = add(new THREE.PlaneGeometry(.38, .8), new THREE.MeshBasicMaterial({ map: emberT, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false }), FX - .24, .175, 0, E, false); embers.rotation.set(-Math.PI / 2, 0, Math.PI / 2);
+  // flames: layered additive billboards that flicker
+  const flameT = tex(64, 128, (g, w, hh) => { const gr = g.createRadialGradient(w / 2, hh * .78, 2, w / 2, hh * .62, hh * .62); gr.addColorStop(0, "rgba(255,250,210,1)"); gr.addColorStop(.25, "rgba(255,200,90,.95)"); gr.addColorStop(.55, "rgba(255,110,20,.6)"); gr.addColorStop(1, "rgba(160,30,0,0)"); g.fillStyle = gr; g.beginPath(); g.moveTo(w / 2, 0); g.bezierCurveTo(w * .95, hh * .45, w, hh * .85, w / 2, hh); g.bezierCurveTo(0, hh * .85, w * .05, hh * .45, w / 2, 0); g.fill(); });
+  const flames = [];
+  for (let i = 0; i < 9; i++) { const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: flameT, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, opacity: .85 })); const z = -.27 + (i % 5) * .135 + (i > 4 ? .065 : 0); sp.userData = { z, x: FX - .24 - (i > 4 ? .06 : 0), base: .26 + (hash("fl" + i) % 10) * .025, ph: i * 1.7 }; sp.position.set(sp.userData.x, .32, z); E.add(sp); flames.push(sp); }
+  const sparks = [];
+  for (let i = 0; i < 14; i++) { const sp = new THREE.Sprite(new THREE.SpriteMaterial({ color: "#FFB050", transparent: true, blending: THREE.AdditiveBlending, depthWrite: false })); sp.scale.set(.018, .018, 1); sp.userData = { life: (i / 14), z: (Math.random() - .5) * .5, v: .25 + Math.random() * .25 }; E.add(sp); sparks.push(sp); }
+  const fire = new THREE.PointLight("#FF8A3A", night ? 3.6 : 2, 5.5, 1.7); fire.position.set(FX - .75, .55, 0); fire.castShadow = true; fire.shadow.mapSize.set(512, 512); E.add(fire);
+  // brass fender, tools, painting, candlesticks
+  add(B(.03, .07, 1.5), brass, FX - .78, .1, 0, E); [-1, 1].forEach(sd => add(B(.32, .07, .03), brass, FX - .63, .1, sd * .75, E));
+  const tools = new THREE.Group(); tools.position.set(FX - .55, 0, 1.05); E.add(tools);
+  add(new THREE.CylinderGeometry(.08, .1, .02, 16), iron, 0, .01, 0, tools); add(new THREE.CylinderGeometry(.01, .01, .7, 8), brass, 0, .36, 0, tools);
+  [[-.04, .02], [.04, -.02], [0, .05]].forEach(([x, z]) => add(new THREE.CylinderGeometry(.007, .007, .6, 6), iron, x, .38, z, tools));
+  const paintT = tex(320, 220, (g, w, hh) => { const gr = g.createLinearGradient(0, 0, 0, hh); gr.addColorStop(0, "#C9A86A"); gr.addColorStop(.6, "#8FA08A"); gr.addColorStop(1, "#4E5E3E"); g.fillStyle = gr; g.fillRect(0, 0, w, hh); g.fillStyle = "#3E4E32"; g.beginPath(); g.moveTo(0, 150); g.quadraticCurveTo(90, 100, 170, 140); g.quadraticCurveTo(250, 170, 320, 120); g.lineTo(320, 220); g.lineTo(0, 220); g.fill(); g.fillStyle = "#F3E6B8"; g.beginPath(); g.arc(240, 60, 22, 0, 7); g.fill(); });
+  add(B(.05, .8, 1.15), brass, FX - .32, 2.05, 0, walls.E); add(B(.02, .68, 1.02), mat("#fff", { map: paintT }), FX - .355, 2.05, 0, walls.E, false);
+  [-.85, .85].forEach(z => { add(new THREE.CylinderGeometry(.03, .05, .2, 12), brass, FX - .42, 1.48, z, E); add(new THREE.CylinderGeometry(.018, .018, .12, 8), mat("#F6EBD0"), FX - .42, 1.64, z, E); add(new THREE.SphereGeometry(.018, 8, 8), mat("#FFE7A3", { emissive: "#FFD27A", emissiveIntensity: 3 }), FX - .42, 1.72, z, E, false); });
+  add(new THREE.SphereGeometry(.09, 16, 12), mat("#2F4535", { roughness: .3 }), FX - .42, 1.47, -.35, E);
+  // SOUTH: door
+  const Sg = walls.S;
+  add(B(1, 2.15, .06), mat("#5A3820", { roughness: .45 }), 1.6, 1.075, RS + .02, Sg);
+  [[1.6, .55], [1.6, 1.55]].forEach(([x, y]) => add(B(.7, .7, .02), mat("#4A2C1A"), x, y, RS - .02, Sg, false));
+  add(new THREE.SphereGeometry(.04, 12, 12), brass, 1.98, 1.05, RS - .05, Sg);
+  add(B(1.16, .1, .1), walnut, 1.6, 2.2, RS - .02, Sg); [1.06, 2.14].forEach(x => add(B(.08, 2.2, .1), walnut, x, 1.1, RS - .02, Sg));
+  // a little side table with a globe by the door
+  const glb = new THREE.Group(); glb.position.set(-1.6, 0, RS - .55); scene.add(glb);
+  add(new THREE.CylinderGeometry(.22, .22, .04, 24), walnut, 0, .62, 0, glb); add(new THREE.CylinderGeometry(.04, .06, .6, 12), walnutDark, 0, .3, 0, glb);
+  const gT = tex(256, 128, (g, w, hh) => { g.fillStyle = "#3E5A6B"; g.fillRect(0, 0, w, hh); g.fillStyle = "#C9B48A"; [[30, 40, 50, 30], [110, 30, 40, 50], [170, 60, 60, 30], [60, 90, 30, 20]].forEach(([x, y, a, b]) => { g.beginPath(); g.ellipse(x, y, a / 2, b / 2, .3, 0, 7); g.fill(); }); });
+  const gl = add(new THREE.SphereGeometry(.17, 24, 16), mat("#fff", { map: gT, roughness: .5 }), 0, .86, 0, glb); gl.rotation.z = .4;
+  add(new THREE.TorusGeometry(.2, .008, 6, 30, Math.PI), brass, 0, .86, 0, glb).rotation.y = Math.PI / 2;
+
+  // chesterfield + coffee table (news)
+  const sofa = group("news", -.9, 0, .2, Math.PI / 2);
+  const sm = leather(c);
+  add(RB(2, .42, .88, .08), sm, 0, .37, 0, sofa);
+  add(RB(2.2, .55, .22, .08), sm, 0, .78, -.36, sofa);
+  [-1.04, 1.04].forEach(x => add(RB(.24, .62, .92, .1), sm, x, .48, 0, sofa));
+  for (let i = 0; i < 9; i++) for (let r = 0; r < 2; r++) add(new THREE.SphereGeometry(.014, 8, 8), mat("#1A0F08"), -.92 + i * .23 + r * .11, .72 + r * .17, -.245, sofa, false);
+  [-1, 1].forEach(x => [-.38, .38].forEach(z => add(new THREE.CylinderGeometry(.03, .025, .16, 10), walnutDark, x, .08, z, sofa)));
+  const table = new THREE.Group(); table.position.set(0, 0, 1.25); sofa.add(table);
+  add(RB(1.1, .06, .6, .02), walnut, 0, .42, 0, table); [-.48, .48].forEach(x => [-.24, .24].forEach(z => add(B(.05, .4, .05), walnutDark, x, .2, z, table)));
+  add(B(.26, .05, .18), mat("#27344D"), .32, .47, -.08, table); add(B(.24, .04, .17), mat("#EDE4D2"), .32, .515, -.08, table);
+  if (mine) { const np = new THREE.Group(); np.position.set(-.15, .46, .02); np.rotation.y = .3; table.add(np); add(B(.42, .01, .28), mat("#EEE9DD"), 0, 0, 0, np); add(B(.36, .003, .05), mat("#2A221C"), 0, .006, -.09, np); if (S.news) sprite(String(S.news > 9 ? "9+" : S.news), .25, .25, 0, np, true); sprite(S.news ? "News · " + S.news : "News", 0, .65, 0, np); }
+
+  // wingback armchair by the fire and a floor lamp
+  const cur = S.reading[0];
+  const arm = group("reading", 1.75, 0, -1.45, .65);
+  const am = leather(cfg.chair);
+  add(RB(.95, .4, .85, .08), am, 0, .36, 0, arm); add(RB(.95, 1.05, .2, .09), am, 0, .9, -.38, arm);
+  [-.5, .5].forEach(x => { add(RB(.18, .6, .85, .07), am, x, .48, 0, arm); add(RB(.16, .5, .3, .06), am, x * .95, 1.18, -.3, arm); });
+  [-.4, .4].forEach(x => [-.35, .35].forEach(z => add(new THREE.CylinderGeometry(.03, .025, .16, 10), walnutDark, x, .08, z, arm)));
+  if (cur) { const bk = new THREE.Group(); bk.position.set(0, .58, .1); bk.rotation.x = -.15; arm.add(bk); [-1, 1].forEach(sd => { const pg = add(B(.17, .012, .24), mat("#FFFBF0"), sd * .088, 0, 0, bk); pg.rotation.z = -sd * .12; }); }
+  sprite(cur ? (cur.title.length > 18 ? cur.title.slice(0, 17) + "…" : cur.title) : "Armchair", 0, 1.75, 0, arm);
+  const fl = new THREE.Group(); fl.position.set(2.55, 0, -2.3); scene.add(fl);
+  add(new THREE.CylinderGeometry(.14, .16, .03, 20), brass, 0, .015, 0, fl); add(new THREE.CylinderGeometry(.015, .015, 1.55, 8), brass, 0, .8, 0, fl);
+  add(new THREE.CylinderGeometry(.15, .24, .26, 20, 1, true), mat(cur ? "#F7DE9A" : "#CDBA8E", { side: THREE.DoubleSide, emissive: cur ? "#FFD27A" : "#000", emissiveIntensity: cur ? .9 : 0 }), 0, 1.62, 0, fl);
+  if (cur) { const ll = new THREE.PointLight("#FFD08A", night ? 2.6 : 1.6, 4, 2); ll.position.set(0, 1.5, 0); fl.add(ll); }
+
+  // chandelier and ceiling (ceiling only in first-person view)
+  const ch = new THREE.Group(); ch.position.set(.5, 2.5, .2); scene.add(ch);
+  add(new THREE.CylinderGeometry(.006, .006, .5, 6), brass, 0, .26, 0, ch, false);
+  const ring = add(new THREE.TorusGeometry(.38, .018, 8, 40), brass, 0, 0, 0, ch, false); ring.rotation.x = Math.PI / 2;
+  for (let i = 0; i < 8; i++) { const a2 = i / 8 * Math.PI * 2; add(new THREE.CylinderGeometry(.014, .014, .1, 8), mat("#F6EBD0"), Math.cos(a2) * .38, .06, Math.sin(a2) * .38, ch, false); add(new THREE.SphereGeometry(.018, 8, 8), mat("#FFE7A3", { emissive: "#FFD27A", emissiveIntensity: 3 }), Math.cos(a2) * .38, .13, Math.sin(a2) * .38, ch, false); }
+  const cl = new THREE.PointLight("#FFD9A0", night ? 7 : 4.5, 8, 1.6); cl.position.set(0, -.05, 0); cl.castShadow = true; cl.shadow.mapSize.set(1024, 1024); cl.shadow.bias = -.002; ch.add(cl);
+  const ceil = add(B(RS * 2 + .24, .1, RS * 2 + .24), walnutDark, 0, WH + .05, 0, scene, false);
+  scene.add(new THREE.HemisphereLight("#FFE9C9", "#3A2214", night ? .3 : .6));
+  scene.add(new THREE.AmbientLight("#FFDDB0", night ? .1 : .2));
+
+  // things high on a wall disappear when that wall is lowered
+  Object.values(walls).forEach(g => g.traverse(o => { if (o.isMesh && !o.userData.keep && o.parent === g && o.position.y > 1.1) o.userData.high = true; }));
+  // cameras
+  const iso = new THREE.OrthographicCamera(-1, 1, 1, -1, .1, 100), per = new THREE.PerspectiveCamera(62, W / H, .05, 40);
+  const isoTarget = new THREE.Vector3(0, .7, 0);
+  const sizeIso = () => { const a = W / H, v = Math.max(7.6, 9.4 / a) * .92; iso.left = -v * a / 2; iso.right = v * a / 2; iso.top = v / 2; iso.bottom = -v / 2; iso.updateProjectionMatrix(); per.aspect = a; per.updateProjectionMatrix(); };
+  sizeIso();
+  const placeIso = az => { const d = 20, el = .62; iso.position.set(isoTarget.x + Math.cos(az) * d * Math.cos(el), isoTarget.y + d * Math.sin(el), isoTarget.z + Math.sin(az) * d * Math.cos(el)); iso.lookAt(isoTarget); };
+  let cam, ctl;
+  const setMode = mode => {
+    R3.mode = mode; ctl?.dispose();
+    if (mode === "iso") {
+      cam = iso; placeIso(R3.az);
+      ctl = new OrbitControls(iso, renderer.domElement); ctl.target.copy(isoTarget); ctl.enableDamping = true; ctl.enablePan = false; ctl.minZoom = .7; ctl.maxZoom = 4.5; ctl.minPolarAngle = ctl.maxPolarAngle = Math.PI / 2 - .62; ctl.rotateSpeed = .6;
+      ceil.visible = false; modeBtn.textContent = "👁 Look around"; rotL.hidden = rotR.hidden = false;
+    } else {
+      cam = per; per.position.set(.4, 1.65, 2.9);
+      ctl = new OrbitControls(per, renderer.domElement); ctl.target.set(0, 1.35, -1.2); ctl.enableDamping = true; ctl.enablePan = false; ctl.minDistance = .8; ctl.maxDistance = 3.2; ctl.minPolarAngle = 1.05; ctl.maxPolarAngle = 1.75; ctl.rotateSpeed = .55;
+      ceil.visible = true; modeBtn.textContent = "⌂ Room view"; rotL.hidden = rotR.hidden = true;
+    }
+    ctl.update();
+  };
+  setMode(R3.mode);
+  modeBtn.onclick = () => setMode(R3.mode === "iso" ? "fp" : "iso");
+  let zoomAnim = null;
+  const zoomBy = f => {
+    if (R3.mode === "iso") { const z0 = iso.zoom, z1 = Math.max(ctl.minZoom, Math.min(ctl.maxZoom, z0 * f)); zoomAnim = { t0: performance.now(), f: k => { iso.zoom = z0 + (z1 - z0) * k; iso.updateProjectionMatrix(); } }; }
+    else { const p0 = per.position.clone(), dir = p0.clone().sub(ctl.target), d0 = dir.length(), d1 = Math.max(ctl.minDistance, Math.min(ctl.maxDistance, d0 / f)); dir.normalize(); zoomAnim = { t0: performance.now(), f: k => per.position.copy(ctl.target).addScaledVector(dir, d0 + (d1 - d0) * k) }; }
+  };
+  zIn.onclick = () => zoomBy(1.35); zOut.onclick = () => zoomBy(1 / 1.35);
+  let spin = null;
+  const rotate = dir => { if (R3.mode !== "iso") return; ctl.enableDamping = false; const from = Math.atan2(iso.position.z - isoTarget.z, iso.position.x - isoTarget.x), to = Math.round((from - Math.PI / 4) / (Math.PI / 2)) * (Math.PI / 2) + Math.PI / 4 + dir * Math.PI / 2; spin = { from, to, t0: performance.now() }; };
+  rotL.onclick = () => rotate(-1); rotR.onclick = () => rotate(1);
+  let dragFrom = null; renderer.domElement.addEventListener("pointerdown", e => dragFrom = [e.clientX, e.clientY]);
+  renderer.domElement.addEventListener("pointerup", e => { const moved = dragFrom && Math.hypot(e.clientX - dragFrom[0], e.clientY - dragFrom[1]) > 8; dragFrom = null; if (moved && R3.mode === "iso" && !spin && !busy) setTimeout(() => { if (!spin && !busy) rotate(0); }, 150); });
+
+  // walls near the camera drop down, like a dollhouse
+  const wallLevel = { N: 1, S: 1, E: 1, W: 1 };
+  const nearSet = { E: true, S: true, W: false, N: false };
+  const updateWalls = () => {
+    if (R3.mode === "iso") {
+      const vx = cam.position.x - isoTarget.x, vz = cam.position.z - isoTarget.z, l = Math.hypot(vx, vz), cx = vx / l, cz = vz / l, hy = .17;
+      if (cx > hy) { nearSet.E = true; nearSet.W = false; } else if (cx < -hy) { nearSet.W = true; nearSet.E = false; }
+      if (cz > hy) { nearSet.S = true; nearSet.N = false; } else if (cz < -hy) { nearSet.N = true; nearSet.S = false; }
+    }
+    for (const [k, g] of Object.entries(walls)) {
+      const want = R3.mode === "iso" && nearSet[k] ? 0 : 1, d = want - wallLevel[k];
+      if (Math.abs(d) < .002) { if (wallLevel[k] === want) continue; wallLevel[k] = want; } else wallLevel[k] += d * .2;
+      g.position.y = -(1 - wallLevel[k]) * (WH - .32);
+      g.traverse(o => { if (o.isSprite) o.visible = wallLevel[k] > .9; if (o.isLight) o.visible = wallLevel[k] > .5; });
+    }
+  };
+
+  // taps: highlight ring, glide, then open
+  const ray = new THREE.Raycaster(), ptr = new THREE.Vector2(); let down = null, busy = false;
+  const ringM = new THREE.Mesh(new THREE.TorusGeometry(.6, .025, 8, 48), new THREE.MeshBasicMaterial({ color: "#7CFF6B", transparent: true, opacity: .9 })); ringM.rotation.x = Math.PI / 2; ringM.visible = false; scene.add(ringM);
+  const actions = { shelf: () => { ui.tab = "all"; ui.q = ""; ui.genre = null; go("/p/" + encodeURIComponent(uid)); }, letters: () => go("/letters"), news: () => go("/news"), year: () => go("/year/" + encodeURIComponent(uid)), profile: () => mine ? editShelf(uid) : toast(p.name + "'s room"), reading: () => cur ? openBook(uid, cur.id) : (ui.tab = "reading", go("/p/" + encodeURIComponent(uid))), lent: () => lentSheet(uid, S.lent) };
+  renderer.domElement.addEventListener("pointerdown", e => down = [e.clientX, e.clientY]);
+  renderer.domElement.addEventListener("pointerup", e => {
+    if (busy || !down || Math.hypot(e.clientX - down[0], e.clientY - down[1]) > 8) return;
+    const r = renderer.domElement.getBoundingClientRect(); ptr.set((e.clientX - r.left) / r.width * 2 - 1, -(e.clientY - r.top) / r.height * 2 + 1);
+    ray.setFromCamera(ptr, cam);
+    const hits = ray.intersectObjects(clickables, true);
+    let o = null; for (const hh of hits) { let x = hh.object; while (x && !x.userData.go) x = x.parent; if (x) { o = x; break; } }
+    const key = o?.userData.go; if (!key) return;
+    if ((key === "letters" || key === "news") && !mine) return;
+    const wp = new THREE.Vector3(); o.getWorldPosition(wp); if (key === "shelf") wp.set(0, 1.2, -RS + .4);
+    ringM.position.set(wp.x, .03, wp.z); ringM.scale.setScalar(key === "shelf" ? 2.6 : key === "news" ? 1.9 : 1); ringM.visible = true; navigator.vibrate?.(20);
+    if (["profile", "lent", "reading"].includes(key)) { setTimeout(() => { ringM.visible = false; actions[key](); }, 250); return; }
+    busy = true; ctl.enabled = false; const t0 = performance.now();
+    if (R3.mode === "iso") { const z0 = iso.zoom, tgt0 = ctl.target.clone(), pos0 = iso.position.clone(), off = pos0.clone().sub(tgt0), tgt1 = new THREE.Vector3(wp.x, Math.max(.6, wp.y), wp.z);
+      const fly = () => { const k = Math.min(1, (performance.now() - t0) / 600), e2 = k * k * (3 - 2 * k); iso.zoom = z0 + (2.8 - z0) * e2; iso.updateProjectionMatrix(); const t = tgt0.clone().lerp(tgt1, e2); iso.position.copy(t).add(off); iso.lookAt(t); if (k < 1) requestAnimationFrame(fly); else actions[key](); }; fly(); }
+    else { const from = per.position.clone(), to = wp.clone().add(new THREE.Vector3(0, .3, 1.2));
+      const fly = () => { const k = Math.min(1, (performance.now() - t0) / 600), e2 = k * k * (3 - 2 * k); per.position.lerpVectors(from, to, e2); per.lookAt(wp); if (k < 1) requestAnimationFrame(fly); else actions[key](); }; fly(); }
+  });
+  const onResize = () => { if (!box.isConnected || !box.clientHeight) return; W = box.clientWidth; H = box.clientHeight; renderer.setSize(W, H); sizeIso(); };
+  new ResizeObserver(onResize).observe(box);
+  addEventListener("resize", onResize);
+  // gentle opening glide
+  if (R3.keepView) { iso.zoom = R3.zoom; iso.updateProjectionMatrix(); R3.keepView = false; } else if (R3.mode === "iso" && !reduce) { const z1 = iso.zoom; iso.zoom = .7; iso.updateProjectionMatrix(); const t0 = performance.now(); const intro = () => { const k = Math.min(1, (performance.now() - t0) / 900); iso.zoom = .7 + (z1 - .7) * (1 - Math.pow(1 - k, 3)); iso.updateProjectionMatrix(); if (k < 1) requestAnimationFrame(intro); }; intro(); }
+  const clock = new THREE.Clock();
+  const loop = () => {
+    if (!renderer.domElement.isConnected) { renderer.dispose(); ctl?.dispose(); removeEventListener("resize", onResize); return; }
+    const t = clock.getElapsedTime();
+    flames.forEach(f => { const u = f.userData, n = Math.sin(t * 7.3 + u.ph) * .5 + Math.sin(t * 13.1 + u.ph * 2) * .3 + Math.sin(t * 23.7 + u.ph) * .2, hgt = u.base * (1 + n * .28); f.scale.set(hgt * .42, hgt, 1); f.position.set(u.x, .2 + hgt / 2, u.z + Math.sin(t * 5 + u.ph) * .015); f.material.opacity = .7 + n * .2; });
+    embers.material.opacity = .85 + Math.sin(t * 3) * .1;
+    sparks.forEach(sp => { const u = sp.userData; u.life += .006 * (1 + u.v); if (u.life > 1) { u.life = 0; u.z = (Math.random() - .5) * .5; } sp.position.set(FX - .26 + Math.sin(u.life * 9 + u.z * 9) * .04, .25 + u.life * .75, u.z + Math.sin(u.life * 7) * .03); sp.material.opacity = (1 - u.life) * .9; });
+    fire.intensity = (night ? 3.2 : 1.8) * (1 + Math.sin(t * 11) * .08 + Math.sin(t * 27) * .05);
+    if (ringM.visible) ringM.rotation.z = t * 2;
+    const ls = R3.mode === "iso" ? 2 / iso.zoom : .85; labels.forEach(sp => sp.scale.set(sp.userData.base[0] * ls, sp.userData.base[1] * ls, 1));
+    if (spin) { const k = Math.min(1, (performance.now() - spin.t0) / 500), e2 = k * k * (3 - 2 * k); const az = spin.from + (spin.to - spin.from) * e2; const d = Math.hypot(iso.position.x - ctl.target.x, iso.position.z - ctl.target.z), y = iso.position.y; iso.position.set(ctl.target.x + Math.cos(az) * d, y, ctl.target.z + Math.sin(az) * d); iso.lookAt(ctl.target); if (k >= 1) { spin = null; R3.az = az; ctl.enableDamping = true; } }
+    if (zoomAnim) { const k = Math.min(1, (performance.now() - zoomAnim.t0) / 260); zoomAnim.f(k * (2 - k)); if (k >= 1) zoomAnim = null; }
+    if (ctl.enabled) ctl.update();
+    if (R3.mode === "iso" && !spin) { R3.az = Math.atan2(iso.position.z - isoTarget.z, iso.position.x - isoTarget.x); R3.zoom = iso.zoom; }
+    updateWalls();
+    renderer.render(scene, cam); requestAnimationFrame(loop);
+  };
+  loop();
+}
+function lentSheet(uid, lent) {
+  const { close } = sheet(h("h2", {}, "Lent books"),
+    lent.length ? h("div", { class: "results" }, lent.map(b => h("button", { class: "result", type: "button", onclick: () => { close(true); openBook(uid, b.id); } }, coverEl(b), h("div", {}, h("b", {}, b.title), h("small", {}, "With " + b.lentTo + (b.lentOn ? " since " + fmtDate(b.lentOn) : "")))))) : h("p", { class: "muted" }, "The basket is empty. Open a book and use Lend this book to keep track of who has it."));
+}
+
+/* ---------- year in books ---------- */
+function finishedIn(uid, Y) { return books(uid).filter(b => stOf(b) === "read" && String(b.finished || "").startsWith(String(Y))); }
+function yearTeaser(uid) {
+  const Y = new Date().getFullYear(), n = finishedIn(uid, Y).length, g = profiles[uid]?.goals?.[Y];
+  return h("div", { class: "muted" }, g ? n + " of " + g + " books finished in " + Y : n + " finished in " + Y + ". Set a goal, see your stats.", g ? h("div", { class: "bigprog", style: { "margin-top": "8px" } }, h("i", { style: { width: Math.min(100, n / g * 100) + "%" } })) : null);
+}
+function renderYear(uid) {
+  const p = profiles[uid]; if (!p) { if (Object.keys(profiles).length) go("/"); return; }
+  watch(uid); ui.route = "year:" + uid; $app.dataset.view = ui.route;
+  const Y = ui.year || new Date().getFullYear(), list = finishedIn(uid, Y).sort((a, b) => a.finished.localeCompare(b.finished));
+  const edit = canEdit(uid), goal = p.goals?.[Y], color = p.color || LEATHER[0];
+  const months = Array(12).fill(0); list.forEach(b => months[parseInt(b.finished.slice(5, 7), 10) - 1]++);
+  const maxM = Math.max(1, ...months);
+  const tally = key => { const m = {}; list.forEach(b => arr(b[key]).forEach(x => m[x] = (m[x] || 0) + 1)); return Object.entries(m).sort((a, b) => b[1] - a[1]).slice(0, 5); };
+  const pages = list.reduce((s, b) => s + (b.pages || 0), 0), rated = list.filter(b => b.rating), avg = rated.length ? (rated.reduce((s, b) => s + b.rating, 0) / rated.length).toFixed(1) : null;
+  const best = [...rated].sort((a, b) => b.rating - a.rating || b.finished.localeCompare(a.finished))[0];
+  const undated = books(uid).filter(b => stOf(b) === "read" && !b.finished).length;
+  const bars = (rows) => h("div", { class: "hbars" }, rows.map(([k, n]) => h("div", { class: "hbar" }, h("span", {}, k), h("b", { style: { width: Math.max(8, n / rows[0][1] * 100) + "%", "--c": color } }, n))));
+  const goalIn = h("input", { type: "number", min: "1", inputmode: "numeric", value: goal || "", placeholder: "24", style: { width: "90px" } });
+  const board = Object.entries(profiles).map(([u, q]) => [q.name, finishedIn(u, Y).length]).sort((a, b) => b[1] - a[1]);
+  mount(
+    h("div", { class: "topbar" }, h("button", { class: "back", onclick: () => go(roomPath(uid)) }, "‹ Room"), h("div", { class: "ribbon", style: { "--c": color } })),
+    h("header", { class: "phead" }, h("div", { class: "sc faint" }, p.name + "'s year in books"),
+      h("div", { class: "yearnav" }, h("button", { class: "back", "aria-label": "Previous year", onclick: () => { ui.year = Y - 1; render(); } }, "‹"), h("h1", {}, String(Y)), h("button", { class: "back", "aria-label": "Next year", disabled: Y >= new Date().getFullYear(), onclick: () => { ui.year = Y + 1; render(); } }, "›"))),
+    h("div", { class: "fleuron" }, "❦"),
+    h("div", { class: "statgrid" },
+      h("div", { class: "stat" }, h("b", {}, list.length), h("span", {}, "books finished")),
+      h("div", { class: "stat" }, h("b", {}, pages ? pages.toLocaleString("en-GB") : "–"), h("span", {}, "pages read")),
+      h("div", { class: "stat" }, h("b", {}, avg ? avg + "★" : "–"), h("span", {}, "average rating")),
+      h("div", { class: "stat" }, h("b", {}, new Set(list.flatMap(b => arr(b.authors))).size), h("span", {}, "authors"))),
+    h("section", { class: "section card" }, h("h2", { style: { "font-size": "22px" } }, "Reading goal"),
+      goal ? [h("div", { class: "muted" }, list.length + " of " + goal + (list.length >= goal ? ". Goal reached!" : ". " + (goal - list.length) + " to go.")), h("div", { class: "bigprog" }, h("i", { style: { width: Math.min(100, list.length / goal * 100) + "%", background: color } }))] : h("div", { class: "muted" }, "No goal set for " + Y + "."),
+      edit ? h("div", { class: "actions" }, "Books this year:", goalIn, h("button", { class: "btn", type: "button", onclick: async () => { const n = parseInt(goalIn.value, 10); if (!n) return; await DB.saveProfile(uid, { goals: { ...(p.goals || {}), [Y]: n } }); toast("Goal saved"); } }, "Save goal")) : null),
+    h("section", { class: "section" }, h("h2", {}, "Month by month"), h("div", { class: "months" }, months.map((n, i) => h("div", { class: "mcol" }, h("div", { class: "mbar", style: { height: (n / maxM * 100) + "%", "--c": color } }, n ? h("span", {}, n) : null), h("small", {}, "JFMAMJJASOND"[i]))))),
+    best ? h("section", { class: "section" }, h("h2", {}, "Favourite of the year"), h("button", { class: "book fav", onclick: () => openBook(uid, best.id) }, coverEl(best), h("div", {}, h("div", { class: "t", style: { "font-size": "18px" } }, best.title), h("div", { class: "a" }, arr(best.authors).join(", ")), starsEl(best.rating)))) : null,
+    tally("genres").length ? h("section", { class: "section" }, h("h2", {}, "Top genres"), bars(tally("genres"))) : null,
+    tally("authors").length ? h("section", { class: "section" }, h("h2", {}, "Most read authors"), bars(tally("authors"))) : null,
+    Object.keys(profiles).length > 1 ? h("section", { class: "section" }, h("h2", {}, "The club this year"), board[0][1] ? bars(board.filter(r => r[1] > 0)) : h("div", { class: "faint" }, "Nobody has finished a book with a date yet.")) : null,
+    list.length ? h("section", { class: "section" }, h("h2", {}, "Every book of " + Y), h("div", { class: "grid" }, list.map(b => h("button", { class: "book", onclick: () => openBook(uid, b.id) }, coverEl(b), h("div", { class: "a" }, fmtDate(b.finished)), b.rating ? starsEl(b.rating, true) : null)))) : h("div", { class: "empty", style: { "margin-top": "24px" } }, "No finished books with a date in " + Y + " yet."),
+    undated ? h("p", { class: "faint", style: { "text-align": "center", "font-size": "14px", "margin-top": "20px" } }, undated + " read books have no finish date, so they are not counted here. Open a book and set Finished to include it.") : null
+  );
+}
+
+/* ---------- news for you ---------- */
+function newsItems(uid) { const c = lsGet("cc-news-" + uid, null), hide = new Set(lsGet("cc-news-hide-" + uid, [])); return (c?.items || []).filter(i => !hide.has(i.key) && !books(uid).some(b => norm(b.title) === i.key)); }
+function newsCount() { const u = myUid(); if (!u) return 0; const seen = new Set(lsGet("cc-news-seen-" + u, [])); return newsItems(u).filter(i => !seen.has(i.key)).length; }
+let newsBusy = false;
+async function fetchNews(uid, force) {
+  const c = lsGet("cc-news-" + uid, null);
+  if (newsBusy || (!force && c && Date.now() - c.at < 20 * 3600e3)) return;
+  const mine = books(uid); if (!mine.length) return;
+  newsBusy = true;
+  try {
+    const read = mine.filter(b => stOf(b) !== "wishlist"), score = {};
+    read.forEach(b => arr(b.authors).forEach(a => score[a] = (score[a] || 0) + (b.rating >= 4 ? 2 : 1) - (b.rating && b.rating <= 2 ? 2 : 0)));
+    const favs = arr(profiles[uid]?.favAuthors);
+    const authors = [...new Set([...favs, ...Object.entries(score).filter(([, n]) => n >= 2).sort((a, b) => b[1] - a[1]).map(([a]) => a)])].slice(0, 14);
+    const series = {}; read.filter(b => b.series).forEach(b => series[b.series] = arr(b.authors)[0] || "");
+    const owned = mine.map(b => norm(b.title)).filter(Boolean);
+    const isOwned = k => owned.some(o => o === k || (k.length > 5 && o.length > 5 && (o.startsWith(k) || k.startsWith(o))));
+    const minY = new Date().getFullYear() - 1, junk = /summary|study guide|analysis of|box ?set|boxed|collection|coloring|colouring|journal|notebook|calendar|sampler|bundle|cofanetto|trilogy set|books? \d+ ?- ?\d+|quiz|trivia|workbook/i;
+    const found = new Map();
+    const take = (items, reason, mustAuthor) => (items || []).forEach(it => {
+      const v = it.volumeInfo || {}, y = parseInt(v.publishedDate, 10); if (!y || y < minY || !v.title) return;
+      if (junk.test(v.title + " " + (v.subtitle || ""))) return;
+      if (mustAuthor && !arr(v.authors).some(a => norm(a) === norm(mustAuthor))) return;
+      const key = norm(v.title); if (!key || isOwned(key)) return;
+      const prev = found.get(key); const thumb = v.imageLinks?.thumbnail?.replace("http:", "https:").replace("&edge=curl", "");
+      if (prev && (prev.cover || !thumb)) return;
+      found.set(key, { key, title: v.title, authors: arr(v.authors).slice(0, 2), date: v.publishedDate, cover: thumb || "", plot: (v.description || "").slice(0, 900), reason, link: v.infoLink || "" });
+    });
+    const gb = q => fetch("https://www.googleapis.com/books/v1/volumes?" + new URLSearchParams({ q, orderBy: "newest", maxResults: 20, printType: "books" })).then(r => r.json()).catch(() => ({}));
+    for (const [sname, a] of Object.entries(series).slice(0, 10)) { const r = await gb('intitle:"' + sname + '"' + (a ? ' inauthor:"' + a + '"' : "")); take(r.items, "Next in " + sname, a); }
+    for (const a of authors) { const r = await gb('inauthor:"' + a + '"'); take(r.items, (favs.includes(a) ? "You follow " : "New from ") + a, a); }
+    const items = [...found.values()].sort((a, b) => (b.date || "").localeCompare(a.date || ""));
+    lsSet("cc-news-" + uid, { at: Date.now(), items, authors, series: Object.keys(series) });
+  } finally { newsBusy = false; }
+  render();
+}
+function renderNews() {
+  ui.route = "news"; $app.dataset.view = "news";
+  const uid = myUid(); if (!uid) { go("/"); return; }
+  watch(uid);
+  const c = lsGet("cc-news-" + uid, null), items = newsItems(uid);
+  lsSet("cc-news-seen-" + uid, [...new Set([...lsGet("cc-news-seen-" + uid, []), ...items.map(i => i.key)])]);
+  const now = today();
+  const card = i => h("div", { class: "letter newsitem" },
+    h("div", { class: "newsrow" }, coverEl({ title: i.title, authors: i.authors, cover: i.cover }),
+      h("div", {}, h("div", { class: "sc faint" }, i.reason), h("div", { class: "t" }, i.title), h("div", { class: "muted" }, i.authors.join(", ")),
+        h("div", { class: i.date > now ? "soon" : "faint" }, (i.date > now ? "Coming " : "Out since ") + (i.date.length >= 10 ? fmtDate(i.date) : i.date)))),
+    i.plot ? h("details", { class: "fold" }, h("summary", {}, "What it's about"), h("p", { style: { margin: "6px 0 0" } }, i.plot)) : null,
+    h("div", { class: "actions" },
+      h("button", { class: "btn primary", type: "button", onclick: async () => { await DB.setBook(uid, slug(i.title), { title: i.title, authors: i.authors, status: "wishlist", genres: [], type: "Book", added: today(), cover: i.cover || undefined, plot: i.plot || undefined, year: parseInt(i.date, 10) || undefined, notes: "Found in News: " + i.reason }); toast("Added to your wishlist"); } }, "Add to wishlist"),
+      h("button", { class: "btn ghost", type: "button", onclick: () => { lsSet("cc-news-hide-" + uid, [...lsGet("cc-news-hide-" + uid, []), i.key]); render(); } }, "Not interested")));
+  const favs = arr(profiles[uid]?.favAuthors);
+  mount(
+    h("div", { class: "topbar" }, h("button", { class: "back", onclick: () => go(roomPath(uid)) }, "‹ Room")),
+    h("header", { class: "phead" }, h("div", { class: "sc faint" }, "fresh from the press"), h("h1", {}, "News for you")),
+    h("div", { class: "fleuron" }, "❦"),
+    h("p", { class: "muted", style: { "text-align": "center" } }, c ? "Watching " + (c.series?.length || 0) + " series and " + (c.authors?.length || 0) + " authors. Checked " + new Date(c.at).toLocaleString("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) + "." : "Looking for new books for the first time."),
+    h("div", { class: "actions", style: { "justify-content": "center" } }, h("button", { class: "btn", type: "button", disabled: newsBusy, onclick: () => { fetchNews(uid, true); toast("Checking for new books"); } }, newsBusy ? "Checking…" : "Check now")),
+    favs.length ? h("p", { class: "faint", style: { "text-align": "center", "font-size": "14px" } }, "You follow: " + favs.join(", ")) : h("p", { class: "faint", style: { "text-align": "center", "font-size": "14px" } }, "Tip: open a book and tap ♡ Follow on an author to always get their new books."),
+    items.length ? h("div", { class: "cards" }, items.map(card)) : h("div", { class: "empty", style: { "margin-top": "20px" } }, newsBusy || !c ? "Searching, this takes a few seconds" : "Nothing new right now. Rate the books you loved, or follow more authors."),
+  );
+  if (!c && !newsBusy) fetchNews(uid);
 }
 
 function addBook(uid, editId) {
@@ -713,7 +1594,7 @@ function renderLetters() {
     if (sent.length) sections.push(h("section", { class: "section" }, h("h2", {}, "Sent", h("small", {}, sent.length)), h("div", { class: "cards", style: { "margin-top": "0" } }, sent.map(s => letter(s, false)))));
   }
   mount(
-    h("div", { class: "topbar" }, h("button", { class: "back", onclick: () => closeTo("/") }, "‹ Library")),
+    h("div", { class: "topbar" }, h("button", { class: "back", onclick: () => myUid() ? go(roomPath(myUid())) : closeTo("/") }, myUid() ? "‹ Room" : "‹ Club")),
     h("header", { class: "phead" }, h("div", { class: "sc faint" }, "correspondence"), h("h1", {}, "Letters")),
     h("div", { class: "fleuron" }, "❦"),
     others.length ? h("form", { class: "card", onsubmit: send },
@@ -821,6 +1702,7 @@ window.addEventListener("hashchange", render);
   user = DB.user();
   DB.watchProfiles(p => { profiles = p; Object.keys(p).forEach(watch); render(); });
   DB.watchSugs(s => { sugs = s; render(); });
+  setTimeout(() => { const u = myUid(); if (u && navigator.onLine) fetchNews(u); }, 4000);
   DB.onAuth(u => { const was = user?.uid; user = u; if (was !== u?.uid) { render(); } });
   render();
 })();
@@ -828,7 +1710,7 @@ window.addEventListener("hashchange", render);
 (() => {
   const ind = h("div", { class: "ptr", "aria-hidden": "true" }, h("span", {}, "↻")); document.body.append(ind);
   let y0 = null, dy = 0, busy = false;
-  const ready = () => !busy && window.scrollY <= 0 && !document.querySelector(".scrim,.turn");
+  const ready = () => !busy && window.scrollY <= 0 && !document.querySelector(".scrim,.turn,.r3full");
   addEventListener("touchstart", e => { y0 = ready() && e.touches.length === 1 ? e.touches[0].clientY : null; dy = 0; ind.style.transition = "none"; }, { passive: true });
   addEventListener("touchmove", e => { if (y0 == null) return; dy = e.touches[0].clientY - y0; if (dy <= 0 || window.scrollY > 0) { ind.style.transform = "translate(-50%,-70px)"; return; } const d = Math.min(dy * 0.5, 90); ind.style.transform = "translate(-50%," + (d - 60) + "px)"; ind.firstChild.style.transform = "rotate(" + dy * 2 + "deg)"; ind.style.opacity = Math.min(1, dy / 120); }, { passive: true });
   addEventListener("touchend", async () => {
@@ -839,6 +1721,7 @@ window.addEventListener("hashchange", render);
     setTimeout(() => location.reload(), 300);
   });
 })();
+if (PREVIEW) document.getElementById("pvbar").hidden = false;
 if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost")) navigator.serviceWorker.register("sw.js");
 </script>
 </body>
