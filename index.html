@@ -8,8 +8,8 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="Ex Libris">
-<title>Ex Libris</title>
+<meta name="apple-mobile-web-app-title" content="Codex Club">
+<title>The Codex Club</title>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -358,7 +358,7 @@ function renderLibrary() {
   const forMe = sugs.filter(s => DB.mode === "local" ? true : s.to === meUid()).length;
   const mine = meUid() && profiles[meUid()];
   mount(
-    h("header", { class: "titlepage" }, h("div", { class: "kicker" }, "Ex Libris"), h("h1", {}, "The Family Library"), h("p", {}, list.length ? "Choose a volume to open it" : "Add the first reader to begin")),
+    h("header", { class: "titlepage" }, h("div", { class: "kicker" }, "Ex Libris"), h("h1", {}, "The Codex Club"), h("p", {}, list.length ? "Choose a volume to open it" : "Add the first reader to begin")),
     h("div", { class: "case" }, h("div", { class: "spines" }, spines), h("div", { class: "plank" })),
     h("div", { class: "cards" },
       h("button", { class: "card", onclick: () => go("/letters") }, h("h2", {}, "Letters ", forMe ? h("span", { class: "badge" }, forMe) : null), h("div", { class: "muted" }, "Suggest books to each other and send the good ones straight to a wishlist.")),
@@ -612,7 +612,7 @@ function renderAuth() {
   const errs = { "auth/invalid-credential": "Wrong email or password.", "auth/email-already-in-use": "That email already has an account, sign in instead.", "auth/weak-password": "Use at least 6 characters.", "auth/invalid-email": "That email does not look right.", "auth/network-request-failed": "No internet connection." };
   const submit = async e => { e.preventDefault(); btn.disabled = true; msg.textContent = mode === "in" ? "Signing in" : "Creating your account"; try { await (mode === "in" ? DB.signIn : DB.signUp)(email.value.trim(), pass.value); } catch (err) { msg.textContent = errs[err.code] || "Could not sign in: " + err.code; } btn.disabled = false; };
   mount(
-    h("header", { class: "titlepage" }, h("div", { class: "kicker" }, "Ex Libris"), h("h1", {}, "The Family Library"), h("p", {}, "Sign in to open your shelf")),
+    h("header", { class: "titlepage" }, h("div", { class: "kicker" }, "Ex Libris"), h("h1", {}, "The Codex Club"), h("p", {}, "Sign in to open your shelf")),
     h("div", { class: "fleuron" }, "❦"),
     h("form", { class: "auth", onsubmit: submit }, h("label", { class: "field" }, "Email", email), h("label", { class: "field" }, "Password", pass), btn, swap, msg,
       h("button", { class: "btn ghost", type: "button", onclick: async () => { if (!email.value) { msg.textContent = "Type your email first."; return; } try { await DB.reset(email.value.trim()); msg.textContent = "Check your inbox for a reset link."; } catch (err) { msg.textContent = errs[err.code] || err.code; } } }, "Forgot password"))
