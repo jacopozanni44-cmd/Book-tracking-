@@ -187,7 +187,14 @@ button.card:hover{border-color:var(--ink-3)}
    Sync setup. Paste the firebaseConfig from the Firebase console here.
    While it stays null the app works on this phone only.
 ------------------------------------------------------------------- */
-const FIREBASE_CONFIG = null;
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyBor-6tHmEoTxPDhU5WwK1LlcPMlCs4KGU",
+  authDomain: "book-traking.firebaseapp.com",
+  projectId: "book-traking",
+  storageBucket: "book-traking.firebasestorage.app",
+  messagingSenderId: "808487284957",
+  appId: "1:808487284957:web:de4a4a420a47932cd0eb34"
+};
 
 const LEATHER = ["#7A2E2A", "#2F4F3A", "#2B3A55", "#A8742B", "#5A3550", "#3F5E63", "#6B4A2B", "#4A4A4A"];
 const STATUS = { reading: "Reading", read: "Read", wishlist: "Wishlist" };
@@ -558,7 +565,10 @@ function renderNewProfile(first) {
   const sources = [["none", "Start with an empty shelf"], ["seed", "Jacopo's books (the original shelf)"]];
   let legacy = null; try { legacy = JSON.parse(localStorage.getItem("shelves-v1") || "null"); } catch (e) {}
   if (legacy) { sources.push(["phone-jacopo", "Jacopo's shelf saved on this phone"]); if (Object.keys(legacy.gaia_books || {}).length) sources.push(["phone-gaia", "Gaia's shelf saved on this phone"]); }
+  let v2 = null; try { v2 = JSON.parse(localStorage.getItem("exlibris-v2") || "null"); } catch (e) {}
+  if (v2?.profiles) Object.entries(v2.profiles).forEach(([k, pp]) => { if (Object.keys(v2.books?.[k] || {}).length) sources.push(["v2-" + k, pp.name + "'s shelf saved on this phone (" + Object.keys(v2.books[k]).length + " books)"]); });
   const src = h("select", {}, sources.map(([v, l]) => h("option", { value: v }, l)));
+  if (v2?.profiles && sources.some(([v]) => v === "v2-jacopo")) src.value = "v2-jacopo";
   const fileIn = h("input", { type: "file", accept: ".json,application/json" });
   const go2 = async e => {
     e.preventDefault(); const n = name.value.trim(); if (!n) { msg.textContent = "Add a name."; return; }
@@ -571,6 +581,7 @@ function renderNewProfile(first) {
       else if (src.value === "seed") { const d = await fetch("data.json").then(r => r.json()); seed = d.books; p.seedFrom = "data.json"; p.seen = Object.keys(d.books); }
       else if (src.value === "phone-jacopo") { seed = legacy.books; p.seedFrom = "data.json"; p.seen = Object.keys(legacy.books || {}); }
       else if (src.value === "phone-gaia") seed = legacy.gaia_books;
+      else if (src.value.startsWith("v2-")) { const k = src.value.slice(3); seed = v2.books[k]; if (v2.profiles[k].seedFrom) { p.seedFrom = v2.profiles[k].seedFrom; p.seen = v2.profiles[k].seen || []; } if (!name.value.trim()) name.value = v2.profiles[k].name; }
       await DB.saveProfile(uid, p);
       if (seed && Object.keys(seed).length) { msg.textContent = "Shelving " + Object.keys(seed).length + " books"; await DB.setBooks(uid, seed); }
       if (DB.mode === "local") DB.use(uid);
