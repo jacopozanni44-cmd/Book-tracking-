@@ -329,6 +329,7 @@ body.withtabs .page{padding-bottom:150px}body.withtabs .fab{bottom:calc(84px + e
 .creviews{margin-top:14px;border-top:1px solid var(--edge);padding-top:8px;display:flex;flex-direction:column;gap:10px}.crev{display:grid;grid-template-columns:28px 1fr;gap:10px;align-items:start}
 .logcards{display:flex;flex-direction:column;gap:12px}.logcard{display:grid;grid-template-columns:70px 1fr;gap:12px;border:1px solid var(--edge);background:var(--paper-2);border-radius:12px;padding:10px}
 .dmonth{margin:14px 0 6px}.drow{display:grid;grid-template-columns:28px 44px 1fr;gap:10px;align-items:center;padding:6px 0;border-bottom:1px solid var(--edge)}.dday{font-family:var(--display);font-size:22px;color:var(--ink-3);text-align:center}.dsnip{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.searchin{width:100%;font-size:16px;background:var(--paper);border:1px solid var(--edge);border-radius:22px;padding:10px 16px}
 .phtop{display:flex;align-items:center;justify-content:space-between;margin:2px 0 10px;font-size:18px}.iconbtn{border:0;background:none;font-size:22px;color:var(--ink);padding:4px 8px}
 .prof{display:flex;align-items:center;gap:18px}.pcounts{flex:1;display:grid;grid-template-columns:repeat(4,1fr);text-align:center}
 .pcount{border:0;background:none;display:flex;flex-direction:column;align-items:center;padding:2px}.pcount b{font-family:var(--display);font-size:22px;line-height:1.1}.pcount span{font-size:12px;color:var(--ink-2)}
@@ -1449,7 +1450,7 @@ function renderMe() {
   const addIn = h("input", { placeholder: "Any author, even one you haven't read", list: "authList", autocomplete: "off" });
   const dl = h("datalist", { id: "authList" }, [...new Set(Object.keys(shelf).flatMap(u => books(u).flatMap(b => arr(b.authors))))].sort().map(a => h("option", { value: a })));
   const Y = new Date().getFullYear(), fin = finishedIn(uid, Y).length, goal = p.goals?.[Y];
-  const seg = h("div", { class: "seg", role: "group", "aria-label": "Layout" }, [["room", "3D room"], ["classic", "Classic"]].map(([v, l]) => h("button", { type: "button", "aria-pressed": lsGet("cc-view", "room") === v ? "true" : "false", onclick: () => setView(v) }, l)));
+  const seg = h("div", { class: "seg", role: "group", "aria-label": "Layout" }, [["room", "3D room"], ["classic", "Classic"]].map(([v, l]) => h("button", { type: "button", "aria-pressed": (classic() ? "classic" : "room") === v ? "true" : "false", onclick: () => setView(v) }, l)));
   mount(
     h("header", { class: "mehead" }, h("div", { class: "meport", style: { "--c": color } }, (p.name || "?")[0].toUpperCase()),
       h("div", {}, h("h1", {}, p.name), h("div", { class: "muted" }, all.filter(b => stOf(b) === "read").length + " read · " + reading.length + " reading · " + all.filter(b => stOf(b) === "wishlist").length + " wished"),
@@ -1741,7 +1742,7 @@ async function shareProfile(uid) {
 function renderExplore() {
   ui.route = "explore"; $app.dataset.view = "explore";
   const me = myUid(); if (!me) { go("/"); return; }
-  const q = h("input", { type: "search", placeholder: "Search people by name or @username", value: ui.pq || "" });
+  const q = h("input", { type: "search", class: "searchin", placeholder: "Search people by name or @username", value: ui.pq || "" });
   const res = h("div", { class: "people" });
   const draw = () => { const v = (q.value || "").toLowerCase().replace(/^@/, "").trim(); ui.pq = q.value; res.replaceChildren(...(v.length < 1 ? [] : Object.keys(profiles).filter(u => u !== me && ((profiles[u].name || "").toLowerCase().includes(v) || handleOf(u).includes(v))).slice(0, 20).map(u => personRow(u)))); };
   q.oninput = draw; draw();
@@ -1841,7 +1842,7 @@ function renderLog() {
   ui.route = "log"; $app.dataset.view = "log";
   const uid = myUid(); if (!uid) { go("/"); return; } watch(uid);
   const mineB = books(uid), reading = mineB.filter(b => stOf(b) === "reading"), read = mineB.filter(b => stOf(b) === "read");
-  const q = h("input", { type: "search", placeholder: "Search a book you've read to review it" }), res = h("div", { class: "results" });
+  const q = h("input", { type: "search", class: "searchin", placeholder: "Search a book you've read to review it" }), res = h("div", { class: "results" });
   q.oninput = () => { const v = norm(q.value); res.replaceChildren(...(v.length < 2 ? [] : read.filter(b => norm(b.title).includes(v) || arr(b.authors).some(a => norm(a).includes(v))).slice(0, 6).map(b => h("button", { class: "result", type: "button", onclick: () => diarySheet(uid, b) }, coverEl(b), h("div", {}, h("b", {}, b.title), h("small", {}, arr(b.authors).join(", ")))))));
   };
   mount(h("header", { class: "feedhead" }, h("h1", {}, "Log")),
