@@ -368,6 +368,10 @@ img.ava{object-fit:cover}.ava.big{width:72px;height:72px;font-size:34px}.editava
 .evcard{display:flex;gap:14px;align-items:center;text-align:left;width:100%}.evcard.past{opacity:.55}.evdate{width:52px;height:56px;flex:0 0 52px;border-radius:10px;background:var(--accent);color:var(--accent-ink);display:flex;flex-direction:column;align-items:center;justify-content:center}.evdate b{font-size:22px;line-height:1}.evdate small{font-size:11px;text-transform:uppercase}
 .threads{display:flex;gap:6px;overflow-x:auto;padding-bottom:6px}.thread{flex:0 0 auto;border:1px solid var(--edge);background:var(--paper);border-radius:16px;padding:6px 12px;font-size:14px}.thread.on{background:var(--ink);color:var(--paper)}.thread.locked{opacity:.5}
 .chat{display:flex;flex-direction:column;gap:10px;margin:12px 0}.msg{display:flex;gap:8px;align-items:flex-end}.msg.me{justify-content:flex-end}.bubble{max-width:78%;background:var(--paper-2);border:1px solid var(--edge);border-radius:14px;padding:8px 12px;display:flex;flex-direction:column;gap:2px}.msg.me .bubble{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}.bubble small{font-size:11px}
+.homehead{display:flex;align-items:center;justify-content:space-between;margin:4px 0 16px}.homehead h1{font-size:36px}
+.rowhead{display:flex;align-items:baseline;justify-content:space-between}.rowhead .linkbtn{margin-left:0}
+.hscroll.books .book{flex:0 0 92px}
+.iconbtn{position:relative}.iconbtn .dot{position:absolute;top:4px;right:4px;width:8px;height:8px;border-radius:50%;background:var(--accent)}
 .toast{position:fixed;left:50%;bottom:calc(90px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:10px 16px;border-radius:8px;font-size:14px;z-index:60;box-shadow:var(--shadow);max-width:90vw}
 .auth{max-width:420px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
 </style>
@@ -612,7 +616,7 @@ function turn({ color, kicker, name, paper, opening }) {
 
 /* ---------- views ---------- */
 function render() {
-  if (!location.hash && classic() && myUid()) { location.replace("#/feed"); return; }
+  if (!location.hash && classic() && myUid()) { location.replace("#/home"); return; }
   const r = location.hash.slice(1) || "/";
   document.body.classList.toggle("full3d", r.startsWith("/room3d/"));
   const showTabs = classic() && (DB.mode === "local" || (user && profiles[user.uid])) && !r.startsWith("/new") && !r.startsWith("/room");
@@ -624,6 +628,7 @@ function render() {
   if (r.startsWith("/club/")) return renderClub(decodeURIComponent(r.slice(6)));
   if (r.startsWith("/u/")) { const hnd = decodeURIComponent(r.slice(3)), u = Object.keys(profiles).find(k => profiles[k].handle === hnd) || (profiles[hnd] ? hnd : null); if (u) return renderProfile(u); }
   if (r === "/feed") return renderFeed();
+  if (r === "/home") return renderHome();
   if (r === "/record") { lsSet("cc-rec", null); location.replace("#/log"); return; }
   if (r === "/log") return renderLog();
   if (r === "/p/me") { const u = myUid(); if (u) { location.replace("#/p/" + encodeURIComponent(u)); return; } }
@@ -1458,7 +1463,7 @@ function drawTabs(r) {
   if (!bar) { bar = h("nav", { id: "tabbar", "aria-label": "Sections" }); document.body.append(bar); }
   const u = myUid(), mail = u ? sugs.filter(x => x.to === u).length : 0, news = newsCount();
   const reqs = u ? follows.filter(f => f.to === u && f.status === "pending").length : 0;
-  const tabs = [["/feed", "🏠", "Feed"], ["/explore", "🔍", "Explore", reqs], ["/log", "＋", "New"], ["/clubs", "🏛", "Clubs", clubBadge()], ["/me", "👤", "You", mail]];
+  const tabs = [["/home", "📚", "Library"], ["/feed", "💬", "Feed"], ["/log", "＋", "New"], ["/clubs", "🏛", "Clubs", clubBadge()], ["/me", "👤", "You", mail + reqs]];
   const cur = r === "/" ? "/" : r.startsWith("/p/") && decodeURIComponent(r.slice(3)) === u ? tabs[1][0] : r;
   bar.replaceChildren(...tabs.map(([path, ic, label, n]) => h("button", { type: "button", "aria-current": cur === path ? "page" : null, onclick: () => { if (path === "/") go("/"); else { ui.tab = "all"; go(path); } } }, h("span", { class: "ti" }, ic, n ? h("b", {}, n > 9 ? "9+" : n) : null), h("span", {}, label))));
 }
@@ -1593,7 +1598,7 @@ function weekCard(uid) {
 function renderFeed() {
   ui.route = "feed"; $app.dataset.view = "feed";
   const uid = myUid(); if (!uid) { go("/"); return; } watch(uid);
-  mount(h("header", { class: "feedhead" }, h("h1", {}, "Feed"), h("button", { class: "btn primary rec", type: "button", onclick: () => go("/log") }, "＋ New")),
+  mount(h("header", { class: "feedhead" }, h("h1", {}, "Feed"), h("div", { class: "actions" }, h("button", { class: "iconbtn", type: "button", "aria-label": "Explore", onclick: () => go("/explore") }, "🔍", follows.filter(f => f.to === uid && f.status === "pending").length ? h("span", { class: "dot" }) : null), h("button", { class: "btn primary rec", type: "button", onclick: () => go("/log") }, "＋ New"))),
     weekCard(uid),
     feedActs(uid).length ? h("div", { class: "feed" }, feedActs(uid).slice(0, 60).map(actCard)) : h("div", { class: "empty", style: { "margin-top": "16px" } }, "Nothing here yet. Follow readers from Explore, or tap ＋ Log to post your own pages and reviews."));
 }
@@ -2104,6 +2109,33 @@ function demoClubs(db) {
   A("dp1", { uid: "elena", type: "post", kind: "quote", quote: "A book is made from a tree. It is an assemblage of flat, flexible parts imprinted with dark pigmented squiggles. One glance at it and you hear the voice of another person.", book: "Cosmos", authors: ["Carl Sagan"], style: "night", caption: "Reading this again before bed. Still gives me chills.", at: new Date(now - 7 * 36e5).toISOString(), kudos: ["jacopo", "gaia"] });
   A("dp2", { uid: "gaia", type: "post", kind: "quote", quote: "But in a solitary life, there are rare moments when another soul dips near yours.", book: "Circe", authors: ["Madeline Miller"], style: "rose", caption: "This line 🥹", club: "fantasy-society", at: new Date(now - 26 * 36e5).toISOString(), kudos: ["elena"] });
   A("dp3", { uid: "papa", type: "post", kind: "text", caption: "Finito di rileggere Il nome della rosa per il club di famiglia. Sempre un capolavoro, ma l'inizio resta lento.", book: "Il nome della rosa", authors: ["Umberto Eco"], club: "family", at: new Date(now - 30 * 36e5).toISOString(), kudos: ["jacopo"] });
+}
+
+
+/* ---------- home: your library and your stats ---------- */
+function renderHome() {
+  ui.route = "home"; $app.dataset.view = "home";
+  const uid = myUid(); if (!uid) { go("/"); return; } watch(uid);
+  const p = profiles[uid], all = books(uid), hr = new Date().getHours(), hello = hr < 5 ? "Good night" : hr < 12 ? "Good morning" : hr < 18 ? "Good afternoon" : "Good evening";
+  const reading = all.filter(b => stOf(b) === "reading"), read = all.filter(b => stOf(b) === "read").sort((a, b) => (b.finished || b.added || "").localeCompare(a.finished || a.added || "")), wish = all.filter(b => stOf(b) === "wishlist");
+  const Y = new Date().getFullYear(), fin = finishedIn(uid, Y).length, goal = p.goals?.[Y], rated = read.filter(b => b.rating), avg = rated.length ? rated.reduce((x, b) => x + b.rating, 0) / rated.length : 0;
+  const authors = new Set(read.flatMap(b => arr(b.authors))).size, genres = {}; read.forEach(b => arr(b.genres).forEach(g => genres[g] = (genres[g] || 0) + 1)); const topG = Object.entries(genres).sort((a, b) => b[1] - a[1]).slice(0, 3);
+  const row = (title, list, tab) => list.length ? h("section", { class: "section" }, h("div", { class: "rowhead" }, h("h2", {}, title, h("small", {}, list.length)), h("button", { class: "linkbtn", type: "button", onclick: () => { ui.tab = tab; go("/p/" + encodeURIComponent(uid)); } }, "See all")),
+    h("div", { class: "hscroll books" }, list.slice(0, 14).map(b => h("button", { class: "book", type: "button", onclick: () => openBook(uid, b.id) }, coverEl(b), b.rating ? starsEl(b.rating, true) : null)))) : null;
+  mount(
+    h("header", { class: "homehead" }, h("div", {}, h("div", { class: "sc faint" }, hello), h("h1", {}, p.name)), h("div", { class: "actions" }, h("button", { class: "iconbtn", type: "button", "aria-label": "Search people and clubs", onclick: () => go("/explore") }, "🔍"), h("button", { class: "personlink", type: "button", "aria-label": "Your profile", onclick: () => go("/me") }, avatar(uid, 40)))),
+    h("div", { class: "statgrid" },
+      h("div", { class: "stat" }, h("b", {}, read.length), h("span", {}, "books read")),
+      h("div", { class: "stat" }, h("b", {}, fin + (goal ? "/" + goal : "")), h("span", {}, Y + (goal ? " goal" : " so far"))),
+      h("div", { class: "stat" }, h("b", {}, avg ? avg.toFixed(1) + "★" : "–"), h("span", {}, "average rating")),
+      h("div", { class: "stat" }, h("b", {}, authors), h("span", {}, "authors"))),
+    goal ? h("div", { class: "bigprog", style: { "margin-top": "10px" } }, h("i", { style: { width: Math.min(100, fin / goal * 100) + "%" } })) : null,
+    weekCard(uid),
+    h("section", { class: "section" }, h("div", { class: "rowhead" }, h("h2", {}, "Reading now", h("small", {}, reading.length)), h("button", { class: "linkbtn", type: "button", onclick: () => go("/log") }, "Log")),
+      reading.length ? h("div", { class: "rcards" }, reading.map(b => readingCard(uid, b))) : h("div", { class: "empty" }, "Nothing on the go. Pick something from your wishlist.")),
+    row("Recently read", read, "all"), row("Wishlist", wish, "wishlist"),
+    topG.length ? h("section", { class: "section card" }, h("h2", { style: { "font-size": "22px" } }, "What you read most"), h("div", { class: "hbars" }, topG.map(([g, n]) => h("div", { class: "hbar" }, h("span", {}, g), h("b", { style: { width: Math.max(8, n / topG[0][1] * 100) + "%" } }, n))))) : null,
+    h("div", { class: "actions", style: { "justify-content": "center", "margin-top": "18px" } }, h("button", { class: "btn", type: "button", onclick: () => go("/p/" + encodeURIComponent(uid)) }, "📖 Open my whole shelf"), h("button", { class: "btn", type: "button", onclick: () => go("/year/" + encodeURIComponent(uid)) }, "◔ Year in books"), h("button", { class: "btn", type: "button", onclick: () => go("/room3d/" + encodeURIComponent(uid)) }, "🏛 My room")));
 }
 
 /* ---------- Letterboxd side: diary, reviews, quick logging ---------- */
