@@ -329,6 +329,23 @@ body.withtabs .page{padding-bottom:150px}body.withtabs .fab{bottom:calc(84px + e
 .creviews{margin-top:14px;border-top:1px solid var(--edge);padding-top:8px;display:flex;flex-direction:column;gap:10px}.crev{display:grid;grid-template-columns:28px 1fr;gap:10px;align-items:start}
 .logcards{display:flex;flex-direction:column;gap:12px}.logcard{display:grid;grid-template-columns:70px 1fr;gap:12px;border:1px solid var(--edge);background:var(--paper-2);border-radius:12px;padding:10px}
 .dmonth{margin:14px 0 6px}.drow{display:grid;grid-template-columns:28px 44px 1fr;gap:10px;align-items:center;padding:6px 0;border-bottom:1px solid var(--edge)}.dday{font-family:var(--display);font-size:22px;color:var(--ink-3);text-align:center}.dsnip{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.phtop{display:flex;align-items:center;justify-content:space-between;margin:2px 0 10px;font-size:18px}.iconbtn{border:0;background:none;font-size:22px;color:var(--ink);padding:4px 8px}
+.prof{display:flex;align-items:center;gap:18px}.pcounts{flex:1;display:grid;grid-template-columns:repeat(4,1fr);text-align:center}
+.pcount{border:0;background:none;display:flex;flex-direction:column;align-items:center;padding:2px}.pcount b{font-family:var(--display);font-size:22px;line-height:1.1}.pcount span{font-size:12px;color:var(--ink-2)}
+.pinfo{margin:10px 0 0;display:flex;flex-direction:column;gap:2px}.pinfo p{margin:2px 0;white-space:pre-wrap}.pinfo a{font-size:14px}
+.pact{margin-top:12px}.pact .btn{flex:1}
+.reqbar{width:100%;margin-top:12px;border:1px solid var(--edge);background:var(--paper-2);border-radius:10px;padding:10px;text-align:left;font-weight:600}
+.top4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:8px}.t4slot{border:0;background:none;padding:0}.top4.edit .t4slot{border:1px dashed var(--edge);border-radius:4px;aspect-ratio:2/3;display:flex;align-items:center;justify-content:center;font-size:26px;color:var(--ink-3)}.top4.edit .t4slot .cover{width:100%}
+.ptabs{display:grid;grid-template-columns:repeat(4,1fr);margin:18px 0 12px;border-bottom:1px solid var(--edge)}.ptab{border:0;background:none;padding:10px 0;font-family:var(--display);font-size:17px;color:var(--ink-3);border-bottom:2px solid transparent}.ptab[aria-selected="true"]{color:var(--ink);border-color:var(--ink)}
+.locked{text-align:center;padding:40px 10px;border-top:1px solid var(--edge);margin-top:18px}.lockic{font-size:40px}
+.pgrid{display:grid;gap:12px}.minicovers{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:8px}
+.people{display:flex;flex-direction:column;gap:6px;margin-top:10px}.person{display:flex;align-items:center;gap:10px;justify-content:space-between}.personlink{display:flex;gap:10px;align-items:center;border:0;background:none;text-align:left;padding:4px 0;min-width:0;flex:1}.personlink small{display:block}
+.person .btn{padding:7px 14px;font-size:14px}
+img.ava{object-fit:cover}.ava.big{width:72px;height:72px;font-size:34px}.editava{display:flex;gap:16px;align-items:flex-start}
+.swatch.round{width:32px;height:32px;border-radius:50%}
+.handlein{display:flex;align-items:center;border:1px solid var(--edge);border-radius:8px;background:var(--paper)}.handlein span{padding-left:12px;color:var(--ink-3)}.handlein input{border:0!important;background:transparent!important}
+.chk.switch{align-items:flex-start;border:1px solid var(--edge);border-radius:10px;padding:10px;background:var(--paper-2)}
+.invites{display:flex;flex-direction:column;gap:8px}.invrow{display:flex;align-items:center;justify-content:space-between;gap:8px}.invrow code{font-size:16px;letter-spacing:.06em;background:var(--paper);border:1px dashed var(--edge);padding:4px 10px;border-radius:6px}.invrow.used code{text-decoration:line-through;opacity:.6}
 .toast{position:fixed;left:50%;bottom:calc(90px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:10px 16px;border-radius:8px;font-size:14px;z-index:60;box-shadow:var(--shadow);max-width:90vw}
 .auth{max-width:420px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
 </style>
@@ -350,6 +367,10 @@ const FIREBASE_CONFIG = {
   appId: "1:808487284957:web:de4a4a420a47932cd0eb34"
 };
 
+/* Photo uploads are built but switched off. To switch on: enable Firebase Storage (Blaze plan), then set this to true. */
+const PHOTOS_ENABLED = false;
+/* New accounts need an invite code. */
+const INVITE_ONLY = true;
 const LEATHER = ["#7A2E2A", "#2F4F3A", "#2B3A55", "#A8742B", "#5A3550", "#3F5E63", "#6B4A2B", "#4A4A4A"];
 const STATUS = { reading: "Reading", read: "Read", wishlist: "Wishlist" };
 const $app = document.getElementById("app");
@@ -397,7 +418,7 @@ const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
 function localAdapter(KEY = "exlibris-v2", sandbox = false) {
   let db; const subs = { profiles: [], sugs: [], books: {} };
   const save = () => { try { localStorage.setItem(KEY, JSON.stringify(db)); } catch (e) { toast("Storage is full, change not saved"); } };
-  const emit = () => { (subs.acts || []).forEach(f => f(Object.entries(db.acts || {}).map(([id, d]) => ({ id, ...d })))); subs.profiles.forEach(f => f(structuredClone(db.profiles))); subs.sugs.forEach(f => f(Object.entries(db.sugs).map(([id, d]) => ({ id, ...d })))); for (const [u, fs] of Object.entries(subs.books)) fs.forEach(f => f(db.books[u] || {})); };
+  const emit = () => { (subs.follows || []).forEach(f => f(Object.entries(db.follows || {}).map(([id, d]) => ({ id, ...d })))); (subs.invites || []).forEach(f => f(Object.entries(db.invites || {}).map(([id, d]) => ({ id, ...d })))); (subs.acts || []).forEach(f => f(Object.entries(db.acts || {}).map(([id, d]) => ({ id, ...d })))); subs.profiles.forEach(f => f(structuredClone(db.profiles))); subs.sugs.forEach(f => f(Object.entries(db.sugs).map(([id, d]) => ({ id, ...d })))); for (const [u, fs] of Object.entries(subs.books)) fs.forEach(f => f(db.books[u] || {})); };
   let me = null; const authSubs = [];
   return {
     mode: "local",
@@ -414,6 +435,7 @@ function localAdapter(KEY = "exlibris-v2", sandbox = false) {
         save();
       }
       if (!db.acts) { db.acts = sandbox ? demoActs(db) : {}; save(); }
+      if (!db.follows) { db.follows = {}; db.invites = {}; if (sandbox) demoSocial(db); save(); }
       me = sessionStorage.getItem("exlibris-me") || null; if (me && !db.profiles[me]) me = null;
     },
     user: () => me ? { uid: me } : null,
@@ -427,6 +449,14 @@ function localAdapter(KEY = "exlibris-v2", sandbox = false) {
     async deleteBook(uid, id) { delete db.books[uid][id]; save(); emit(); },
     async setBooks(uid, map) { db.books[uid] = { ...(db.books[uid] || {}), ...map }; save(); emit(); },
     watchSugs(f) { subs.sugs.push(f); f(Object.entries(db.sugs).map(([id, d]) => ({ id, ...d }))); },
+    watchFollows(f) { (subs.follows = subs.follows || []).push(f); f(Object.entries(db.follows || {}).map(([id, d]) => ({ id, ...d }))); },
+    async setFollow(id, d) { (db.follows = db.follows || {})[id] = d; save(); emit(); },
+    async delFollow(id) { delete db.follows[id]; save(); emit(); },
+    watchInvites(uid, f) { (subs.invites = subs.invites || []).push(f); f(Object.entries(db.invites || {}).map(([id, d]) => ({ id, ...d }))); },
+    async addInvite(code, d) { (db.invites = db.invites || {})[code] = d; save(); emit(); },
+    async getInvite(code) { return db.invites?.[code] || null; },
+    async useInvite(code, uid) { if (db.invites?.[code]) { db.invites[code].usedBy = uid; db.invites[code].usedAt = today(); save(); emit(); } },
+    async uploadPhoto() { throw Object.assign(new Error("Photos are not switched on yet"), { code: "photos-off" }); },
     watchActs(f) { (subs.acts = subs.acts || []).push(f); f(Object.entries(db.acts || {}).map(([id, d]) => ({ id, ...d }))); },
     async addAct(d) { const id = "a" + Date.now().toString(36) + Math.random().toString(36).slice(2, 5); (db.acts = db.acts || {})[id] = d; save(); emit(); return id; },
     async updateAct(id, p) { if (db.acts?.[id]) { Object.assign(db.acts[id], p); save(); emit(); } },
@@ -464,6 +494,21 @@ async function firebaseAdapter(cfg) {
     async setBooks(uid, map) { const ids = Object.keys(map); for (let i = 0; i < ids.length; i += 400) { const b = F.writeBatch(fs); ids.slice(i, i + 400).forEach(id => b.set(F.doc(books(uid), id), map[id])); await b.commit(); } },
     watchSugs(f) { return F.onSnapshot(F.collection(fs, "suggestions"), s => f(s.docs.map(d => ({ id: d.id, ...d.data() }))), () => {}); },
     addSug: d => F.addDoc(F.collection(fs, "suggestions"), d),
+    watchFollows(f) { const me = auth.currentUser?.uid; if (!me) return; const out = { a: [], b: [] }, push = () => f([...out.a, ...out.b]);
+      F.onSnapshot(F.query(F.collection(fs, "follows"), F.where("from", "==", me)), s => { out.a = s.docs.map(d => ({ id: d.id, ...d.data() })); push(); }, () => {});
+      F.onSnapshot(F.query(F.collection(fs, "follows"), F.where("to", "==", me)), s => { out.b = s.docs.map(d => ({ id: d.id, ...d.data() })); push(); }, () => {}); },
+    setFollow: (id, d) => F.setDoc(F.doc(fs, "follows", id), d),
+    delFollow: id => F.deleteDoc(F.doc(fs, "follows", id)),
+    watchInvites(uid, f) { return F.onSnapshot(F.query(F.collection(fs, "invites"), F.where("by", "==", uid)), s => f(s.docs.map(d => ({ id: d.id, ...d.data() }))), () => {}); },
+    addInvite: (code, d) => F.setDoc(F.doc(fs, "invites", code), d),
+    getInvite: code => F.getDoc(F.doc(fs, "invites", code)).then(d => d.exists() ? d.data() : null),
+    useInvite: (code, uid) => F.updateDoc(F.doc(fs, "invites", code), { usedBy: uid, usedAt: today() }),
+    // photo foundation: compressed client side, stored under photos/<uid>/..., only runs when PHOTOS_ENABLED is true
+    async uploadPhoto(blob, path) {
+      if (!PHOTOS_ENABLED) throw Object.assign(new Error("Photos are not switched on yet"), { code: "photos-off" });
+      const S = await import(base + "firebase-storage.js"), st = S.getStorage(app), ref = S.ref(st, "photos/" + auth.currentUser.uid + "/" + path);
+      await S.uploadBytes(ref, blob, { contentType: blob.type || "image/webp", cacheControl: "public,max-age=31536000" }); return S.getDownloadURL(ref);
+    },
     watchActs(f) { return F.onSnapshot(F.query(F.collection(fs, "activity"), F.orderBy("at", "desc"), F.limit(150)), s => f(s.docs.map(d => ({ id: d.id, ...d.data() }))), () => {}); },
     addAct: d => F.addDoc(F.collection(fs, "activity"), JSON.parse(JSON.stringify(d))).then(r => r.id),
     updateAct: (id, p) => F.updateDoc(F.doc(fs, "activity", id), p),
@@ -473,7 +518,7 @@ async function firebaseAdapter(cfg) {
 }
 
 /* ---------- state ---------- */
-let DB, profiles = {}, sugs = [], acts = [], user = null;
+let DB, profiles = {}, sugs = [], acts = [], follows = [], user = null;
 const shelf = {}; const unsub = {};
 const ui = { route: "", tab: "all", q: "", genre: null, group: localStorage.getItem("exl-group") || "genre", sort: localStorage.getItem("exl-sort") || "title" };
 const meUid = () => user?.uid || null;
@@ -541,7 +586,10 @@ function render() {
   document.body.classList.toggle("full3d", r.startsWith("/room3d/"));
   const showTabs = classic() && (DB.mode === "local" || (user && profiles[user.uid])) && !r.startsWith("/new") && !r.startsWith("/room");
   document.body.classList.toggle("withtabs", showTabs); if (showTabs) drawTabs(r);
-  if (r === "/me") return renderMe();
+  if (r === "/me") { const u = myUid(); if (u) return renderProfile(u); }
+  if (r === "/settings") return renderMe();
+  if (r === "/explore") return renderExplore();
+  if (r.startsWith("/u/")) { const hnd = decodeURIComponent(r.slice(3)), u = Object.keys(profiles).find(k => profiles[k].handle === hnd) || (profiles[hnd] ? hnd : null); if (u) return renderProfile(u); }
   if (r === "/feed") return renderFeed();
   if (r === "/record") { lsSet("cc-rec", null); location.replace("#/log"); return; }
   if (r === "/log") return renderLog();
@@ -562,7 +610,7 @@ function mount(...kids) { const y = window.scrollY, same = $app.dataset.view ===
 
 function renderLibrary() {
   ui.route = "lib"; $app.dataset.view = "lib";
-  const list = Object.entries(profiles).sort((a, b) => (a[1].created || 0) - (b[1].created || 0));
+  const me0 = myUid(), list = Object.entries(profiles).filter(([u]) => !me0 || u === me0 || isFollowing(me0, u)).sort((a, b) => (a[1].created || 0) - (b[1].created || 0));
   const heights = [230, 210, 240, 200, 225, 215];
   const spines = list.map(([uid, p], i) => {
     const n = shelfCount(uid);
@@ -599,6 +647,7 @@ async function closeTo(path) { const t = turn({ paper: true, kicker: "Ex Libris"
 
 function renderShelf(uid) {
   const p = profiles[uid]; if (!p) { if (Object.keys(profiles).length) go("/"); return; }
+  if (!canSee(uid)) return renderProfile(uid);
   watch(uid); ui.route = "shelf:" + uid; $app.dataset.view = ui.route;
   const all = books(uid), color = p.color || LEATHER[0], edit = canEdit(uid);
   const counts = { reading: 0, read: 0, wishlist: 0 }; all.forEach(b => counts[b.status === "reading" ? "reading" : b.status === "wishlist" ? "wishlist" : "read"]++);
@@ -1022,6 +1071,7 @@ function decoPanel(uid) {
 function webglOK() { try { const c = document.createElement("canvas"); return !!(c.getContext("webgl2") || c.getContext("webgl")); } catch (e) { return false; } }
 async function renderRoom3D(uid) {
   const p = profiles[uid]; if (!p) { if (Object.keys(profiles).length) go("/"); return; }
+  if (!canSee(uid)) { location.replace("#/u/" + encodeURIComponent(p.handle || uid)); return; }
   watch(uid);
   if ($app.dataset.view === "room3d:" + uid && $app.querySelector(".room3d canvas")) return;
   if (!shelf[uid]) { ui.route = "room3d-wait"; $app.dataset.view = "room3d-wait"; mount(h("div", { class: "r3full" }, h("div", { class: "room3d" }, h("div", { class: "r3msg" }, "Opening " + (uid === myUid() ? "your" : p.name + "'s") + " room…")))); return; }
@@ -1373,7 +1423,8 @@ function drawTabs(r) {
   let bar = document.getElementById("tabbar");
   if (!bar) { bar = h("nav", { id: "tabbar", "aria-label": "Sections" }); document.body.append(bar); }
   const u = myUid(), mail = u ? sugs.filter(x => x.to === u).length : 0, news = newsCount();
-  const tabs = [["/feed", "🏠", "Feed"], ["/p/" + encodeURIComponent(u || ""), "📖", "Shelf"], ["/log", "＋", "Log"], ["/", "🏛", "Club", mail + news], ["/me", "👤", "You"]];
+  const reqs = u ? follows.filter(f => f.to === u && f.status === "pending").length : 0;
+  const tabs = [["/feed", "🏠", "Feed"], ["/explore", "🔍", "Explore", reqs], ["/log", "＋", "Log"], ["/", "🏛", "Club", mail + news], ["/me", "👤", "You"]];
   const cur = r === "/" ? "/" : r.startsWith("/p/") && decodeURIComponent(r.slice(3)) === u ? tabs[1][0] : r;
   bar.replaceChildren(...tabs.map(([path, ic, label, n]) => h("button", { type: "button", "aria-current": cur === path ? "page" : null, onclick: () => { if (path === "/") go("/"); else { ui.tab = "all"; go(path); } } }, h("span", { class: "ti" }, ic, n ? h("b", {}, n > 9 ? "9+" : n) : null), h("span", {}, label))));
 }
@@ -1403,8 +1454,7 @@ function renderMe() {
     h("header", { class: "mehead" }, h("div", { class: "meport", style: { "--c": color } }, (p.name || "?")[0].toUpperCase()),
       h("div", {}, h("h1", {}, p.name), h("div", { class: "muted" }, all.filter(b => stOf(b) === "read").length + " read · " + reading.length + " reading · " + all.filter(b => stOf(b) === "wishlist").length + " wished"),
         h("div", { class: "actions", style: { "margin-top": "8px" } }, h("button", { class: "rename", type: "button", onclick: () => editShelf(uid) }, "✎ Edit shelf"), h("button", { class: "rename", type: "button", onclick: () => go("/year/" + encodeURIComponent(uid)) }, "◔ Year in books")))),
-    diaryBlock(uid),
-    ...statsBlock(uid),
+    h("div", { class: "topbar" }, h("button", { class: "back", onclick: () => go("/me") }, "‹ Profile"), h("div", { class: "sc faint" }, "settings & more")),
     h("section", { class: "section card" }, h("h2", { style: { "font-size": "22px" } }, Y + " so far"), h("div", { class: "muted" }, fin + (goal ? " of " + goal : "") + " books finished"), goal ? h("div", { class: "bigprog" }, h("i", { style: { width: Math.min(100, fin / goal * 100) + "%" } })) : null),
     h("section", { class: "section" }, h("h2", {}, "Reading now", h("small", {}, reading.length)), reading.length ? h("div", { class: "rcards" }, reading.map(b => readingCard(uid, b))) : h("div", { class: "empty" }, "Nothing on the go. Pick something from your wishlist.")),
     h("section", { class: "section" }, h("h2", {}, "Authors"),
@@ -1418,6 +1468,7 @@ function renderMe() {
       h("p", { class: "faint", style: { "font-size": "13px" } }, "News watches who you follow, plus suggested authors that aren't muted.")),
     h("section", { class: "section" }, h("h2", {}, "Lent books", h("small", {}, lent.length)), lent.length ? h("div", { class: "results" }, lent.map(b => h("button", { class: "result", type: "button", onclick: () => openBook(uid, b.id) }, coverEl(b), h("div", {}, h("b", {}, b.title), h("small", {}, "With " + b.lentTo + (b.lentOn ? " since " + fmtDate(b.lentOn) : "")))))) : h("p", { class: "faint" }, "Nothing lent right now.")),
     h("section", { class: "section" }, h("h2", {}, "Favourite quotes", h("small", {}, quotes.length)), quotes.length ? h("div", { class: "quotes" }, quotes.map(([q, b]) => h("blockquote", { onclick: () => openBook(uid, b.id) }, "“" + q + "”", h("cite", {}, b.title)))) : h("p", { class: "faint" }, "Save lines you love from any book page.")),
+    h("section", { class: "section card" }, h("h2", { style: { "font-size": "22px" } }, "✉️ Invites"), h("p", { class: "muted", style: { "margin-top": "0" } }, "The Codex Club is invite only. Each code works once."), inviteBlock(uid)),
     h("section", { class: "section card" }, h("h2", { style: { "font-size": "22px" } }, "Settings"),
       h("div", { class: "field" }, "Layout", seg),
       h("div", { class: "faint", style: { "font-size": "13px" } }, PREVIEW ? "Test version" : "Version 7 Nov m"),
@@ -1468,7 +1519,7 @@ function records(uid) {
   return r;
 }
 async function postAct(d) { const uid = myUid(); if (!uid || !DB.addAct) return; try { return await DB.addAct({ uid, at: new Date().toISOString(), kudos: [], comments: [], ...d }); } catch (e) { toast("Could not post to the feed: " + (e.code || e.message)); } }
-function avatar(uid, size = 40) { const p = profiles[uid] || {}; return h("div", { class: "ava", style: { "--c": p.color || LEATHER[0], width: size + "px", height: size + "px", "font-size": size * .48 + "px" } }, (p.name || "?")[0].toUpperCase()); }
+function avatar(uid, size = 40) { const p = profiles[uid] || {}; const st = { "--c": p.avatarColor || p.color || LEATHER[0], width: size + "px", height: size + "px", "font-size": size * .48 + "px" }; return p.photo ? h("img", { class: "ava", src: p.photo, alt: "", style: st }) : h("div", { class: "ava", style: st }, (p.name || "?")[0].toUpperCase()); }
 function actCard(a) {
   const me = myUid(), mine = a.uid === me, who = profiles[a.uid]?.name || "Someone", kud = arr(a.kudos), com = arr(a.comments);
   const head = h("div", { class: "ahead" }, avatar(a.uid), h("div", {}, h("b", {}, who), h("div", { class: "faint", style: { "font-size": "13px" } }, ago(a.at) + (a.type === "session" ? " · " + (a.feel || "") : ""))));
@@ -1508,7 +1559,7 @@ function renderFeed() {
   const uid = myUid(); if (!uid) { go("/"); return; } watch(uid);
   mount(h("header", { class: "feedhead" }, h("h1", {}, "Feed"), h("button", { class: "btn primary rec", type: "button", onclick: () => go("/log") }, "＋ Log")),
     weekCard(uid),
-    acts.length ? h("div", { class: "feed" }, acts.slice(0, 60).map(actCard)) : h("div", { class: "empty", style: { "margin-top": "16px" } }, "No activity yet. Tap ＋ Log to update your pages or log a finished book."));
+    feedActs(uid).length ? h("div", { class: "feed" }, feedActs(uid).slice(0, 60).map(actCard)) : h("div", { class: "empty", style: { "margin-top": "16px" } }, "Nothing here yet. Follow readers from Explore, or tap ＋ Log to post your own pages and reviews."));
 }
 let recTick = null;
 function renderRecord() {
@@ -1583,6 +1634,154 @@ function clubBoards() {
     h("section", { class: "card" }, h("h2", {}, "📅 " + mname + " challenge"), h("div", { class: "muted" }, "Finish 3 books this month."), ...ids.map(u => { const m = monthMins(u); return h("div", { class: "chal" }, h("span", {}, profiles[u].name + (m >= GOAL ? " ✅" : "")), h("div", { class: "bigprog" }, h("i", { style: { width: Math.min(100, m / GOAL * 100) + "%" } })), h("small", { class: "faint" }, m + " / " + GOAL)); })));
 }
 
+
+
+/* ---------- social: profiles, follows, privacy, invites ---------- */
+const fid = (a, b) => a + "_" + b;
+const followOf = (a, b) => follows.find(f => f.from === a && f.to === b);
+const isFollowing = (a, b) => followOf(a, b)?.status === "accepted";
+const canSee = uid => { const me = myUid(); return !profiles[uid]?.private || uid === me || (me && isFollowing(me, uid)); };
+const followersOf = uid => follows.filter(f => f.to === uid && f.status === "accepted").map(f => f.from);
+const followingOf = uid => follows.filter(f => f.from === uid && f.status === "accepted").map(f => f.to);
+function feedActs(uid) { const ok = new Set([uid, ...followingOf(uid)]); return acts.filter(a => ok.has(a.uid)); }
+const handleOk = h0 => /^[a-z0-9._]{3,20}$/.test(h0);
+async function freeHandle(name) { let base = slug(name).replace(/-/g, ".").slice(0, 16) || "reader"; if (base.length < 3) base += ".reads"; let hnd = base, i = 2; while (Object.values(profiles).some(p => p.handle === hnd)) hnd = base + i++; return hnd; }
+function handleOf(uid) { return profiles[uid]?.handle || slug(profiles[uid]?.name || uid).replace(/-/g, "."); }
+async function doFollow(target) {
+  const me = myUid(); if (!me || me === target) return;
+  const cur = followOf(me, target);
+  if (cur) { await DB.delFollow(cur.id); toast(cur.status === "pending" ? "Request cancelled" : "Unfollowed"); return; }
+  const st = profiles[target]?.private ? "pending" : "accepted";
+  await DB.setFollow(fid(me, target), { from: me, to: target, status: st, at: new Date().toISOString() });
+  toast(st === "pending" ? "Request sent" : "Following " + profiles[target].name);
+}
+function followBtn(target) {
+  const me = myUid(), f = me && followOf(me, target), back = me && isFollowing(target, me);
+  const label = !f ? (back ? "Follow back" : "Follow") : f.status === "pending" ? "Requested" : "Following";
+  return h("button", { class: "btn " + (!f ? "primary" : ""), type: "button", onclick: () => { if (f && f.status === "accepted" && !confirm("Unfollow " + profiles[target].name + "?")) return; doFollow(target); } }, label);
+}
+// shrinks a photo before upload; ready for when photos are switched on
+async function compressPhoto(file, max = 1080) {
+  const url = URL.createObjectURL(file), im = new Image(); im.src = url; await im.decode();
+  const k = Math.min(1, max / Math.max(im.naturalWidth, im.naturalHeight)), c = document.createElement("canvas"); c.width = Math.round(im.naturalWidth * k); c.height = Math.round(im.naturalHeight * k);
+  c.getContext("2d").drawImage(im, 0, 0, c.width, c.height); URL.revokeObjectURL(url);
+  return new Promise(r => c.toBlob(r, "image/webp", .82));
+}
+function editProfile(uid) {
+  const p = profiles[uid]; let color = p.avatarColor || p.color || LEATHER[0], top4 = arr(p.top4).slice(0, 4);
+  const name = h("input", { value: p.name || "", maxlength: 30 }), handle = h("input", { value: handleOf(uid), maxlength: 20, autocapitalize: "off", autocomplete: "off", spellcheck: "false" });
+  const bio = h("textarea", { rows: 3, maxlength: 150, placeholder: "A line about you and what you love to read" }); bio.value = p.bio || "";
+  const link = h("input", { value: p.link || "", placeholder: "https://", type: "url" });
+  const priv = h("input", { type: "checkbox", checked: !!p.private });
+  const msg = h("div", { class: "status" });
+  const prev = h("div", {}); const drawPrev = () => prev.replaceChildren(h("div", { class: "ava big", style: { "--c": color } }, (name.value || "?")[0].toUpperCase())); drawPrev(); name.oninput = drawPrev;
+  const sw = h("div", { class: "swatches" }, LEATHER.map(cl => h("button", { type: "button", class: "swatch round", style: { "--c": cl }, "aria-pressed": cl === color ? "true" : "false", onclick: e => { color = cl; sw.querySelectorAll(".swatch").forEach(x => x.setAttribute("aria-pressed", x === e.currentTarget ? "true" : "false")); drawPrev(); } })));
+  const photoIn = h("input", { type: "file", accept: "image/*", hidden: true, onchange: async e => { const f = e.target.files[0]; if (!f) return; try { const url = await DB.uploadPhoto(await compressPhoto(f, 512), "avatar.webp"); await DB.saveProfile(uid, { photo: url }); toast("Photo updated"); } catch (err) { msg.textContent = err.code === "photos-off" ? "Profile photos are coming soon." : "Upload failed: " + (err.code || err.message); } } });
+  const readB = books(uid).filter(b => stOf(b) === "read");
+  const topRow = h("div", { class: "top4 edit" }); const drawTop = () => topRow.replaceChildren(...[0, 1, 2, 3].map(i => { const b = readB.find(x => x.id === top4[i]); return h("button", { type: "button", class: "t4slot", onclick: () => { if (b) { top4.splice(i, 1); drawTop(); } else pick(); } }, b ? coverEl(b) : h("span", {}, "+")); })); drawTop();
+  const q = h("input", { type: "search", placeholder: "Search your read books" }), res = h("div", { class: "results" }), pickBox = h("div", { hidden: true }, q, res);
+  const pick = () => { pickBox.hidden = false; q.focus(); };
+  q.oninput = () => { const v = norm(q.value); res.replaceChildren(...(v.length < 2 ? [] : readB.filter(b => norm(b.title).includes(v) && !top4.includes(b.id)).slice(0, 5).map(b => h("button", { type: "button", class: "result", onclick: () => { if (top4.length < 4) top4.push(b.id); q.value = ""; res.replaceChildren(); pickBox.hidden = top4.length >= 4; drawTop(); } }, coverEl(b), h("div", {}, h("b", {}, b.title), h("small", {}, arr(b.authors).join(", "))))))); };
+  const save = async e => {
+    e.preventDefault(); const hnd = handle.value.trim().toLowerCase().replace(/^@/, "");
+    if (!handleOk(hnd)) { msg.textContent = "Username: 3 to 20 letters, numbers, dots or underscores."; return; }
+    if (Object.entries(profiles).some(([u, x]) => u !== uid && x.handle === hnd)) { msg.textContent = "@" + hnd + " is taken."; return; }
+    let url = link.value.trim(); if (url && !/^https?:\/\//.test(url)) url = "https://" + url;
+    msg.textContent = "Saving";
+    try { await DB.saveProfile(uid, { name: name.value.trim() || p.name, handle: hnd, bio: bio.value.trim(), link: url, private: priv.checked, avatarColor: color, top4 }); close(); toast("Profile saved"); }
+    catch (err) { msg.textContent = "Could not save: " + (err.code || err.message); }
+  };
+  const { close } = sheet(h("form", { onsubmit: save, style: { display: "flex", "flex-direction": "column", gap: "12px" } },
+    h("h2", {}, "Edit profile"),
+    h("div", { class: "editava" }, prev, h("div", { style: { flex: "1" } }, h("div", { class: "field" }, "Avatar colour", sw), h("button", { class: "btn ghost", type: "button", style: { "margin-top": "8px" }, onclick: () => PHOTOS_ENABLED ? photoIn.click() : (msg.textContent = "Profile photos are coming soon.") }, "📷 Photo" + (PHOTOS_ENABLED ? "" : " (soon)")), photoIn)),
+    h("label", { class: "field" }, "Name", name), h("label", { class: "field" }, "Username", h("div", { class: "handlein" }, h("span", {}, "@"), handle)),
+    h("label", { class: "field" }, "Bio", bio), h("label", { class: "field" }, "Link", link),
+    h("div", { class: "field" }, "Top 4 books (tap a cover to remove it)", topRow, pickBox),
+    h("label", { class: "chk switch" }, priv, h("span", {}, h("b", {}, "Private account"), h("br"), h("small", { class: "faint" }, "Only followers you approve see your posts, shelf, diary and room."))),
+    h("div", { class: "actions" }, h("button", { class: "btn primary", type: "submit" }, "Save"), h("button", { class: "btn ghost", type: "button", onclick: () => close() }, "Cancel")), msg));
+}
+function renderProfile(uid) {
+  const me = myUid(), p = profiles[uid]; if (!p) { go("/"); return; }
+  const mine = uid === me, visible = canSee(uid); if (visible) watch(uid);
+  ui.route = "profile:" + uid; $app.dataset.view = ui.route;
+  ui.ptab = ui.ptabFor === uid ? ui.ptab : "posts"; ui.ptabFor = uid;
+  const posts = acts.filter(a => a.uid === uid), nRead = shelf[uid] ? books(uid).filter(b => stOf(b) === "read").length : p.sum?.read ?? "·";
+  const count = (n, l, onclick) => h("button", { class: "pcount", type: "button", onclick }, h("b", {}, n), h("span", {}, l));
+  const top = arr(p.top4).map(id => (shelf[uid] || {})[id] ? { id, ...shelf[uid][id] } : null).filter(Boolean);
+  const tab = (k, l) => h("button", { class: "ptab", "aria-selected": ui.ptab === k ? "true" : "false", onclick: () => { ui.ptab = k; render(); } }, l);
+  let body;
+  if (!visible) body = h("div", { class: "locked" }, h("div", { class: "lockic" }, "🔒"), h("b", {}, "This account is private"), h("p", { class: "muted" }, "Follow " + p.name + " to see their posts, books and room."));
+  else if (ui.ptab === "posts") body = posts.length ? h("div", { class: "feed" }, posts.slice(0, 40).map(actCard)) : h("div", { class: "empty" }, mine ? "Your posts will show here. Tap ＋ Log to share pages or a review." : "No posts yet.");
+  else if (ui.ptab === "diary") body = diaryBlock(uid);
+  else if (ui.ptab === "stats") body = h("div", {}, ...statsBlock(uid));
+  else body = h("div", { class: "pgrid" }, ["reading", "read", "wishlist"].map(st => { const l = books(uid).filter(b => stOf(b) === st); return h("button", { class: "card", type: "button", onclick: () => { ui.tab = st === "read" ? "all" : st; go("/p/" + encodeURIComponent(uid)); } }, h("h2", { style: { "font-size": "20px" } }, STATUS[st] + " ", h("small", { class: "faint" }, l.length)), h("div", { class: "minicovers" }, l.slice(0, 5).map(b => coverEl(b)))); }),
+    h("button", { class: "card", type: "button", onclick: () => go(roomPath(uid).replace("/p/", "/room3d/")) }, h("h2", { style: { "font-size": "20px" } }, "🏛 " + (mine ? "Your room" : p.name + "'s room")), h("div", { class: "muted" }, "Step inside the study.")));
+  const reqs = mine ? follows.filter(f => f.to === uid && f.status === "pending") : [];
+  mount(
+    h("div", { class: "phtop" }, h("b", {}, "@" + handleOf(uid), p.private ? " 🔒" : ""), mine ? h("button", { class: "iconbtn", type: "button", "aria-label": "Settings", onclick: () => go("/settings") }, "⚙") : h("button", { class: "iconbtn", type: "button", onclick: () => history.back() }, "✕")),
+    h("header", { class: "prof" }, avatar(uid, 86), h("div", { class: "pcounts" }, count(posts.length, "posts"), count(followersOf(uid).length, "followers", () => peopleSheet("Followers", followersOf(uid))), count(followingOf(uid).length, "following", () => peopleSheet("Following", followingOf(uid))), count(nRead, "read"))),
+    h("div", { class: "pinfo" }, h("b", {}, p.name), p.bio ? h("p", {}, p.bio) : null, p.link ? h("a", { href: p.link, target: "_blank", rel: "noopener nofollow" }, p.link.replace(/^https?:\/\//, "")) : null, !mine && me && isFollowing(uid, me) ? h("div", { class: "faint", style: { "font-size": "13px" } }, "Follows you") : null),
+    h("div", { class: "actions pact" }, mine ? [h("button", { class: "btn", type: "button", onclick: () => editProfile(uid) }, "Edit profile"), h("button", { class: "btn", type: "button", onclick: () => shareProfile(uid) }, "Share profile")] : [followBtn(uid), h("button", { class: "btn", type: "button", onclick: () => go("/letters") }, "Recommend a book")]),
+    reqs.length ? h("button", { class: "reqbar", type: "button", onclick: () => go("/explore") }, "👤 " + reqs.length + " follow request" + (reqs.length > 1 ? "s" : "") + " waiting ›") : null,
+    visible && top.length ? h("section", { class: "section" }, h("div", { class: "sc faint" }, "favourite books"), h("div", { class: "top4" }, top.map(b => h("button", { class: "t4slot", type: "button", onclick: () => openBook(uid, b.id) }, coverEl(b))))) : null,
+    visible ? h("div", { class: "ptabs" }, tab("posts", "Posts"), tab("diary", "Diary"), tab("stats", "Stats"), tab("books", "Books")) : null,
+    body);
+}
+function peopleSheet(title, ids) {
+  const { close } = sheet(h("h2", {}, title), ids.length ? h("div", { class: "people" }, ids.map(u => personRow(u, () => close(true)))) : h("p", { class: "muted" }, "Nobody yet."));
+}
+function personRow(u, before) {
+  const p = profiles[u] || {}, me = myUid();
+  return h("div", { class: "person" }, h("button", { class: "personlink", type: "button", onclick: () => { before?.(); go("/u/" + encodeURIComponent(handleOf(u))); } }, avatar(u, 44), h("div", {}, h("b", {}, p.name, p.private ? " 🔒" : ""), h("small", { class: "faint" }, "@" + handleOf(u) + (p.sum?.read ? " · " + p.sum.read + " read" : "")))), u !== me ? followBtn(u) : null);
+}
+async function shareProfile(uid) {
+  const url = location.origin + location.pathname + "#/u/" + encodeURIComponent(handleOf(uid));
+  try { if (navigator.share) await navigator.share({ title: profiles[uid].name + " on The Codex Club", url }); else { await navigator.clipboard.writeText(url); toast("Link copied"); } } catch (e) {}
+}
+function renderExplore() {
+  ui.route = "explore"; $app.dataset.view = "explore";
+  const me = myUid(); if (!me) { go("/"); return; }
+  const q = h("input", { type: "search", placeholder: "Search people by name or @username", value: ui.pq || "" });
+  const res = h("div", { class: "people" });
+  const draw = () => { const v = (q.value || "").toLowerCase().replace(/^@/, "").trim(); ui.pq = q.value; res.replaceChildren(...(v.length < 1 ? [] : Object.keys(profiles).filter(u => u !== me && ((profiles[u].name || "").toLowerCase().includes(v) || handleOf(u).includes(v))).slice(0, 20).map(u => personRow(u)))); };
+  q.oninput = draw; draw();
+  const reqs = follows.filter(f => f.to === me && f.status === "pending");
+  const sugg = Object.keys(profiles).filter(u => u !== me && !followOf(me, u)).sort((a, b) => followersOf(b).length - followersOf(a).length).slice(0, 8);
+  mount(h("header", { class: "feedhead" }, h("h1", {}, "Explore")), q, res,
+    reqs.length ? h("section", { class: "section" }, h("h2", {}, "Follow requests", h("small", {}, reqs.length)), h("div", { class: "people" }, reqs.map(f => h("div", { class: "person" }, h("button", { class: "personlink", type: "button", onclick: () => go("/u/" + encodeURIComponent(handleOf(f.from))) }, avatar(f.from, 44), h("div", {}, h("b", {}, profiles[f.from]?.name || "Someone"), h("small", { class: "faint" }, "@" + handleOf(f.from)))),
+      h("div", { class: "actions" }, h("button", { class: "btn primary", type: "button", onclick: async () => { await DB.setFollow(f.id, { from: f.from, to: f.to, status: "accepted", at: f.at || new Date().toISOString() }); toast("Accepted"); } }, "Accept"), h("button", { class: "btn", type: "button", onclick: () => DB.delFollow(f.id) }, "Decline")))))) : null,
+    sugg.length ? h("section", { class: "section" }, h("h2", {}, "Readers to follow"), h("div", { class: "people" }, sugg.map(u => personRow(u)))) : null,
+    h("section", { class: "section card" }, h("h2", { style: { "font-size": "22px" } }, "✉️ Invite a friend"), h("p", { class: "muted" }, "The Codex Club is invite only. You have codes to give to the people you want here."), h("button", { class: "btn primary", type: "button", onclick: () => go("/settings") }, "My invites")));
+}
+const INVITES_PER_USER = 5;
+function inviteBlock(uid) {
+  const box = h("div", { class: "invites" }, h("div", { class: "faint" }, "Loading invites…"));
+  let shown = false;
+  DB.watchInvites?.(uid, list => {
+    const mine = list.filter(i => i.by === uid);
+    const draw = () => box.replaceChildren(...mine.map(i => h("div", { class: "invrow" + (i.usedBy ? " used" : "") }, h("code", {}, i.id), i.usedBy ? h("small", { class: "faint" }, "used by " + (profiles[i.usedBy]?.name || "someone")) : h("button", { class: "btn", type: "button", onclick: () => shareInvite(i.id) }, "Share"))),
+      mine.length < INVITES_PER_USER ? h("button", { class: "btn ghost", type: "button", onclick: async () => { const c = "BOOK-" + Math.random().toString(36).slice(2, 6).toUpperCase(); await DB.addInvite(c, { by: uid, at: today() }); } }, "＋ New invite (" + (INVITES_PER_USER - mine.length) + " left)") : null);
+    if (box.isConnected || !shown) { shown = true; draw(); }
+  });
+  return box;
+}
+async function shareInvite(code) {
+  const url = location.origin + location.pathname.replace(/preview\/?$/, "") + "?invite=" + code;
+  const text = "Join me on The Codex Club, a little social club for readers. Your invite code: " + code;
+  try { if (navigator.share) await navigator.share({ title: "The Codex Club", text, url }); else { await navigator.clipboard.writeText(text + " " + url); toast("Invite copied"); } } catch (e) {}
+}
+function demoSocial(db) {
+  const P = db.profiles;
+  Object.assign(P.jacopo, { handle: "jacopo.reads", bio: "Thrillers, history and too much fantasy. Groningen 📚", private: false, top4: Object.keys(db.books.jacopo || {}).filter(k => /(iron-flame|fourth-wing|red-storm|leviathan)/.test(k)).slice(0, 4) });
+  if (P.gaia) Object.assign(P.gaia, { name: "Gaia", handle: "gaia.legge", bio: "Romantasy and Greek myths ✨", private: true, top4: ["circe"] });
+  P.papa = { name: "Papà", color: LEATHER[1], created: 3, handle: "papa.legge", bio: "Classici e gialli.", private: false }; db.books.papa = { "il-nome-della-rosa": { title: "Il nome della rosa", authors: ["Umberto Eco"], status: "read", rating: 5, genres: ["Mystery"], finished: today() } };
+  P.elena = { name: "Elena", color: LEATHER[5], created: 4, handle: "elena.pages", bio: "Bookstagrammer in Milan. Literary fiction, always.", private: false }; db.books.elena = { "tomorrow": { title: "Tomorrow, and Tomorrow, and Tomorrow", authors: ["Gabrielle Zevin"], status: "read", rating: 4.5, genres: ["Literary fiction"], finished: today() } };
+  P.marco = { name: "Marco", color: LEATHER[3], created: 5, handle: "marco_scifi", bio: "Hard sci fi only.", private: true }; db.books.marco = { "dune": { title: "Dune", authors: ["Frank Herbert"], status: "read", rating: 5 } };
+  const now = new Date().toISOString(), F = (a, b, st = "accepted") => db.follows[fid(a, b)] = { from: a, to: b, status: st, at: now };
+  F("jacopo", "gaia"); F("gaia", "jacopo"); F("jacopo", "papa"); F("papa", "jacopo"); F("elena", "jacopo"); F("gaia", "elena"); F("marco", "jacopo", "pending");
+  db.acts["delena1"] = { uid: "elena", type: "diary", bookId: "tomorrow", book: "Tomorrow, and Tomorrow, and Tomorrow", authors: ["Gabrielle Zevin"], cover: "", rating: 4.5, liked: true, date: today(), review: "A love letter to friendship and to games. I cried on a train.", at: new Date(Date.now() - 36e5 * 5).toISOString(), kudos: ["gaia"], comments: [] };
+  db.invites["BOOK-DEMO"] = { by: "jacopo", at: today() }; db.invites["BOOK-7Q2K"] = { by: "jacopo", at: today(), usedBy: "gaia", usedAt: today() };
+}
 
 /* ---------- Letterboxd side: diary, reviews, quick logging ---------- */
 function diarySheet(uid, b) {
@@ -2017,8 +2216,10 @@ function renderNewProfile(first) {
       else if (src.value === "phone-gaia") seed = legacy.gaia_books;
       else if (src.value.startsWith("v2-")) { const k = src.value.slice(3); seed = v2.books[k]; if (v2.profiles[k].seedFrom) { p.seedFrom = v2.profiles[k].seedFrom; p.seen = v2.profiles[k].seen || []; } if (!name.value.trim()) name.value = v2.profiles[k].name; }
       ui.creating = true; submit.disabled = true;
+      p.handle = await freeHandle(n); p.private = false;
       await DB.saveProfile(uid, p);
       profiles[uid] = { ...(profiles[uid] || {}), ...p };
+      const inv = sessionStorage.getItem("cc-invite"); if (inv && DB.mode === "firebase") { await DB.useInvite(inv, uid).catch(() => {}); sessionStorage.removeItem("cc-invite"); }
       if (seed && Object.keys(seed).length) { msg.textContent = "Shelving " + Object.keys(seed).length + " books"; await DB.setBooks(uid, seed); }
       if (DB.mode === "local") DB.use(uid);
       ui.creating = false; $app.dataset.view = ""; toast("Your shelf is ready");
@@ -2050,13 +2251,19 @@ function renderAuth() {
   let mode = "in";
   const email = h("input", { type: "email", autocomplete: "email", required: true }), pass = h("input", { type: "password", autocomplete: "current-password", required: true, minlength: 6 }), msg = h("div", { class: "status", role: "status" });
   const btn = h("button", { class: "btn primary", type: "submit" }, "Sign in"), swap = h("button", { class: "btn ghost", type: "button" }, "New here? Create an account");
-  swap.onclick = () => { mode = mode === "in" ? "up" : "in"; btn.textContent = mode === "in" ? "Sign in" : "Create account"; swap.textContent = mode === "in" ? "New here? Create an account" : "I already have an account"; pass.autocomplete = mode === "in" ? "current-password" : "new-password"; msg.textContent = ""; };
+  swap.onclick = () => { mode = mode === "in" ? "up" : "in"; codeRow.hidden = !(mode === "up" && INVITE_ONLY); btn.textContent = mode === "in" ? "Sign in" : "Create account"; swap.textContent = mode === "in" ? "New here? Create an account" : "I already have an account"; pass.autocomplete = mode === "in" ? "current-password" : "new-password"; msg.textContent = ""; };
   const errs = { "auth/invalid-credential": "Wrong email or password.", "auth/email-already-in-use": "That email already has an account, sign in instead.", "auth/weak-password": "Use at least 6 characters.", "auth/invalid-email": "That email does not look right.", "auth/network-request-failed": "No internet connection." };
-  const submit = async e => { e.preventDefault(); btn.disabled = true; msg.textContent = mode === "in" ? "Signing in" : "Creating your account"; try { await (mode === "in" ? DB.signIn : DB.signUp)(email.value.trim(), pass.value); } catch (err) { msg.textContent = errs[err.code] || "Could not sign in: " + err.code; } btn.disabled = false; };
+  const code = h("input", { autocomplete: "off", placeholder: "e.g. BOOK-7Q2K", value: new URLSearchParams(location.search).get("invite") || sessionStorage.getItem("cc-invite") || "" });
+  const codeRow = h("label", { class: "field", hidden: true }, "Invite code", code);
+  const submit = async e => { e.preventDefault(); btn.disabled = true; msg.textContent = mode === "in" ? "Signing in" : "Creating your account";
+    try {
+      if (mode === "up" && INVITE_ONLY) { const c = code.value.trim().toUpperCase(), inv = c && await DB.getInvite(c).catch(() => null); if (!inv || inv.usedBy) { msg.textContent = "The Codex Club is invite only. Ask a member for a code."; btn.disabled = false; return; } sessionStorage.setItem("cc-invite", c); }
+      await (mode === "in" ? DB.signIn : DB.signUp)(email.value.trim(), pass.value);
+    } catch (err) { msg.textContent = errs[err.code] || "Could not sign in: " + err.code; } btn.disabled = false; };
   mount(
     h("header", { class: "titlepage" }, h("div", { class: "kicker" }, "Ex Libris"), h("h1", {}, "The Codex Club"), h("p", {}, "Sign in to open your shelf")),
     h("div", { class: "fleuron" }, "❦"),
-    h("form", { class: "auth", onsubmit: submit }, h("label", { class: "field" }, "Email", email), h("label", { class: "field" }, "Password", pass), btn, swap, msg,
+    h("form", { class: "auth", onsubmit: submit }, h("label", { class: "field" }, "Email", email), h("label", { class: "field" }, "Password", pass), codeRow, btn, swap, msg,
       h("button", { class: "btn ghost", type: "button", onclick: async () => { if (!email.value) { msg.textContent = "Type your email first."; return; } try { await DB.reset(email.value.trim()); msg.textContent = "Check your inbox for a reset link."; } catch (err) { msg.textContent = errs[err.code] || err.code; } } }, "Forgot password"))
   );
 }
@@ -2077,12 +2284,13 @@ async function importBackup(e) {
 function go(path) { if (location.hash.slice(1) === path) render(); else location.hash = path; }
 window.addEventListener("hashchange", render);
 (async () => {
-  try { DB = PREVIEW ? localAdapter("exlibris-preview-sandbox-4", true) : FIREBASE_CONFIG ? await firebaseAdapter(FIREBASE_CONFIG) : localAdapter(); }
+  try { DB = PREVIEW ? localAdapter("exlibris-preview-sandbox-5", true) : FIREBASE_CONFIG ? await firebaseAdapter(FIREBASE_CONFIG) : localAdapter(); }
   catch (e) { DB = localAdapter(); setTimeout(() => toast("Sync is unreachable, working on this phone only"), 500); }
   await DB.init();
   user = DB.user();
   DB.watchProfiles(p => { profiles = p; const me = myUid(); if (DB.mode === "local") Object.keys(p).forEach(watch); else if (me) watch(me); render(); });
   DB.watchSugs(s => { sugs = s; render(); });
+  DB.watchFollows?.(f => { follows = f; render(); });
   DB.watchActs?.(a => { acts = a.sort((x, y) => (y.at || "").localeCompare(x.at || "")); if (!["record"].includes(ui.route)) render(); });
   setTimeout(() => { const u = myUid(); if (u && navigator.onLine) fetchNews(u); }, 4000);
   DB.onAuth(u => { const was = user?.uid; user = u; if (was !== u?.uid) { render(); } });
