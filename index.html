@@ -1383,7 +1383,7 @@ function readingCard(uid, b) {
     h("div", { class: "rbody" }, h("div", { class: "t" }, b.title), h("div", { class: "a" }, arr(b.authors).join(", ")),
       h("div", { class: "bigprog" }, h("i", { style: { width: pct + "%" } })),
       h("div", { class: "faint", style: { "font-size": "13px" } }, b.pages ? "Page " + (b.page || 0) + " of " + b.pages + (pct ? " · " + pct + "%" : "") : "Add the page count in the book page"),
-      edit && b.pages ? h("div", { class: "actions" }, h("button", { class: "btn", type: "button", onclick: async () => { const page = Math.min(b.pages, (b.page || 0) + 10); await DB.updateBook(uid, b.id, page >= b.pages ? { page, status: "read", finished: today() } : { page }); toast(page >= b.pages ? "Finished! Give it some stars" : "Page " + page); } }, "+10 pages")) : null));
+      edit && b.pages ? h("div", { class: "actions" }, h("button", { class: "btn", type: "button", onclick: async () => { const page = Math.min(b.pages, (b.page || 0) + 10); const from = b.page || 0; await DB.updateBook(uid, b.id, { page }); if (uid === myUid() && page > from) postAct({ type: "progress", bookId: b.id, book: b.title, authors: arr(b.authors), cover: b.cover || "", from, to: page, pages: page - from, total: b.pages }); if (page >= b.pages) diarySheet(uid, { ...b, page }); else toast("Page " + page); } }, "+10 pages")) : null));
 }
 function renderMe() {
   const uid = myUid(); if (!uid || !profiles[uid]) { go("/"); return; }
