@@ -543,7 +543,7 @@ function render() {
   document.body.classList.toggle("withtabs", showTabs); if (showTabs) drawTabs(r);
   if (r === "/me") return renderMe();
   if (r === "/feed") return renderFeed();
-  if (r === "/record") return renderRecord();
+  if (r === "/record") { lsSet("cc-rec", null); location.replace("#/log"); return; }
   if (r === "/log") return renderLog();
   if (r === "/p/me") { const u = myUid(); if (u) { location.replace("#/p/" + encodeURIComponent(u)); return; } }
   if (DB.mode === "firebase" && !user) return renderAuth();
@@ -1032,7 +1032,7 @@ async function renderRoom3D(uid) {
   const modeBtn = h("button", { class: "r3btn wide", type: "button" }), rotL = h("button", { class: "r3btn", type: "button", "aria-label": "Rotate left" }, "↺"), rotR = h("button", { class: "r3btn", type: "button", "aria-label": "Rotate right" }, "↻");
   const zIn = h("button", { class: "r3btn", type: "button", "aria-label": "Zoom in" }, "+"), zOut = h("button", { class: "r3btn", type: "button", "aria-label": "Zoom out" }, "−");
   const decoBtn = mine ? h("button", { class: "r3btn wide", type: "button", "aria-pressed": R3.deco ? "true" : "false", onclick: () => { R3.deco = !R3.deco; if (!R3.deco) R3.draft = null; rebuildRoom(); } }, "🎨 Decorate") : null;
-  const recBtn = mine ? h("button", { class: "r3btn wide rec", type: "button", onclick: () => go("/record") }, "● Record") : null;
+  const recBtn = mine ? h("button", { class: "r3btn wide rec", type: "button", onclick: () => go("/log") }, "＋ Log") : null;
   const bar = h("div", { class: "r3bar" }, zOut, rotL, modeBtn, rotR, zIn, recBtn, decoBtn);
   const hint = h("div", { class: "r3hint" }, (mine && S.mail ? "A sealed letter is waiting on your desk. " : "") + "Drag to turn, pinch to zoom, two fingers to move, tap to open.");
   setTimeout(() => hint.classList.add("gone"), 5000);
@@ -1383,7 +1383,7 @@ function readingCard(uid, b) {
     h("div", { class: "rbody" }, h("div", { class: "t" }, b.title), h("div", { class: "a" }, arr(b.authors).join(", ")),
       h("div", { class: "bigprog" }, h("i", { style: { width: pct + "%" } })),
       h("div", { class: "faint", style: { "font-size": "13px" } }, b.pages ? "Page " + (b.page || 0) + " of " + b.pages + (pct ? " · " + pct + "%" : "") : "Add the page count in the book page"),
-      edit && b.pages ? h("div", { class: "actions" }, h("button", { class: "btn", type: "button", onclick: async () => { const page = Math.min(b.pages, (b.page || 0) + 10); await DB.updateBook(uid, b.id, page >= b.pages ? { page, status: "read", finished: today() } : { page }); toast(page >= b.pages ? "Finished! Give it some stars" : "Page " + page); } }, "+10 pages")) : null));
+      edit && b.pages ? h("div", { class: "actions" }, h("button", { class: "btn", type: "button", onclick: async () => { const page = Math.min(b.pages, (b.page || 0) + 10); const from = b.page || 0; await DB.updateBook(uid, b.id, { page }); if (uid === myUid() && page > from) postAct({ type: "progress", bookId: b.id, book: b.title, authors: arr(b.authors), cover: b.cover || "", from, to: page, pages: page - from, total: b.pages }); if (page >= b.pages) diarySheet(uid, { ...b, page }); else toast("Page " + page); } }, "+10 pages")) : null));
 }
 function renderMe() {
   const uid = myUid(); if (!uid || !profiles[uid]) { go("/"); return; }
@@ -1437,10 +1437,10 @@ function demoActs(db) {
   const lw = Object.entries(jb).find(([, b]) => /leviathan/i.test(b.title)) || Object.entries(jb).find(([, b]) => b.status === "reading") || ["x", {}];
   const cm = Object.entries(jb).find(([, b]) => /crown of midnight/i.test(b.title)) || lw;
   [[9, 22, 38, 31, 0], [8, 21, 52, 44, 31], [6, 7, 25, 18, 75], [5, 22, 64, 57, 93], [3, 21, 41, 36, 150], [2, 13, 30, 22, 186], [1, 22, 72, 61, 208], [0, 8, 28, 20, 269]].forEach(([dA, hr, mins, pages, from], i) => {
-    const [id, b] = i % 3 === 2 ? cm : lw; mk("jacopo", dA, hr, { type: "session", bookId: id, book: b.title, authors: arr(b.authors), cover: b.cover || "", mins, pages, from, to: from + pages, feel: ["🙂", "😍", "🤯", "😴"][i % 4], name: sessionName(new Date(now - dA * 864e5).setHours(hr)), kudos: i % 2 ? ["gaia"] : [], comments: i === 6 ? [{ uid: "gaia", text: "72 minutes, what a session!", at: new Date(now - 864e5 * .9).toISOString() }] : [] });
+    const [id, b] = i % 3 === 2 ? cm : lw; mk("jacopo", dA, hr, { type: "progress", bookId: id, book: b.title, authors: arr(b.authors), cover: b.cover || "", pages, from, to: from + pages, total: /leviathan/i.test(b.title) ? 592 : 418, note: i === 6 ? "Couldn't put it down tonight." : "", kudos: i % 2 ? ["gaia"] : [], comments: i === 6 ? [{ uid: "gaia", text: "61 pages, what a night!", at: new Date(now - 864e5 * .9).toISOString() }] : [] });
   });
   Object.values(out).forEach(x => { const bk = jb[x.bookId]; if (bk && x.to > (bk.page || 0)) { bk.page = x.to; bk.pages = bk.pages || (/leviathan/i.test(bk.title) ? 592 : 418); } });
-  [[7, 20, 45, 40, 30], [4, 21, 35, 28, 70], [2, 9, 50, 22, 98], [0, 18, 40, 30, 90]].forEach(([dA, hr, mins, pages, from], i) => mk("gaia", dA, hr, { type: "session", bookId: "dune", book: "Dune", authors: ["Frank Herbert"], cover: "", mins, pages, from, to: from + pages, feel: "😍", name: sessionName(new Date(now - dA * 864e5).setHours(hr)), kudos: i % 2 ? [] : ["jacopo"], comments: [] }));
+  [[7, 20, 45, 40, 30], [4, 21, 35, 28, 70], [2, 9, 50, 22, 98], [0, 18, 40, 30, 90]].forEach(([dA, hr, mins, pages, from], i) => mk("gaia", dA, hr, { type: "progress", bookId: "dune", book: "Dune", authors: ["Frank Herbert"], cover: "", pages, from, to: from + pages, total: 600, note: "", kudos: i % 2 ? [] : ["jacopo"], comments: [] }));
   mk("gaia", 5, 23, { type: "diary", bookId: "circe", book: "Circe", authors: ["Madeline Miller"], cover: "", rating: 5, liked: true, date: dayKey(new Date(now - 5 * 864e5)), review: "Gorgeous. Every page feels like it was written in gold leaf. Circe is the best narrator I've read this year.", kudos: ["jacopo"], comments: [{ uid: "jacopo", text: "Adding it to my wishlist", at: new Date(now - 864e5 * 4.8).toISOString() }] });
   const ifl = Object.entries(jb).find(([, b]) => /iron flame/i.test(b.title)), fw = Object.entries(jb).find(([, b]) => /fourth wing/i.test(b.title));
   if (fw) mk("jacopo", 12, 23, { type: "diary", bookId: fw[0], book: fw[1].title, authors: arr(fw[1].authors), cover: fw[1].cover || "", rating: 4, liked: false, date: dayKey(new Date(now - 12 * 864e5)), review: "Pure fun. Dragons, a war college and a lot of drama. Not deep, but I couldn't stop.", kudos: ["gaia"], comments: [] });
@@ -1457,13 +1457,14 @@ function weekStats(uid, weeksAgo = 0) {
   return { mins: list.reduce((x, a) => x + (a.mins || 0), 0), pages: list.reduce((x, a) => x + (a.pages || 0), 0), n: list.length, days, fin: userActs(uid).filter(a => a.type === "diary" && !a.reread && new Date(a.at) >= start && new Date(a.at) < end).length };
 }
 function records(uid) {
-  const ss = userActs(uid).filter(a => a.type === "session"); if (!ss.length) return [];
-  const best = (f, l, fmt) => { const a = ss.reduce((m, x) => f(x) > f(m) ? x : m); return [l, fmt(f(a)), a]; };
-  const r = [best(a => a.mins || 0, "Longest session", fmtMin), best(a => a.pages || 0, "Most pages in a session", v => v + " pages"), best(a => (a.mins >= 10 ? (a.pages || 0) / a.mins * 60 : 0), "Fastest pace", v => Math.round(v) + " pages/hour")];
-  const byDay = {}; ss.forEach(a => byDay[dayKey(a.at)] = (byDay[dayKey(a.at)] || 0) + (a.pages || 0)); const top = Object.entries(byDay).sort((a, b) => b[1] - a[1])[0];
-  r.push(["Biggest reading day", top[1] + " pages", null]);
-  let run = 0, bestRun = 0, prev = null; [...new Set(ss.map(a => dayKey(a.at)))].sort().forEach(d => { run = prev && (new Date(d) - new Date(prev)) / 864e5 === 1 ? run + 1 : 1; bestRun = Math.max(bestRun, run); prev = d; });
-  r.push(["Longest streak", bestRun + " days", null]);
+  const ss = userActs(uid).filter(a => a.type === "progress" || a.type === "session"), di = userActs(uid).filter(a => a.type === "diary" && !a.reread);
+  if (!ss.length && !di.length) return [];
+  const r = [];
+  if (ss.length) { const big = ss.reduce((m, x) => (x.pages || 0) > (m.pages || 0) ? x : m); r.push(["Most pages in one go", big.pages + " pages", big]);
+    const byDay = {}; ss.forEach(a => byDay[dayKey(a.at)] = (byDay[dayKey(a.at)] || 0) + (a.pages || 0)); const top = Object.entries(byDay).sort((a, b) => b[1] - a[1])[0]; r.push(["Biggest reading day", top[1] + " pages", null]);
+    let run = 0, bestRun = 0, prev = null; [...new Set([...ss, ...di].map(a => dayKey(a.at)))].sort().forEach(d => { run = prev && Math.round((new Date(d) - new Date(prev)) / 864e5) === 1 ? run + 1 : 1; bestRun = Math.max(bestRun, run); prev = d; }); r.push(["Longest streak", bestRun + " days", null]); }
+  if (di.length) { const byM = {}; di.forEach(a => { const k = (a.date || dayKey(a.at)).slice(0, 7); byM[k] = (byM[k] || 0) + 1; }); const m = Object.entries(byM).sort((a, b) => b[1] - a[1])[0]; r.push(["Most books in a month", m[1] + " · " + new Date(m[0] + "-15").toLocaleDateString("en-GB", { month: "long", year: "numeric" }), null]);
+    const top = di.filter(a => a.rating).sort((a, b) => b.rating - a.rating)[0]; if (top) r.push(["Highest rated", top.book + " · " + top.rating + "★", null]); }
   return r;
 }
 async function postAct(d) { const uid = myUid(); if (!uid || !DB.addAct) return; try { return await DB.addAct({ uid, at: new Date().toISOString(), kudos: [], comments: [], ...d }); } catch (e) { toast("Could not post to the feed: " + (e.code || e.message)); } }
@@ -1498,7 +1499,7 @@ function actCard(a) {
 function weekCard(uid) {
   const w = weekStats(uid), last = weekStats(uid, 1), max = Math.max(20, ...w.days), st = streakOf(uid);
   return h("section", { class: "card wk" }, h("div", { class: "wkhead" }, h("h2", { style: { "font-size": "22px" } }, "This week"), st ? h("span", { class: "streak" }, "🔥 " + st + " day" + (st > 1 ? "s" : "")) : null),
-    h("div", { class: "astats" }, h("div", {}, h("small", {}, "Pages"), h("b", {}, w.pages)), h("div", {}, h("small", {}, "Books finished"), h("b", {}, w.fin)), h("div", {}, h("small", {}, "Time logged"), h("b", {}, w.mins ? fmtMin(w.mins) : "–"))),
+    h("div", { class: "astats" }, h("div", {}, h("small", {}, "Pages"), h("b", {}, w.pages)), h("div", {}, h("small", {}, "Books finished"), h("b", {}, w.fin)), h("div", {}, h("small", {}, "Reading days"), h("b", {}, w.days.filter(Boolean).length + "/7"))),
     h("div", { class: "wbars" }, w.days.map((m, i) => h("div", { class: "wcol" }, h("i", { style: { height: Math.max(3, m / max * 100) + "%", opacity: m ? 1 : .25 } }), h("small", {}, "MTWTFSS"[i])))),
     h("div", { class: "faint", style: { "font-size": "13px" } }, last.pages ? (w.pages >= last.pages ? "▲ " : "▼ ") + Math.abs(w.pages - last.pages) + " pages vs last week" : "Log your pages to start the week."));
 }
@@ -1507,7 +1508,7 @@ function renderFeed() {
   const uid = myUid(); if (!uid) { go("/"); return; } watch(uid);
   mount(h("header", { class: "feedhead" }, h("h1", {}, "Feed"), h("button", { class: "btn primary rec", type: "button", onclick: () => go("/log") }, "＋ Log")),
     weekCard(uid),
-    acts.length ? h("div", { class: "feed" }, acts.slice(0, 60).map(actCard)) : h("div", { class: "empty", style: { "margin-top": "16px" } }, "No activity yet. Tap Record when you sit down to read."));
+    acts.length ? h("div", { class: "feed" }, acts.slice(0, 60).map(actCard)) : h("div", { class: "empty", style: { "margin-top": "16px" } }, "No activity yet. Tap ＋ Log to update your pages or log a finished book."));
 }
 let recTick = null;
 function renderRecord() {
@@ -1561,16 +1562,16 @@ function finishSheet(uid, R, b, mins) {
   setTimeout(() => toIn.select(), 300);
 }
 function statsBlock(uid) {
-  const weeks = Array.from({ length: 12 }, (_, i) => weekStats(uid, 11 - i)), maxW = Math.max(30, ...weeks.map(w => w.mins));
-  const days = new Map(); userActs(uid).filter(a => a.type === "session").forEach(a => days.set(dayKey(a.at), (days.get(dayKey(a.at)) || 0) + (a.mins || 0)));
+  const weeks = Array.from({ length: 12 }, (_, i) => weekStats(uid, 11 - i)), maxW = Math.max(50, ...weeks.map(w => w.pages));
+  const days = new Map(); userActs(uid).filter(a => a.type === "progress" || a.type === "session" || a.type === "diary").forEach(a => days.set(dayKey(a.at), (days.get(dayKey(a.at)) || 0) + (a.pages || 20)));
   const start = new Date(); start.setDate(start.getDate() - 7 * 15 - ((start.getDay() + 6) % 7));
-  const cells = []; for (let i = 0; i < 16 * 7; i++) { const d = new Date(start); d.setDate(d.getDate() + i); const m = days.get(dayKey(d)) || 0; cells.push(h("i", { title: dayKey(d) + (m ? " · " + fmtMin(m) : ""), class: m >= 60 ? "h4" : m >= 30 ? "h3" : m >= 15 ? "h2" : m ? "h1" : "", style: d > new Date() ? { visibility: "hidden" } : null })); }
-  const month = (() => { const now = new Date(), ss = userActs(uid).filter(a => a.type === "session" && new Date(a.at).getMonth() === now.getMonth() && new Date(a.at).getFullYear() === now.getFullYear()); return { mins: ss.reduce((x, a) => x + (a.mins || 0), 0), pages: ss.reduce((x, a) => x + (a.pages || 0), 0), n: ss.length }; })();
+  const cells = []; for (let i = 0; i < 16 * 7; i++) { const d = new Date(start); d.setDate(d.getDate() + i); const m = days.get(dayKey(d)) || 0; cells.push(h("i", { title: dayKey(d) + (m ? " · " + m + " pages" : ""), class: m >= 60 ? "h4" : m >= 35 ? "h3" : m >= 15 ? "h2" : m ? "h1" : "", style: d > new Date() ? { visibility: "hidden" } : null })); }
+  const month = (() => { const now = new Date(), inM = a => new Date(a.at).getMonth() === now.getMonth() && new Date(a.at).getFullYear() === now.getFullYear(), ss = userActs(uid).filter(a => (a.type === "progress" || a.type === "session") && inM(a)); return { pages: ss.reduce((x, a) => x + (a.pages || 0), 0), fin: userActs(uid).filter(a => a.type === "diary" && !a.reread && inM(a)).length, days: new Set(userActs(uid).filter(inM).map(a => dayKey(a.at))).size }; })();
   const rec = records(uid);
   return [h("section", { class: "section card" }, h("h2", { style: { "font-size": "22px" } }, "Last 12 weeks"),
-      h("div", { class: "wbars tall" }, weeks.map((w, i) => h("div", { class: "wcol" }, h("i", { style: { height: Math.max(3, w.mins / maxW * 100) + "%", opacity: w.mins ? 1 : .25 } }), h("small", {}, i === 11 ? "now" : "")))),
-      h("div", { class: "astats" }, h("div", {}, h("small", {}, "This month"), h("b", {}, fmtMin(month.mins))), h("div", {}, h("small", {}, "Pages"), h("b", {}, month.pages)), h("div", {}, h("small", {}, "Sessions"), h("b", {}, month.n)))),
-    h("section", { class: "section card" }, h("h2", { style: { "font-size": "22px" } }, "Reading days"), h("div", { class: "heat" }, cells), h("div", { class: "faint", style: { "font-size": "12px" } }, "Darker squares are longer reading days.")),
+      h("div", { class: "wbars tall" }, weeks.map((w, i) => h("div", { class: "wcol" }, h("i", { style: { height: Math.max(3, w.pages / maxW * 100) + "%", opacity: w.pages ? 1 : .25 } }), h("small", {}, i === 11 ? "now" : "")))),
+      h("div", { class: "astats" }, h("div", {}, h("small", {}, "Pages this month"), h("b", {}, month.pages)), h("div", {}, h("small", {}, "Books finished"), h("b", {}, month.fin)), h("div", {}, h("small", {}, "Reading days"), h("b", {}, month.days)))),
+    h("section", { class: "section card" }, h("h2", { style: { "font-size": "22px" } }, "Reading days"), h("div", { class: "heat" }, cells), h("div", { class: "faint", style: { "font-size": "12px" } }, "Darker squares are days with more pages.")),
     rec.length ? h("section", { class: "section card" }, h("h2", { style: { "font-size": "22px" } }, "🏆 Personal records"), h("div", { class: "recs" }, rec.map(([l, v, a]) => h("div", { class: "recrow" }, h("span", {}, l), h("b", {}, v), a ? h("small", { class: "faint" }, a.book + " · " + fmtDate(dayKey(a.at))) : null)))) : null];
 }
 function clubBoards() {
@@ -1648,8 +1649,7 @@ function renderLog() {
     h("section", { class: "section" }, h("h2", {}, "Reading now", h("small", {}, reading.length)),
       reading.length ? h("div", { class: "logcards" }, reading.map(b => { const pct = b.pages && b.page ? Math.min(100, Math.round(b.page / b.pages * 100)) : 0; return h("div", { class: "logcard" }, coverEl(b), h("div", { class: "rbody" }, h("div", { class: "t" }, b.title), h("div", { class: "bigprog" }, h("i", { style: { width: pct + "%" } })), h("div", { class: "faint", style: { "font-size": "13px" } }, b.pages ? "Page " + (b.page || 0) + " of " + b.pages : "Page " + (b.page || 0)),
         h("div", { class: "actions" }, h("button", { class: "btn", type: "button", onclick: () => progressSheet(uid, b) }, "📖 Pages"), h("button", { class: "btn primary", type: "button", onclick: () => diarySheet(uid, b) }, "✅ Finished")))); })) : h("div", { class: "empty" }, "Nothing on the go. Start a book from your shelf.")),
-    h("section", { class: "section" }, h("h2", {}, "Review a book you've read"), q, res),
-    h("section", { class: "section" }, h("h2", {}, "Timed session"), h("p", { class: "muted" }, "Prefer to time yourself? Start the clock when you sit down to read."), h("button", { class: "btn", type: "button", onclick: () => go("/record") }, "⏱ Start a timed session")));
+    h("section", { class: "section" }, h("h2", {}, "Review a book you've read"), q, res));
 }
 function diaryBlock(uid) {
   const list = userActs(uid).filter(a => a.type === "diary"); if (!list.length) return h("section", { class: "section" }, h("h2", {}, "Diary"), h("p", { class: "faint" }, "Finished books you log will appear here, month by month."));
@@ -2077,7 +2077,7 @@ async function importBackup(e) {
 function go(path) { if (location.hash.slice(1) === path) render(); else location.hash = path; }
 window.addEventListener("hashchange", render);
 (async () => {
-  try { DB = PREVIEW ? localAdapter("exlibris-preview-sandbox-3", true) : FIREBASE_CONFIG ? await firebaseAdapter(FIREBASE_CONFIG) : localAdapter(); }
+  try { DB = PREVIEW ? localAdapter("exlibris-preview-sandbox-4", true) : FIREBASE_CONFIG ? await firebaseAdapter(FIREBASE_CONFIG) : localAdapter(); }
   catch (e) { DB = localAdapter(); setTimeout(() => toast("Sync is unreachable, working on this phone only"), 500); }
   await DB.init();
   user = DB.user();
