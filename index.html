@@ -1115,7 +1115,7 @@ async function renderRoom3D(uid) {
   const modeBtn = h("button", { class: "r3btn wide", type: "button" }), rotL = h("button", { class: "r3btn", type: "button", "aria-label": "Rotate left" }, "↺"), rotR = h("button", { class: "r3btn", type: "button", "aria-label": "Rotate right" }, "↻");
   const zIn = h("button", { class: "r3btn", type: "button", "aria-label": "Zoom in" }, "+"), zOut = h("button", { class: "r3btn", type: "button", "aria-label": "Zoom out" }, "−");
   const decoBtn = mine ? h("button", { class: "r3btn wide", type: "button", "aria-pressed": R3.deco ? "true" : "false", onclick: () => { R3.deco = !R3.deco; if (!R3.deco) R3.draft = null; rebuildRoom(); } }, "🎨 Decorate") : null;
-  const recBtn = mine ? h("button", { class: "r3btn wide rec", type: "button", onclick: () => go("/log") }, "＋ Log") : null;
+  const recBtn = mine ? h("button", { class: "r3btn wide rec", type: "button", onclick: () => go("/log") }, "＋ New") : null;
   const bar = h("div", { class: "r3bar" }, zOut, rotL, modeBtn, rotR, zIn, recBtn, decoBtn);
   const hint = h("div", { class: "r3hint" }, (mine && S.mail ? "A sealed letter is waiting on your desk. " : "") + "Drag to turn, pinch to zoom, two fingers to move, tap to open.");
   setTimeout(() => hint.classList.add("gone"), 5000);
@@ -1592,7 +1592,7 @@ function weekCard(uid) {
 function renderFeed() {
   ui.route = "feed"; $app.dataset.view = "feed";
   const uid = myUid(); if (!uid) { go("/"); return; } watch(uid);
-  mount(h("header", { class: "feedhead" }, h("h1", {}, "Feed"), h("button", { class: "btn primary rec", type: "button", onclick: () => go("/log") }, "＋ Log")),
+  mount(h("header", { class: "feedhead" }, h("h1", {}, "Feed"), h("button", { class: "btn primary rec", type: "button", onclick: () => go("/log") }, "＋ New")),
     weekCard(uid),
     feedActs(uid).length ? h("div", { class: "feed" }, feedActs(uid).slice(0, 60).map(actCard)) : h("div", { class: "empty", style: { "margin-top": "16px" } }, "Nothing here yet. Follow readers from Explore, or tap ＋ Log to post your own pages and reviews."));
 }
