@@ -656,6 +656,7 @@ function renderLibrary() {
   mount(
     h("header", { class: "titlepage" }, h("div", { class: "kicker" }, "Ex Libris"), h("h1", {}, "The Codex Club"), h("p", {}, list.length ? "Open your volume to step into your room" : "Add the first reader to begin")),
     h("div", { class: "case" }, h("div", { class: "spines" }, spines), h("div", { class: "plank" })),
+    myUid() ? h("button", { class: "card", type: "button", style: { width: "100%", "margin-top": "22px" }, onclick: () => go("/clubs") }, h("h2", {}, "🏛 Your clubs ", clubs.filter(c => arr(c.members).includes(myUid())).length ? h("span", { class: "badge" }, clubs.filter(c => arr(c.members).includes(myUid())).length) : null), h("div", { class: "muted" }, "Book of the month, polls, spoiler-free threads and events. Found your own club.")) : null,
     classic() && myUid() ? clubBoards() : null,
     h("div", { class: "cards" },
       classic() && myUid() ? h("button", { class: "card", onclick: () => go("/letters") }, h("h2", {}, "Letters ", sugs.filter(x => x.to === myUid()).length ? h("span", { class: "badge" }, sugs.filter(x => x.to === myUid()).length) : null), h("div", { class: "muted" }, "Recommend books to each other.")) : null,
@@ -1064,10 +1065,10 @@ function renderRoom(uid) {
 }
 
 /* ---------- 3D room (beta) ---------- */
-const classic = () => lsGet("cc-view", PREVIEW ? "classic" : "room") === "classic";
+const classic = () => PREVIEW ? lsGet("cc-view-preview", "classic") === "classic" : lsGet("cc-view", "room") === "classic";
 const roomPath = uid => classic() ? "/p/" + encodeURIComponent(uid) : (webglOK() ? "/room3d/" : "/room/") + encodeURIComponent(uid);
 const backLabel = () => classic() ? "‹ Club" : "‹ Room";
-function setView(v) { lsSet("cc-view", v); const u = myUid(); toast(v === "classic" ? "Classic layout on" : "3D room on"); go(v === "classic" ? "/me" : u ? "/room3d/" + encodeURIComponent(u) : "/"); }
+function setView(v) { lsSet(PREVIEW ? "cc-view-preview" : "cc-view", v); const u = myUid(); toast(v === "classic" ? "Classic layout on" : "3D room on"); go(v === "classic" ? "/me" : u ? "/room3d/" + encodeURIComponent(u) : "/"); }
 const R3 = { mode: "iso", az: Math.PI / 4, zoom: 1, draft: null, deco: false };
 const DECO = {
   wall: [["#C9B08A", "Warm plaster"], ["#E8E2D6", "Ivory"], ["#2F4535", "Forest green"], ["#27344D", "Navy"], ["#7A2E2A", "Oxblood"], ["#5A6B5A", "Sage"], ["#B5654A", "Terracotta"], ["#3B3B3B", "Charcoal"]],
@@ -1122,7 +1123,7 @@ async function renderRoom3D(uid) {
   const menu = h("details", { class: "r3menu" }, h("summary", { "aria-label": "More" }, "⋯"), h("button", { type: "button", onclick: () => setView("classic") }, "Switch to the classic layout"));
   mount(h("div", { class: "r3full" + (mine && R3.deco ? " decoon" : "") },
     box,
-    h("div", { class: "r3top" }, h("button", { class: "r3pill", type: "button", onclick: () => closeTo("/") }, "‹ Club"), h("div", { class: "r3title" }, mine ? "Your room" : p.name + "'s room", PREVIEW ? h("small", { class: "r3tag" }, "preview") : null), menu),
+    h("div", { class: "r3top" }, h("button", { class: "r3pill", type: "button", onclick: () => go("/clubs") }, "🏛 Clubs"), h("div", { class: "r3title" }, mine ? "Your room" : p.name + "'s room", PREVIEW ? h("small", { class: "r3tag" }, "preview") : null), menu),
     h("div", { class: "r3bottom" }, ...(mine && R3.deco ? [bar, decoPanel(uid)] : [hint, bar]))));
   let THREE, OrbitControls, RoundedBoxGeometry;
   try {
